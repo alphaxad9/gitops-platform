@@ -1,0 +1,9 @@
+# gitops-platform/infrastructure/base/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: infrastructure
+  labels:
+    name: infrastructure
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: privileged

@@ -1,0 +1,29 @@
+# gitops-platform/infrastructure/base/configmaps/platform-endpoints.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-endpoints
+  namespace: infrastructure
+data:
+  # PostgreSQL
+  POSTGRES_HOST: "postgresql.infrastructure.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  
+  # RabbitMQ
+  RABBITMQ_HOST: "rabbitmq.infrastructure.svc.cluster.local"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_VHOST: "microservice_one"
+  RABBITMQ_QUEUE: "microservice_one.events"
+  
+  # Redis
+  REDIS_HOST: "redis-master.infrastructure.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  
+  # Kafka
+  KAFKA_BROKERS: "kafka.infrastructure.svc.cluster.local:9092"
+  KAFKA_TOPIC: "microservice_one.events"
+  
+  # Service URLs
+  AUTH_SERVICE_URL: "http://auth-service.auth-service.svc.cluster.local:8000"
+  PAYMENT_SERVICE_URL: "http://payment-service.payment-service.svc.cluster.local:8000"

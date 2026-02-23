@@ -1,0 +1,16 @@
+# gitops-platform/infrastructure/base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - configmaps/platform-endpoints.yaml
+  - configmaps/traefik-config.yaml
+  - secrets/postgres-credentials.yaml
+  - secrets/rabbitmq-credentials.yaml
+  - secrets/kafka-credentials.yaml
+  - secrets/redis-credentials.yaml
+
+commonLabels:
+  component: infrastructure
+  managed-by: gitops

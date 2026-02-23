@@ -1,0 +1,210 @@
+# gitops-platform/infrastructure/overlays/staging/values.yaml
+# Staging environment - production-like but smaller
+
+global:
+  environment: staging
+
+# PostgreSQL
+postgresql:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: postgres
+    tag: 15
+    pullPolicy: IfNotPresent
+  architecture: replication
+  auth:
+    existingSecret: postgres-credentials
+  primary:
+    persistence:
+      size: 50Gi
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 500m
+      limits:
+        memory: 2Gi
+        cpu: 1000m
+  readReplicas:
+    replicaCount: 1
+    persistence:
+      size: 50Gi
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 500m
+      limits:
+        memory: 2Gi
+        cpu: 1000m
+  metrics:
+    enabled: true
+  initdbScripts:
+    create-databases.sql: |
+      CREATE DATABASE authdb;
+      CREATE DATABASE paymentdb;
+      CREATE DATABASE bookingdb;
+      CREATE DATABASE roomdb;
+      CREATE DATABASE walletdb;
+
+# Kafka (KRaft mode - no Zookeeper)
+kafka:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: apache/kafka
+    tag: 4.1.1
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  persistence:
+    size: 50Gi
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 1000m
+    limits:
+      memory: 4Gi
+      cpu: 2000m
+  kraft:
+    enabled: true
+    processRoles: "broker,controller"
+    controllerQuorumVoters: "1@kafka-0.kafka-headless.infrastructure.svc.cluster.local:9093,2@kafka-1.kafka-headless.infrastructure.svc.cluster.local:9093"
+  listeners:
+    client:
+      protocol: PLAINTEXT
+      containerPort: 9092
+    controller:
+      protocol: PLAINTEXT
+      containerPort: 9093
+  environment:
+    KAFKA_NODE_ID: "$(POD_NAME)"
+    KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-0:9093,2@kafka-1:9093"
+    KAFKA_PROCESS_ROLES: "broker,controller"
+    CLUSTER_ID: "STAGING-MkU3OEVBNTcwNTJENDM2Qk"
+  metrics:
+    enabled: true
+
+# Redis
+redis:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: redis
+    tag: 7
+    pullPolicy: IfNotPresent
+  architecture: replication
+  auth:
+    enabled: true
+    existingSecret: redis-credentials
+  master:
+    persistence:
+      size: 20Gi
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 500m
+      limits:
+        memory: 1Gi
+        cpu: 1000m
+  replica:
+    replicaCount: 1
+    persistence:
+      size: 20Gi
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 250m
+      limits:
+        memory: 1Gi
+        cpu: 500m
+  metrics:
+    enabled: true
+
+# RabbitMQ
+rabbitmq:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: rabbitmq
+    tag: 3.13-management
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  persistence:
+    size: 30Gi
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+  auth:
+    existingSecret: rabbitmq-credentials
+  extraPlugins: "rabbitmq_management rabbitmq_peer_discovery_k8s"
+  extraConfiguration: |
+    default_vhost = microservice_one
+    cluster_formation.peer_discovery_backend = rabbit_peer_discovery_k8s
+  loadDefinition:
+    enabled: true
+    file: /app/load_definition.json
+  extraSecrets:
+    load-definition:
+      data: |
+        {
+          "vhosts": [{"name": "microservice_one"}],
+          "queues": [{"name": "microservice_one.events", "vhost": "microservice_one", "durable": true}],
+          "exchanges": [
+            {"name": "booking.events", "vhost": "microservice_one", "type": "topic", "durable": true},
+            {"name": "post_service.events", "vhost": "microservice_one", "type": "topic", "durable": true}
+          ]
+        }
+  metrics:
+    enabled: true
+
+# Traefik
+traefik:
+  enabled: true
+  image:
+    name: traefik
+    tag: v2.11
+    pullPolicy: IfNotPresent
+  deployment:
+    replicas: 1
+  service:
+    type: LoadBalancer
+  logs:
+    general:
+      level: INFO
+  ingressRoute:
+    dashboard:
+      enabled: false
+  certificatesResolvers:
+    letsencrypt:
+      acme:
+        email: staging-admin@example.com
+        storage: /data/acme.json
+        httpChallenge:
+          entryPoint: web
+  additionalArguments:
+    - "--api.dashboard=false"
+    - "--metrics.prometheus=true"
+  ports:
+    web:
+      port: 80
+      expose: true
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+    websecure:
+      port: 443
+      expose: true
+    metrics:
+      port: 8080
+      expose: true
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m

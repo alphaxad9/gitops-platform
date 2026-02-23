@@ -1,0 +1,156 @@
+# gitops-platform/infrastructure/overlays/dev/values.yaml
+# Development environment - minimal resources, easy debugging
+
+global:
+  environment: dev
+
+# PostgreSQL
+postgresql:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: postgres
+    tag: 15-alpine
+    pullPolicy: IfNotPresent
+  auth:
+    existingSecret: postgres-credentials
+  primary:
+    persistence:
+      size: 20Gi
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 500m
+      limits:
+        memory: 1Gi
+        cpu: 1000m
+  initdbScripts:
+    create-databases.sql: |
+      CREATE DATABASE authdb;
+      CREATE DATABASE paymentdb;
+
+# Kafka (KRaft mode - no Zookeeper)
+kafka:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: apache/kafka
+    tag: 4.1.1
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  persistence:
+    size: 30Gi
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+  kraft:
+    enabled: true
+    processRoles: "broker,controller"
+    controllerQuorumVoters: "1@kafka-0.kafka-headless.infrastructure.svc.cluster.local:9093"
+  listeners:
+    client:
+      protocol: PLAINTEXT
+      containerPort: 9092
+    controller:
+      protocol: PLAINTEXT
+      containerPort: 9093
+  environment:
+    KAFKA_NODE_ID: "1"
+    KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9093"
+    KAFKA_PROCESS_ROLES: "broker,controller"
+    CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+
+# Redis
+redis:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: redis
+    tag: 7-alpine
+    pullPolicy: IfNotPresent
+  architecture: standalone
+  auth:
+    enabled: true
+    existingSecret: redis-credentials
+  master:
+    persistence:
+      size: 10Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 200m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+# RabbitMQ
+rabbitmq:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: rabbitmq
+    tag: 3.13-management
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  persistence:
+    size: 20Gi
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 500m
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+  auth:
+    existingSecret: rabbitmq-credentials
+  extraPlugins: "rabbitmq_management"
+  extraConfiguration: |
+    default_vhost = microservice_one
+  loadDefinition:
+    enabled: true
+    file: /app/load_definition.json
+  extraSecrets:
+    load-definition:
+      data: |
+        {
+          "vhosts": [{"name": "microservice_one"}],
+          "queues": [{"name": "microservice_one.events", "vhost": "microservice_one", "durable": true}],
+          "exchanges": [
+            {"name": "booking.events", "vhost": "microservice_one", "type": "topic", "durable": true},
+            {"name": "post_service.events", "vhost": "microservice_one", "type": "topic", "durable": true}
+          ]
+        }
+
+# Traefik
+traefik:
+  enabled: true
+  image:
+    name: traefik
+    tag: v2.11
+    pullPolicy: IfNotPresent
+  deployment:
+    replicas: 1
+  service:
+    type: LoadBalancer
+  logs:
+    general:
+      level: DEBUG
+  ingressRoute:
+    dashboard:
+      enabled: true
+      match: Host(`traefik.dev.local`)
+  additionalArguments:
+    - "--api.insecure=true"
+    - "--api.dashboard=true"
+    - "--accesslog=true"
+  ports:
+    web:
+      port: 80
+      expose: true
+    websecure:
+      port: 443
+      expose: true

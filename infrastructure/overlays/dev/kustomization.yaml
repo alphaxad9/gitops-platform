@@ -1,27 +1,74 @@
+# gitops-platform/infrastructure/overlays/dev/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: infrastructure-dev
+namespace: infrastructure
 
 resources:
   - ../../base
 
-patches:
-  - target:
-      kind: Deployment
-      name: postgresql
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
-  - target:
-      kind: StatefulSet
-      name: kafka
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
+commonLabels:
+  environment: dev
+  managed-by: gitops
 
-# Override values for dev environment
-patchesStrategicMerge:
-  - values-patch.yaml
+configMapGenerator:
+  - name: platform-endpoints
+    behavior: merge
+    literals:
+      - ENVIRONMENT=dev
+      - LOG_LEVEL=DEBUG
+
+secretGenerator:
+  - name: postgres-credentials
+    behavior: replace
+    literals:
+      - postgres-password=dev-postgres-password-change-me
+      - password=dev-postgres-password-change-me
+  - name: rabbitmq-credentials
+    behavior: replace
+    literals:
+      - rabbitmq-password=dev-rabbitmq-password-change-me
+  - name: kafka-credentials
+    behavior: replace
+    literals:
+      - kafka-password=dev-kafka-password-change-me
+  - name: redis-credentials
+    behavior: replace
+    literals:
+      - redis-password=dev-redis-password-change-me
+
+helmCharts:
+  - name: postgresql
+    repo: https://charts.bitnami.com/bitnami
+    version: 12.x.x
+    releaseName: postgresql
+    namespace: infrastructure
+    valuesFile: values.yaml
+
+  - name: kafka
+    repo: https://charts.bitnami.com/bitnami
+    version: 22.x.x
+    releaseName: kafka
+    namespace: infrastructure
+    valuesFile: values.yaml
+
+  - name: redis
+    repo: https://charts.bitnami.com/bitnami
+    version: 17.x.x
+    releaseName: redis
+    namespace: infrastructure
+    valuesFile: values.yaml
+
+  - name: rabbitmq
+    repo: https://charts.bitnami.com/bitnami
+    version: 12.x.x
+    releaseName: rabbitmq
+    namespace: infrastructure
+    valuesFile: values.yaml
+
+  - name: traefik
+    repo: https://helm.traefik.io/traefik
+    version: 25.x.x
+    releaseName: traefik
+    namespace: infrastructure
+    valuesFile: values.yaml

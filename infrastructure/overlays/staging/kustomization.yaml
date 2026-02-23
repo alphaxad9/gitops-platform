@@ -1,0 +1,78 @@
+# gitops-platform/infrastructure/overlays/staging/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: infrastructure
+
+resources:
+  - ../../base
+
+commonLabels:
+  environment: staging
+  managed-by: gitops
+
+configMapGenerator:
+  - name: platform-endpoints
+    behavior: merge
+    literals:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=INFO
+
+secretGenerator:
+  - name: postgres-credentials
+    behavior: replace
+    literals:
+      - postgres-password=staging-postgres-password-change-me
+      - password=staging-postgres-password-change-me
+      - repmgr-password=staging-repmgr-password-change-me
+  - name: rabbitmq-credentials
+    behavior: replace
+    literals:
+      - rabbitmq-password=staging-rabbitmq-password-change-me
+      - rabbitmq-erlang-cookie=staging-rabbitmq-cookie-change-me
+  - name: kafka-credentials
+    behavior: replace
+    literals:
+      - kafka-password=staging-kafka-password-change-me
+      - client-password=staging-client-password-change-me
+  - name: redis-credentials
+    behavior: replace
+    literals:
+      - redis-password=staging-redis-password-change-me
+      - password=staging-redis-password-change-me
+
+helmCharts:
+  - name: postgresql
+    repo: https://charts.bitnami.com/bitnami
+    version: 12.x.x
+    releaseName: postgresql
+    namespace: infrastructure
+    valuesFile: values.yaml
+
+  - name: kafka
+    repo: https://charts.bitnami.com/bitnami
+    version: 22.x.x
+    releaseName: kafka
+    namespace: infrastructure
+    valuesFile: values.yaml
+
+  - name: redis
+    repo: https://charts.bitnami.com/bitnami
+    version: 17.x.x
+    releaseName: redis
+    namespace: infrastructure
+    valuesFile: values.yaml
+
+  - name: rabbitmq
+    repo: https://charts.bitnami.com/bitnami
+    version: 12.x.x
+    releaseName: rabbitmq
+    namespace: infrastructure
+    valuesFile: values.yaml
+
+  - name: traefik
+    repo: https://helm.traefik.io/traefik
+    version: 25.x.x
+    releaseName: traefik
+    namespace: infrastructure
+    valuesFile: values.yaml
