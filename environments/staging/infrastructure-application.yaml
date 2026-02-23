@@ -1,0 +1,30 @@
+# gitops-platform/environments/staging/infrastructure-application.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infrastructure
+  annotations:
+    environment: staging
+spec:
+  project: default
+  source:
+    repoURL: placeholder-repo  # Will be replaced by kustomize patch
+    targetRevision: placeholder-rev  # Will be replaced by kustomize patch
+    path: infrastructure/overlays/staging
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infrastructure
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

@@ -10,3 +10,50 @@ resources:
 commonLabels:
   environment: staging
   managed-by: gitops
+  app.kubernetes.io/managed-by: argocd
+  app.kubernetes.io/part-of: microservices-platform
+
+commonAnnotations:
+  description: "Staging environment for microservices (pre-production)"
+  team: "platform-team"
+  contact: "platform@example.com"
+  stability: "pre-production"
+
+namespace: argocd
+
+configMapGenerator:
+  - name: environment-config
+    literals:
+      - ENVIRONMENT=staging
+      - REPO_URL=https://github.com/alphaxad9/gitops-platform.git
+      - TARGET_REVISION=staging  # Could use a staging branch or main
+
+patches:
+  # Add common annotations to all applications
+  - target:
+      kind: Application
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          argocd.argoproj.io/sync-options: Prune=true
+          argocd.argoproj.io/managed-by: argocd
+      - op: replace
+        path: /spec/source/repoURL
+        value: https://github.com/alphaxad9/gitops-platform.git
+      - op: replace
+        path: /spec/source/targetRevision
+        value: staging  # Using staging branch for more controlled deployments
+  
+  # Optional: Add staging-specific sync windows or other policies
+  - target:
+      kind: Application
+    patch: |-
+      - op: add
+        path: /spec/syncPolicy/retry
+        value:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 5m

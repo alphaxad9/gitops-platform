@@ -1,0 +1,32 @@
+# gitops-platform/environments/prod/auth-application.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: auth-service
+  annotations:
+    environment: prod
+spec:
+  project: default
+  source:
+    repoURL: placeholder-repo  # Will be replaced by kustomize patch
+    targetRevision: placeholder-rev  # Will be replaced by kustomize patch
+    path: services/auth-service/overlays/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: auth-service
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true
+      - Validate=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 10m
