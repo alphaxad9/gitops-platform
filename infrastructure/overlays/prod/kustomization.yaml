@@ -20,29 +20,6 @@ configMapGenerator:
       - LOG_LEVEL=WARNING
       - BACKUP_ENABLED=true
 
-secretGenerator:
-  - name: postgres-credentials
-    behavior: replace
-    literals:
-      - postgres-password=prod-postgres-password-change-me
-      - password=prod-postgres-password-change-me
-      - repmgr-password=prod-repmgr-password-change-me
-  - name: rabbitmq-credentials
-    behavior: replace
-    literals:
-      - rabbitmq-password=prod-rabbitmq-password-change-me
-      - rabbitmq-erlang-cookie=prod-rabbitmq-cookie-change-me
-  - name: kafka-credentials
-    behavior: replace
-    literals:
-      - kafka-password=prod-kafka-password-change-me
-      - client-password=prod-client-password-change-me
-  - name: redis-credentials
-    behavior: replace
-    literals:
-      - redis-password=prod-redis-password-change-me
-      - password=prod-redis-password-change-me
-
 helmCharts:
   - name: postgresql
     repo: https://charts.bitnami.com/bitnami

@@ -18,25 +18,6 @@ configMapGenerator:
       - ENVIRONMENT=dev
       - LOG_LEVEL=DEBUG
 
-secretGenerator:
-  - name: postgres-credentials
-    behavior: replace
-    literals:
-      - postgres-password=dev-postgres-password-change-me
-      - password=dev-postgres-password-change-me
-  - name: rabbitmq-credentials
-    behavior: replace
-    literals:
-      - rabbitmq-password=dev-rabbitmq-password-change-me
-  - name: kafka-credentials
-    behavior: replace
-    literals:
-      - kafka-password=dev-kafka-password-change-me
-  - name: redis-credentials
-    behavior: replace
-    literals:
-      - redis-password=dev-redis-password-change-me
-
 helmCharts:
   - name: postgresql
     repo: https://charts.bitnami.com/bitnami
