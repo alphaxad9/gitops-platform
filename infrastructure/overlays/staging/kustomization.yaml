@@ -23,33 +23,33 @@ helmCharts:
     repo: https://charts.bitnami.com/bitnami
     version: 12.x.x
     releaseName: postgresql
-    namespace: infrastructure
+    
     valuesFile: values.yaml
 
   - name: kafka
     repo: https://charts.bitnami.com/bitnami
     version: 22.x.x
     releaseName: kafka
-    namespace: infrastructure
+    
     valuesFile: values.yaml
 
   - name: redis
     repo: https://charts.bitnami.com/bitnami
     version: 17.x.x
     releaseName: redis
-    namespace: infrastructure
+    
     valuesFile: values.yaml
 
   - name: rabbitmq
     repo: https://charts.bitnami.com/bitnami
     version: 12.x.x
     releaseName: rabbitmq
-    namespace: infrastructure
+    
     valuesFile: values.yaml
 
   - name: traefik
     repo: https://helm.traefik.io/traefik
     version: 25.x.x
     releaseName: traefik
-    namespace: infrastructure
+    
     valuesFile: values.yaml
