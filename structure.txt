@@ -1,0 +1,56 @@
+gitops-platform/
+├── environments/
+│   ├── dev/
+│   │   ├── infrastructure-application.yaml   # Platform infra
+│   │   ├── auth-application.yaml             # Auth service
+│   │   ├── payment-application.yaml          # Payment service
+│   │   └── kustomization.yaml                # Compose all apps for dev
+│   ├── staging/
+│   └── prod/
+│
+├── infrastructure/          # 🟢 SHARED PLATFORM LAYER
+│   ├── base/
+│   │   ├── configmaps/
+│   │   │   └── platform-endpoints.yaml       # Generic endpoints (no service-specific DB names)
+│   │   ├── secrets/
+│   │   ├── kustomization.yaml
+│   │   └── namespace.yaml                    # namespace: infrastructure
+│   ├── overlays/{dev,staging,prod}/
+│   ├── Chart.yaml + values.yaml              # Umbrella chart for Bitnami deps
+│   └── README.md
+│
+├── services/                # 🔵 APPLICATION LAYER (per-service)
+│   ├── base/                                 # Shared service template
+│   │   ├── service-template/
+│   │   │   ├── deployment.yaml
+│   │   │   ├── service.yaml
+│   │   │   ├── configmap-template.yaml       # Uses placeholders: {{SERVICE_NAME}}, {{DB_NAME}}
+│   │   │   ├── secret-template.yaml
+│   │   │   └── kustomization.yaml
+│   │   └── kustomization.yaml
+│   │
+│   ├── auth-service/                         # Auth instance
+│   │   ├── base/
+│   │   │   ├── kustomization.yaml
+│   │   │   ├── configmap.yaml                # Sets: SERVICE_NAME=auth, DB_NAME=authdb
+│   │   │   └── secrets/
+│   │   ├── overlays/
+│   │   │   ├── dev/
+│   │   │   ├── staging/
+│   │   │   └── prod/
+│   │   └── Chart.yaml (optional)
+│   │
+│   ├── payment-service/                      # Payment instance
+│   │   ├── base/
+│   │   │   ├── kustomization.yaml
+│   │   │   ├── configmap.yaml                # Sets: SERVICE_NAME=payment, DB_NAME=paymentdb
+│   │   │   └── secrets/
+│   │   └── overlays/...
+│   │
+│   └── {future-service}/                     # Just copy the template!
+│
+├── scripts/
+│   ├── bootstrap.sh
+│   ├── sync-secrets.sh
+│   └── new-service.sh                        # Scaffold a new service in 1 command
+└── README.md

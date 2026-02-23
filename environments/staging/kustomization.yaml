@@ -1,0 +1,12 @@
+# gitops-platform/environments/staging/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - infrastructure-application.yaml
+  - auth-application.yaml
+  - payment-application.yaml
+
+commonLabels:
+  environment: staging
+  managed-by: gitops

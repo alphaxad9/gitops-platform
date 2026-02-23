@@ -1,0 +1,99 @@
+# infrastructure/values.yaml - Base configuration
+
+global:
+  environment: base
+
+postgresql:
+  enabled: true
+  auth:
+    existingSecret: "postgres-credentials"
+    secretKeys:
+      adminPasswordKey: password
+      userPasswordKey: password
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+  service:
+    ports:
+      postgresql: 5432
+
+kafka:
+  enabled: true
+  replicaCount: 1  # Dev default
+  listeners:
+    client:
+      protocol: PLAINTEXT
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  service:
+    ports:
+      plaintext: 9092
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+    existingSecret: "redis-credentials"
+    existingSecretPasswordKey: password
+  master:
+    persistence:
+      enabled: true
+      size: 5Gi
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+
+rabbitmq:
+  enabled: true
+  replicaCount: 1
+  auth:
+    existingSecret: "rabbitmq-credentials"
+    existingSecretPasswordKey: rabbitmq-password
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  service:
+    ports:
+      amqp: 5672
+      management: 15672
+
+traefik:
+  enabled: true
+  deployment:
+    replicas: 1
+  service:
+    type: LoadBalancer  # Change to NodePort/ClusterIP per env
+  ports:
+    web:
+      port: 80
+      expose: true
+    websecure:
+      port: 443
+      expose: true
+      tls:
+        enabled: true
+  ingressRoute:
+    dashboard:
+      enabled: false  # Secure in prod
+  logs:
+    general:
+      level: INFO
