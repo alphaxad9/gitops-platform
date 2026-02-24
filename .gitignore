@@ -16,7 +16,7 @@ structure.txt
 tree.txt
 *-structure.txt
 directory-structure.txt
-
+.gitignore
 
 
 # Kubernetes/AKS specific

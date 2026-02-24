@@ -1,0 +1,28 @@
+# gitops-platform/services/auth-service/base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: auth-service
+
+resources:
+  - ../../base/service-template
+  - secrets/auth-secrets.yaml
+
+configMapGenerator:
+  - name: auth-config
+    literals:
+      - SERVICE_NAME=auth
+      - DB_NAME=authdb
+      - DJANGO_SETTINGS_MODULE=my_backend.settings
+      - KAFKA_GROUP_ID=my_backend_id
+      - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
+      - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
+      - LOG_LEVEL=INFO
+      - RABBITMQ_QUEUE=microservice_one.events
+      - RABBITMQ_VHOST=microservice_one     
+      - KAFKA_TOPIC=microservice_one.events      
+
+images:
+  - name: placeholder
+    newName: alphaxad9/auth_service
+    newTag: "0.0.1"

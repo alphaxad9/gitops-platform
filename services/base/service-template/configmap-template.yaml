@@ -1,0 +1,52 @@
+# gitops-platform/services/base/service-template/configmap-template.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{SERVICE_NAME}}-config
+data:
+  # Django Core
+  DJANGO_SETTINGS_MODULE: "{{SERVICE_NAME}}_service.settings"
+  DJANGO_DEBUG: "False"
+  DJANGO_ALLOWED_HOSTS: "*"
+  DJANGO_LANGUAGE_CODE: "en-us"
+  DJANGO_TIME_ZONE: "UTC"
+  DEFAULT_FROM_EMAIL: "noreply@example.com"
+  LOG_LEVEL: "INFO"
+  
+  # Database
+  POSTGRES_ENGINE: "django.db.backends.postgresql"
+  POSTGRES_HOST: "postgresql.infrastructure.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "{{DB_NAME}}"
+  
+  # RabbitMQ
+  RABBITMQ_HOST: "rabbitmq.infrastructure.svc.cluster.local"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_QUEUE: "{{RABBITMQ_QUEUE}}"
+  RABBITMQ_VHOST: "{{RABBITMQ_VHOST}}"
+  # Kafka
+  KAFKA_BROKERS: "kafka.infrastructure.svc.cluster.local:9092"
+  KAFKA_TOPIC: "microservice_one.events"
+  KAFKA_GROUP_ID: "{{SERVICE_NAME}}_service_id"
+  KAFKA_SECURITY_PROTOCOL: "PLAINTEXT"
+  KAFKA_ENABLE_AUTO_COMMIT: "false"
+  KAFKA_AUTO_OFFSET_RESET: "earliest"
+  
+  # Redis
+  REDIS_HOST: "redis-master.infrastructure.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  
+  # Cache TTLs
+  LIKES_CACHE_TTL: "300"
+  AUTHOR_TIMELINE_CACHE_TTL: "120"
+  
+  # Channel Layers
+  CHANNEL_LAYER_HOSTS: "redis-master.infrastructure.svc.cluster.local:6379"
+  CHANNEL_LAYER_CAPACITY: "1000"
+  CHANNEL_LAYER_EXPIRY: "10"
+  
+  # CORS Settings
+  CORS_ALLOWED_ORIGINS: "http://localhost:3000,https://yourdomain.com"
+  CSRF_TRUSTED_ORIGINS: "http://localhost:3000,https://yourdomain.com"
+  CORS_ALLOW_CREDENTIALS: "True"
