@@ -1,39 +1,51 @@
-# gitops-platform/infrastructure/base/configmaps/treafik-config.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-patches:
-  - target:
-      kind: ConfigMap
-      name: traefik-config
-    patch: |-
-      - op: replace
-        path: /data/traefik.yaml
-        value: |
-          entryPoints:
-            web:
-              address: ":80"
-              http:
-                redirections:
-                  entryPoint:
-                    to: websecure
-                    scheme: https
-            websecure:
-              address: ":443"
-          
-          certificatesResolvers:
-            letsencrypt:
-              acme:
-                email: dev@example.com  # Only this changes
-                storage: /data/acme.json
-                httpChallenge:
-                  entryPoint: web
-          
-          providers:
-            kubernetesCRD:
-              enabled: true
-              namespaces:
-                - auth
-                - payment
-            kubernetesIngress:
-              enabled: true
+# gitops-platform/infrastructure/base/configmaps/traefik-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-config
+  labels:
+    component: infrastructure
+    managed-by: gitops
+data:
+  traefik.yaml: |
+    api:
+      dashboard: true
+      debug: true
+    
+    entryPoints:
+      web:
+        address: ":80"
+        http:
+          redirections:
+            entryPoint:
+              to: websecure
+              scheme: https
+      websecure:
+        address: ":443"
+    
+    certificatesResolvers:
+      letsencrypt:
+        acme:
+          email: dev@example.com
+          storage: /data/acme.json
+          httpChallenge:
+            entryPoint: web
+    
+    providers:
+      kubernetesCRD:
+        enabled: true
+        namespaces:
+          - auth-service
+          - payment-service
+          - infrastructure
+      kubernetesIngress:
+        enabled: true
+        namespaces:
+          - auth-service
+          - payment-service
+          - infrastructure
+    
+    log:
+      level: INFO
+    
+    accessLog: {}
