@@ -8,6 +8,7 @@ resources:
   - ../../base/service-template
   - auth-secrets.yaml
   - auth-sa.yaml
+  - ../../../infrastructure/base/secrets/postgres-credentials.yaml  # ← ADD THIS
 
 configMapGenerator:
   - name: auth-config
@@ -28,6 +29,21 @@ images:
     newTag: "0.0.1"
 
 patches:
+  # Patch postgres-credentials with auth-specific values (NEW)
+  - target:
+      kind: Secret
+      name: postgres-credentials
+    patch: |-
+      - op: replace
+        path: /stringData/DB_NAME
+        value: authdb
+      - op: replace
+        path: /stringData/DB_USER
+        value: ishimwe
+      - op: replace
+        path: /stringData/DB_PASSWORD
+        value: "2025New+"
+
   # Patch deployment name and all references
   - target:
       kind: Deployment

@@ -8,6 +8,7 @@ resources:
   - ../../base/service-template
   - payment-secrets.yaml
   - payment-sa.yaml
+  - ../../../infrastructure/base/secrets/postgres-credentials.yaml  # ← ADD THIS
 
 configMapGenerator:
   - name: payment-config
@@ -28,7 +29,22 @@ images:
     newTag: "0.0.1"
 
 patches:
-  # Patch deployment name and all references (your existing patches)
+  # Patch postgres-credentials with payment-specific values (NEW)
+  - target:
+      kind: Secret
+      name: postgres-credentials
+    patch: |-
+      - op: replace
+        path: /stringData/DB_NAME
+        value: paymentdb
+      - op: replace
+        path: /stringData/DB_USER
+        value: ishimwe
+      - op: replace
+        path: /stringData/DB_PASSWORD
+        value: "2025New+"
+
+  # Patch deployment name and all references
   - target:
       kind: Deployment
       name: service-placeholder
@@ -64,7 +80,7 @@ patches:
         path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
         value: payment-secrets
 
-  # REMOVE the keys volume and volumeMount for payment-service (NEW)
+  # REMOVE the keys volume and volumeMount for payment-service
   - target:
       kind: Deployment
       name: payment-service

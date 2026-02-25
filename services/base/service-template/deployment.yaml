@@ -25,7 +25,7 @@ spec:
       containers:
       - name: service-placeholder
         image: placeholder:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
           name: http
