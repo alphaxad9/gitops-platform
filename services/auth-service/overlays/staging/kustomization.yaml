@@ -7,9 +7,11 @@ namespace: auth-service
 resources:
   - ../../base
 
-commonLabels:
-  environment: staging
 
+labels:
+  - pairs:
+      environment: staging
+    includeSelectors: false
 configMapGenerator:
   - name: auth-config
     behavior: merge

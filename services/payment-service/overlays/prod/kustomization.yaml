@@ -7,10 +7,13 @@ namespace: payment-service
 resources:
   - ../../base
 
-commonLabels:
-  environment: prod
-  criticality: high
-
+labels:
+  - pairs:
+      environment: prod
+      managed-by: gitops
+      criticality: high
+    includeSelectors: false
+    
 configMapGenerator:
   - name: payment-config
     behavior: merge

@@ -7,9 +7,11 @@ namespace: payment-service
 resources:
   - ../../base
 
-commonLabels:
-  environment: staging
-
+labels:
+  - pairs:
+      environment: staging
+    includeSelectors: false
+    
 configMapGenerator:
   - name: payment-config
     behavior: merge

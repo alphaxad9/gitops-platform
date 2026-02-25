@@ -10,6 +10,8 @@ resources:
   - secrets/kafka-credentials.yaml
   - secrets/redis-credentials.yaml
 
-commonLabels:
-  component: infrastructure
-  managed-by: gitops
+labels:
+  - pairs:
+      component: infrastructure
+      managed-by: gitops
+    includeSelectors: false

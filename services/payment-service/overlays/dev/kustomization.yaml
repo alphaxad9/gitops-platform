@@ -7,9 +7,12 @@ namespace: payment-service
 resources:
   - ../../base
 
-commonLabels:
-  environment: dev
-
+labels:
+  - pairs:
+      environment: dev
+      managed-by: gitops
+    includeSelectors: false
+    
 configMapGenerator:
   - name: payment-config
     behavior: merge

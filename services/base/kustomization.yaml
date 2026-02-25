@@ -5,5 +5,7 @@ kind: Kustomization
 resources:
   - service-template
 
-commonLabels:
-  managed-by: gitops
+labels:
+  - pairs:
+      managed-by: gitops
+    includeSelectors: false

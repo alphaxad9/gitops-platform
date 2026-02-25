@@ -7,13 +7,14 @@ resources:
   - auth-application.yaml
   - payment-application.yaml
 
-commonLabels:
-  environment: prod
-  managed-by: gitops
-  app.kubernetes.io/managed-by: argocd
-  app.kubernetes.io/part-of: microservices-platform
-  app.kubernetes.io/environment: production
-
+labels:
+  - pairs:
+      environment: prod
+      managed-by: gitops
+      app.kubernetes.io/managed-by: argocd
+      app.kubernetes.io/part-of: microservices-platform
+      app.kubernetes.io/environment: production
+    includeSelectors: false
 commonAnnotations:
   description: "Production environment for microservices (LIVE TRAFFIC)"
   team: "platform-team"

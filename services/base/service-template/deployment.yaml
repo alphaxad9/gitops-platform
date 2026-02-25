@@ -2,29 +2,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{SERVICE_NAME}}
+  name: service-placeholder
   labels:
-    app: {{SERVICE_NAME}}
-    service: {{SERVICE_NAME}}
+    app: service-placeholder
+    service: service-placeholder
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{SERVICE_NAME}}
+      app: service-placeholder
   template:
     metadata:
       labels:
-        app: {{SERVICE_NAME}}
-        service: {{SERVICE_NAME}}
+        app: service-placeholder
+        service: service-placeholder
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8000"
         prometheus.io/path: "/metrics"
     spec:
-      serviceAccountName: {{SERVICE_NAME}}-sa
+      serviceAccountName: service-placeholder-sa
       containers:
-      - name: {{SERVICE_NAME}}
-        image: {{IMAGE_REPOSITORY}}:{{IMAGE_TAG}}
+      - name: service-placeholder
+        image: placeholder:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -33,9 +33,9 @@ spec:
           name: metrics
         envFrom:
         - configMapRef:
-            name: {{SERVICE_NAME}}-config
+            name: service-placeholder-config
         - secretRef:
-            name: {{SERVICE_NAME}}-secrets
+            name: service-placeholder-secrets
         - secretRef:
             name: postgres-credentials
         - secretRef:
@@ -94,13 +94,13 @@ spec:
       volumes:
       - name: static-files
         persistentVolumeClaim:
-          claimName: {{SERVICE_NAME}}-static-pvc
+          claimName: service-placeholder-static-pvc
       - name: media-files
         persistentVolumeClaim:
-          claimName: {{SERVICE_NAME}}-media-pvc
+          claimName: service-placeholder-media-pvc
       - name: keys
         secret:
-          secretName: {{SERVICE_NAME}}-secrets
+          secretName: service-placeholder-secrets
           items:
           - key: SIGNING_KEY
             path: private.pem

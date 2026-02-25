@@ -7,11 +7,12 @@ namespace: infrastructure
 resources:
   - ../../base
 
-commonLabels:
-  environment: prod
-  managed-by: gitops
-  criticality: high
-
+labels:
+  - pairs:
+      environment: prod
+      managed-by: gitops
+      criticality: high
+    includeSelectors: false
 configMapGenerator:
   - name: platform-endpoints
     behavior: merge

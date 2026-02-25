@@ -7,10 +7,12 @@ namespace: auth-service
 resources:
   - ../../base
 
-commonLabels:
-  environment: prod
-  criticality: high
-
+labels:
+  - pairs:
+      environment: prod
+      criticality: high
+    includeSelectors: false
+    
 configMapGenerator:
   - name: auth-config
     behavior: merge

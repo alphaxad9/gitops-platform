@@ -6,7 +6,7 @@ namespace: auth-service
 
 resources:
   - ../../base/service-template
-  - secrets/auth-secrets.yaml
+  - auth-secrets.yaml
 
 configMapGenerator:
   - name: auth-config
@@ -15,14 +15,66 @@ configMapGenerator:
       - DB_NAME=authdb
       - DJANGO_SETTINGS_MODULE=my_backend.settings
       - KAFKA_GROUP_ID=my_backend_id
-      - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
       - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
       - LOG_LEVEL=INFO
       - RABBITMQ_QUEUE=microservice_one.events
       - RABBITMQ_VHOST=microservice_one     
-      - KAFKA_TOPIC=microservice_one.events      
+      - KAFKA_TOPIC=microservice_one.events
 
 images:
   - name: placeholder
     newName: alphaxad9/auth_service
     newTag: "0.0.1"
+
+patches:
+  # Patch deployment name and all references
+  - target:
+      kind: Deployment
+      name: service-placeholder
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: auth-service
+      - op: replace
+        path: /metadata/labels/app
+        value: auth-service
+      - op: replace
+        path: /metadata/labels/service
+        value: auth-service
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: auth-service
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: auth-service
+      - op: replace
+        path: /spec/template/metadata/labels/service
+        value: auth-service
+      - op: replace
+        path: /spec/template/spec/serviceAccountName
+        value: auth-service-sa
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: auth-service
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
+        value: auth-config
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
+        value: auth-secrets
+
+  # Patch PVC names
+  - target:
+      kind: PersistentVolumeClaim
+      name: service-placeholder-static-pvc
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: auth-service-static-pvc
+  - target:
+      kind: PersistentVolumeClaim
+      name: service-placeholder-media-pvc
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: auth-service-media-pvc
