@@ -5,7 +5,7 @@ metadata:
   name: service-placeholder-static-pvc
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce  # ← Changed from ReadWriteMany
   resources:
     requests:
       storage: 5Gi
@@ -16,7 +16,7 @@ metadata:
   name: service-placeholder-media-pvc
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce  # ← Changed from ReadWriteMany
   resources:
     requests:
       storage: 10Gi
