@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{SERVICE_NAME}}-service
+  name: service-placeholder-service
   labels:
-    app: {{SERVICE_NAME}}
+    app: service-placeholder
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8000"
@@ -20,4 +20,4 @@ spec:
     protocol: TCP
     name: metrics
   selector:
-    app: {{SERVICE_NAME}}
+    app: service-placeholder

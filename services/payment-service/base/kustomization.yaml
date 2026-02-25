@@ -62,6 +62,24 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
         value: payment-secrets
+      - op: replace
+        path: /spec/template/spec/volumes/2/secret/secretName
+        value: payment-secrets
+
+  # Patch service name and labels
+  - target:
+      kind: Service
+      name: service-placeholder-service
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: payment-service
+      - op: replace
+        path: /metadata/labels/app
+        value: payment-service
+      - op: replace
+        path: /spec/selector/app
+        value: payment-service
 
   # Patch PVC names
   - target:

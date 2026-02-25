@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "{{SERVICE_NAME}}-config" 
+  name: service-placeholder-config
 data:
   # Django Core
-  DJANGO_SETTINGS_MODULE: "{{SERVICE_NAME}}_service.settings"
+  DJANGO_SETTINGS_MODULE: "service-placeholder_service.settings"
   DJANGO_DEBUG: "False"
   DJANGO_ALLOWED_HOSTS: "*"
   DJANGO_LANGUAGE_CODE: "en-us"
@@ -17,17 +17,18 @@ data:
   POSTGRES_ENGINE: "django.db.backends.postgresql"
   POSTGRES_HOST: "postgresql.infrastructure.svc.cluster.local"
   POSTGRES_PORT: "5432"
-  POSTGRES_DB: "{{DB_NAME}}"
+  POSTGRES_DB: "db-placeholder"
   
   # RabbitMQ
   RABBITMQ_HOST: "rabbitmq.infrastructure.svc.cluster.local"
   RABBITMQ_PORT: "5672"
-  RABBITMQ_QUEUE: "{{RABBITMQ_QUEUE}}"
-  RABBITMQ_VHOST: "{{RABBITMQ_VHOST}}"
+  RABBITMQ_QUEUE: "queue-placeholder"
+  RABBITMQ_VHOST: "vhost-placeholder"
+  
   # Kafka
   KAFKA_BROKERS: "kafka.infrastructure.svc.cluster.local:9092"
   KAFKA_TOPIC: "microservice_one.events"
-  KAFKA_GROUP_ID: "{{SERVICE_NAME}}_service_id"
+  KAFKA_GROUP_ID: "service-placeholder_service_id"
   KAFKA_SECURITY_PROTOCOL: "PLAINTEXT"
   KAFKA_ENABLE_AUTO_COMMIT: "false"
   KAFKA_AUTO_OFFSET_RESET: "earliest"

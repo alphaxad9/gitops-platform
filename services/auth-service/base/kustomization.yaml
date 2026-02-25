@@ -62,6 +62,24 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
         value: auth-secrets
+      - op: replace
+        path: /spec/template/spec/volumes/2/secret/secretName
+        value: auth-secrets
+
+  # Patch service name and labels
+  - target:
+      kind: Service
+      name: service-placeholder-service
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: auth-service
+      - op: replace
+        path: /metadata/labels/app
+        value: auth-service
+      - op: replace
+        path: /spec/selector/app
+        value: auth-service
 
   # Patch PVC names
   - target:
