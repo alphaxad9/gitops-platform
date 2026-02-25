@@ -8,6 +8,7 @@ resources:
   - ../../base/service-template
   - payment-secrets.yaml
   - payment-sa.yaml
+
 configMapGenerator:
   - name: payment-config
     literals:
@@ -27,7 +28,7 @@ images:
     newTag: "0.0.1"
 
 patches:
-  # Patch deployment name and all references
+  # Patch deployment name and all references (your existing patches)
   - target:
       kind: Deployment
       name: service-placeholder
@@ -62,9 +63,18 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
         value: payment-secrets
-      - op: replace
-        path: /spec/template/spec/volumes/2/secret/secretName
-        value: payment-secrets
+
+  # REMOVE the keys volume and volumeMount for payment-service (NEW)
+  - target:
+      kind: Deployment
+      name: payment-service
+    patch: |-
+      # Remove volumeMount (index 2 - after static-files and media-files)
+      - op: remove
+        path: /spec/template/spec/containers/0/volumeMounts/2
+      # Remove volume (index 2 - after static-files and media-files)  
+      - op: remove
+        path: /spec/template/spec/volumes/2
 
   # Patch service name and labels
   - target:
