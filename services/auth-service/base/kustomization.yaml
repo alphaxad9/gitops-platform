@@ -7,6 +7,7 @@ namespace: auth-service
 resources:
   - ../../base/service-template
   - auth-secrets.yaml
+  - auth-sa.yaml
 
 configMapGenerator:
   - name: auth-config

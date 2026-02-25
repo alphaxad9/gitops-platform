@@ -1,0 +1,10 @@
+# gitops-platform/services/payment-service/base/payment-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: payment-service-sa
+  namespace: payment-service
+  labels:
+    app: payment-service
+    managed-by: gitops
+    component: payment-service

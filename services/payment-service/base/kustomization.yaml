@@ -7,7 +7,7 @@ namespace: payment-service
 resources:
   - ../../base/service-template
   - payment-secrets.yaml
-
+  - auth-sa.yaml
 configMapGenerator:
   - name: payment-config
     literals:

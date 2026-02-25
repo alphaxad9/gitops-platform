@@ -1,0 +1,10 @@
+# gitops-platform/services/auth-service/base/auth-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: auth-service-sa
+  namespace: auth-service
+  labels:
+    app: auth-service
+    managed-by: gitops
+    component: auth-service
