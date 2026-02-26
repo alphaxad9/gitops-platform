@@ -8,7 +8,7 @@ resources:
   - ../../base/service-template
   - payment-secrets.yaml
   - payment-sa.yaml
-  - ../../../infrastructure/base/secrets/postgres-credentials.yaml
+  - postgres-credentials.yaml
 
 configMapGenerator:
   - name: payment-config

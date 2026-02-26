@@ -8,7 +8,7 @@ resources:
   - ../../base/service-template
   - auth-secrets.yaml
   - auth-sa.yaml
-  - ../../../infrastructure/base/secrets/postgres-credentials.yaml  # ← ADD THIS
+  - postgres-credentials.yam
 
 configMapGenerator:
   - name: auth-config
