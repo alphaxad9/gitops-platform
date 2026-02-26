@@ -8,7 +8,7 @@ resources:
   - ../../base/service-template
   - payment-secrets.yaml
   - payment-sa.yaml
-  - ../../../infrastructure/base/secrets/postgres-credentials.yaml  # ← ADD THIS
+  - ../../../infrastructure/base/secrets/postgres-credentials.yaml
 
 configMapGenerator:
   - name: payment-config
@@ -29,7 +29,7 @@ images:
     newTag: "0.0.1"
 
 patches:
-  # Patch postgres-credentials with payment-specific values (NEW)
+  # Patch postgres-credentials with payment-specific values
   - target:
       kind: Secret
       name: postgres-credentials
@@ -80,15 +80,15 @@ patches:
         path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
         value: payment-secrets
 
-  # REMOVE the keys volume and volumeMount for payment-service
+  # REMOVE the keys volume and volumeMount for payment-service (UPDATED with descriptive comments)
   - target:
       kind: Deployment
       name: payment-service
     patch: |-
-      # Remove volumeMount (index 2 - after static-files and media-files)
+      # Remove volumeMount that mounts to /app/keys (index may need adjustment)
       - op: remove
         path: /spec/template/spec/containers/0/volumeMounts/2
-      # Remove volume (index 2 - after static-files and media-files)  
+      # Remove volume that references payment-secrets for keys
       - op: remove
         path: /spec/template/spec/volumes/2
 

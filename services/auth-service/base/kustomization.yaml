@@ -26,6 +26,7 @@ configMapGenerator:
 images:
   - name: placeholder
     newName: alphaxad9/auth-service
+    #alphaxad9/auth_service
     newTag: "0.0.1"
 
 patches:
