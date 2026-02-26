@@ -9,6 +9,9 @@ resources:
   - auth-secrets.yaml
   - auth-sa.yaml
   - postgres-credentials.yam
+  - rabbitmq-credentials.yaml  
+  - kafka-credentials.yaml      
+  - redis-credentials.yaml   
 
 configMapGenerator:
   - name: auth-config

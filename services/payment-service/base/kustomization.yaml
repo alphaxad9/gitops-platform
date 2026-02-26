@@ -9,6 +9,9 @@ resources:
   - payment-secrets.yaml
   - payment-sa.yaml
   - postgres-credentials.yaml
+  - rabbitmq-credentials.yaml   
+  - kafka-credentials.yaml      
+  - redis-credentials.yaml   
 
 configMapGenerator:
   - name: payment-config
