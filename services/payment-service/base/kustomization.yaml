@@ -29,7 +29,7 @@ configMapGenerator:
 images:
   - name: placeholder
     newName: alphaxad9/payment-service
-    newTag: "0.0.2"
+    newTag: "0.0.3"
 
 patches:
   # Patch postgres-credentials with payment-specific values
