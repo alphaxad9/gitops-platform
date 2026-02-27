@@ -8,7 +8,7 @@ resources:
   - ../../base/service-template
   - auth-secrets.yaml
   - auth-sa.yaml
-  - postgres-credentials.yam
+  - postgres-credentials.yaml
   - rabbitmq-credentials.yaml  
   - kafka-credentials.yaml      
   - redis-credentials.yaml   
