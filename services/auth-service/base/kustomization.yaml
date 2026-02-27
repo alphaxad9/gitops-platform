@@ -1,4 +1,3 @@
-# gitops-platform/services/auth-service/base/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -29,11 +28,10 @@ configMapGenerator:
 images:
   - name: placeholder
     newName: alphaxad9/auth-service
-    #alphaxad9/auth_service
     newTag: "0.0.1"
 
 patches:
-  # Patch postgres-credentials with auth-specific values (NEW)
+  # Patch postgres-credentials with auth-specific values
   - target:
       kind: Secret
       name: postgres-credentials
@@ -83,9 +81,29 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
         value: auth-secrets
-      - op: replace
-        path: /spec/template/spec/volumes/2/secret/secretName
-        value: auth-secrets
+
+  # ADD keys volume and volumeMount for auth-service ONLY
+  - target:
+      kind: Deployment
+      name: auth-service
+    patch: |-
+      # Add volumeMount for keys
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: keys
+          mountPath: /app/keys
+          readOnly: true
+      # Add volume for keys
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: keys
+          secret:
+            secretName: auth-secrets
+            items:
+            - key: SIGNING_KEY
+              path: private.pem
 
   # Patch service name and labels
   - target:
