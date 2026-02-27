@@ -24,6 +24,8 @@ configMapGenerator:
       - RABBITMQ_QUEUE=microservice_one.events
       - RABBITMQ_VHOST=microservice_one     
       - KAFKA_TOPIC=microservice_one.events
+      - POSTGRES_HOST=postgres-service.infrastructure.svc.cluster.local
+      - POSTGRES_PORT=5432
 
 images:
   - name: placeholder
