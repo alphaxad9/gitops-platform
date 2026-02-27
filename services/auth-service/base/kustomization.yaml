@@ -26,6 +26,8 @@ configMapGenerator:
       - KAFKA_TOPIC=microservice_one.events
       - POSTGRES_HOST=postgres-service.infrastructure.svc.cluster.local
       - POSTGRES_PORT=5432
+      - DB_HOST=postgres-service.infrastructure.svc.cluster.local
+      - DB_PORT=5432
 
 images:
   - name: placeholder
