@@ -3,6 +3,10 @@ kind: Kustomization
 
 namespace: auth-service
 
+# 👇 Disable hash suffix so ConfigMap name stays "auth-config"
+generatorOptions:
+  disableNameSuffixHash: true
+
 resources:
   - ../../base/service-template
   - auth-secrets.yaml
@@ -16,7 +20,7 @@ configMapGenerator:
   - name: auth-config
     literals:
       - SERVICE_NAME=auth
-      - DB_NAME=authdb
+      - DB_NAME=authdb               # Keep if your Django uses it, but better align with POSTGRES_*
       - DJANGO_SETTINGS_MODULE=my_backend.settings
       - KAFKA_GROUP_ID=my_backend_id
       - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
@@ -35,19 +39,19 @@ images:
     newTag: "0.0.2"
 
 patches:
-  # Patch postgres-credentials with auth-specific values
+  # ✅ Patch postgres-credentials with POSTGRES_* keys (Django standard)
   - target:
       kind: Secret
       name: postgres-credentials
     patch: |-
       - op: replace
-        path: /stringData/DB_NAME
+        path: /stringData/POSTGRES_DB
         value: authdb
       - op: replace
-        path: /stringData/DB_USER
+        path: /stringData/POSTGRES_USER
         value: ishimwe
       - op: replace
-        path: /stringData/DB_PASSWORD
+        path: /stringData/POSTGRES_PASSWORD
         value: "2025New+"
 
   # Patch deployment name and all references
@@ -91,14 +95,12 @@ patches:
       kind: Deployment
       name: auth-service
     patch: |-
-      # Add volumeMount for keys
       - op: add
         path: /spec/template/spec/containers/0/volumeMounts/-
         value:
           name: keys
           mountPath: /app/keys
           readOnly: true
-      # Add volume for keys
       - op: add
         path: /spec/template/spec/volumes/-
         value:
