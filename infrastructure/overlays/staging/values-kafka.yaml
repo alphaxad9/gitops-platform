@@ -1,17 +1,26 @@
 # gitops-platform/infrastructure/overlays/staging/values-kafka.yaml
-# Staging config: KRaft, persistence, basic auth
+# Staging config: Production-like but smaller, Bitnami image
 
-replicaCount: 2  # ✅ Test HA with 2 nodes
+replicaCount: 2  # Test HA with 2 nodes
 
-image:
-  registry: docker.io
-  repository: apache/kafka
-  tag: 4.1.1
-  pullPolicy: IfNotPresent
+kraft:
+  enabled: true
+
+listeners:
+  client:
+    protocol: PLAINTEXT
+    containerPort: 9092
+  controller:
+    protocol: PLAINTEXT
+    containerPort: 9093
+  interbroker:
+    protocol: PLAINTEXT
+    containerPort: 9094
 
 persistence:
   enabled: true
   size: 50Gi
+  # storageClass: "gp3"  # Uncomment if using specific storage class
 
 resources:
   requests:
@@ -21,31 +30,21 @@ resources:
     memory: 4Gi
     cpu: 2000m
 
-kraft:
-  enabled: true
-  processRoles: "broker,controller"
-  controllerQuorumVoters: "1@kafka-0.kafka-headless.infrastructure.svc.cluster.local:9093,2@kafka-1.kafka-headless.infrastructure.svc.cluster.local:9093"
-
-listeners:
-  client:
-    protocol: SASL_PLAIN  # ✅ Test auth without TLS complexity
-    containerPort: 9092
-  controller:
-    protocol: PLAINTEXT
-    containerPort: 9093
-
-sasl:
-  enabled: true
-  existingSecret: kafka-credentials
-
-# ✅ TLS disabled for staging simplicity (enable to test prod config)
 tls:
-  enabled: false
+  enabled: false  # Enable in prod; test TLS in staging if needed
+
+autoCreateTopicsEnable: true
+
+logLevel: INFO
 
 metrics:
   enabled: true
+  serviceMonitor:
+    enabled: true  # Enable if using Prometheus Operator
 
-config:
-  log:
-    retention:
-      hours: 72  # 3 days
+# ✅ Optional: Enable SASL auth for staging testing
+# auth:
+#   clientProtocol: sasl_plaintext
+#   interBrokerProtocol: plaintext
+#   existingSecret: kafka-credentials
+#   existingSecretPasswordKey: KAFKA_PASSWORD
