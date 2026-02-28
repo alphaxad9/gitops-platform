@@ -27,31 +27,31 @@ patches:
 
 helmCharts:
   - name: postgresql
-    repo: https://charts.bitnami.com/bitnami
+    repo: file:///tmp/charts/postgresql-12.1.2
     version: "12.1.2"
     releaseName: postgresql
     valuesFile: values-postgresql.yaml
 
   - name: kafka
-    repo: https://charts.bitnami.com/bitnami
+    repo: file:///tmp/charts/kafka-22.1.4
     version: "22.1.4"
     releaseName: kafka
     valuesFile: values-kafka.yaml
 
   - name: redis
-    repo: https://charts.bitnami.com/bitnami
+    repo: file:///tmp/charts/redis-17.11.3
     version: "17.11.3"
     releaseName: redis
     valuesFile: values-redis.yaml
 
   - name: rabbitmq
-    repo: https://charts.bitnami.com/bitnami
+    repo: file:///tmp/charts/rabbitmq-12.5.2
     version: "12.5.2"
     releaseName: rabbitmq
     valuesFile: values-rabbitmq.yaml
 
   - name: traefik
-    repo: https://helm.traefik.io/traefik
+    repo: file:///tmp/charts/traefik
     version: "25.0.0"
     releaseName: traefik
     valuesFile: values-traefik.yaml
