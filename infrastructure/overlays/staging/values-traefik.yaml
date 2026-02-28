@@ -1,0 +1,55 @@
+# gitops-platform/infrastructure/overlays/staging/values-traefik.yaml
+# Staging config: TLS enabled, dashboard accessible for testing
+
+deployment:
+  replicas: 1  # ✅ Single replica for staging
+
+image:
+  name: traefik
+  tag: v2.11
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+
+logs:
+  general:
+    level: INFO
+  access:
+    enabled: true
+
+# ✅ Enable dashboard in staging for testing (restrict via middleware in prod)
+ingressRoute:
+  dashboard:
+    enabled: true
+    matchRule: Host(`traefik.staging.local`)
+    entryPoints:
+      - websecure
+    tls: {}
+
+additionalArguments:
+  - "--providers.kubernetescrd.namespaces=auth-service,payment-service,infrastructure"
+  - "--accesslog=true"
+  - "--metrics.prometheus=true"
+  - "--serverstransport.insecureskipverify=false"
+
+ports:
+  web:
+    port: 80
+    expose: true
+    redirectTo:
+      port: websecure
+  websecure:
+    port: 443
+    expose: true
+    tls:
+      enabled: true
+      options: "default"
+
+tlsOptions:
+  default:
+    minVersion: VersionTLS12
+
+metrics:
+  prometheus:
+    entryPoint: metrics

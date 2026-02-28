@@ -1,0 +1,43 @@
+# gitops-platform/infrastructure/overlays/dev/values-rabbitmq.yaml
+# Extracted from your original values.yaml, references existing secret
+
+replicaCount: 1
+
+image:
+  registry: docker.io
+  repository: rabbitmq
+  tag: 3.13-management
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: true
+  size: 20Gi
+
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 500m
+  limits:
+    memory: 1Gi
+    cpu: 1000m
+
+auth:
+  existingSecret: rabbitmq-credentials  # ✅ Uses your base secret
+  existingSecretPasswordKey: RABBITMQ_PASS
+  existingSecretErlangCookieKey: RABBITMQ_ERLANG_COOKIE
+
+extraPlugins: "rabbitmq_management"
+
+extraConfiguration: |
+  default_vhost = microservice_one
+
+# Load queue/exchange definitions from your base secret
+loadDefinition:
+  enabled: true
+  existingSecret: rabbitmq-credentials
+  existingSecretKey: load-definition
+
+# Dev-only: enable management UI without TLS
+management:
+  tls:
+    enabled: false

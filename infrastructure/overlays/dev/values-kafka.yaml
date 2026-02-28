@@ -1,0 +1,50 @@
+# gitops-platform/infrastructure/overlays/dev/values-kafka.yaml
+# Extracted from your original values.yaml
+
+replicaCount: 1
+
+image:
+  registry: docker.io
+  repository: apache/kafka
+  tag: 4.1.1
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: true
+  size: 30Gi
+
+resources:
+  requests:
+    memory: 1Gi
+    cpu: 500m
+  limits:
+    memory: 2Gi
+    cpu: 1000m
+
+# KRaft mode (no Zookeeper)
+kraft:
+  enabled: true
+  processRoles: "broker,controller"
+  controllerQuorumVoters: "1@kafka-0.kafka-headless.infrastructure.svc.cluster.local:9093"
+
+listeners:
+  client:
+    protocol: PLAINTEXT
+    containerPort: 9092
+  controller:
+    protocol: PLAINTEXT
+    containerPort: 9093
+
+# Environment variables for KRaft
+extraEnvVars:
+  - name: KAFKA_NODE_ID
+    value: "1"
+  - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+    value: "1@localhost:9093"
+  - name: KAFKA_PROCESS_ROLES
+    value: "broker,controller"
+  - name: CLUSTER_ID
+    value: "MkU3OEVBNTcwNTJENDM2Qk"
+
+# Security: Use existing secret for credentials if needed
+# (Bitnami Kafka chart supports existingSecret for SASL, but PLAINTEXT is fine for dev)

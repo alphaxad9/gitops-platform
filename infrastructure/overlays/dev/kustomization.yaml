@@ -5,53 +5,55 @@ kind: Kustomization
 namespace: infrastructure
 
 resources:
-  - ../../base
+  - ../../base  # ✅ This brings in your existing secrets & configmaps
 
 labels:
   - pairs:
       environment: dev
       managed-by: gitops
     includeSelectors: false
-    
-configMapGenerator:
-  - name: platform-endpoints
-    behavior: merge
-    literals:
-      - ENVIRONMENT=dev
-      - LOG_LEVEL=DEBUG
 
+# ✅ FIX: Use patches (not configMapGenerator) for static base ConfigMaps
+patches:
+  - target:
+      kind: ConfigMap
+      name: platform-endpoints
+    patch: |
+      - op: add
+        path: /data/ENVIRONMENT
+        value: dev
+      - op: add
+        path: /data/LOG_LEVEL
+        value: DEBUG
+
+# ✅ FIX: Separate valuesFile per chart (point to split files below)
 helmCharts:
   - name: postgresql
     repo: https://charts.bitnami.com/bitnami
-    version: 12.x.x
+    version: "12.1.2"
     releaseName: postgresql
-    
-    valuesFile: values.yaml
+    valuesFile: values-postgresql.yaml
 
   - name: kafka
     repo: https://charts.bitnami.com/bitnami
-    version: 22.x.x
+    version: "22.1.4"
     releaseName: kafka
-    
-    valuesFile: values.yaml
+    valuesFile: values-kafka.yaml
 
   - name: redis
     repo: https://charts.bitnami.com/bitnami
-    version: 17.x.x
+    version: "17.11.3"
     releaseName: redis
-    
-    valuesFile: values.yaml
+    valuesFile: values-redis.yaml
 
   - name: rabbitmq
     repo: https://charts.bitnami.com/bitnami
-    version: 12.x.x
+    version: "12.5.2"
     releaseName: rabbitmq
-    
-    valuesFile: values.yaml
+    valuesFile: values-rabbitmq.yaml
 
   - name: traefik
     repo: https://helm.traefik.io/traefik
-    version: 25.x.x
+    version: "25.0.0"
     releaseName: traefik
-    
-    valuesFile: values.yaml
+    valuesFile: values-traefik.yaml

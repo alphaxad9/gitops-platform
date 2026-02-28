@@ -1,0 +1,69 @@
+# gitops-platform/infrastructure/overlays/prod/values-traefik.yaml
+# Production config: TLS, security headers, monitoring
+
+deployment:
+  replicas: 2  # ✅ HA: multiple Traefik pods
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+image:
+  name: traefik
+  tag: v2.11
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"  # ✅ Example for AWS
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:..."  # ✅ ACM cert
+
+logs:
+  general:
+    level: WARN  # ✅ Less verbose in prod
+  access:
+    enabled: true
+    format: json  # ✅ Structured logs for ingestion
+
+# ✅ Disable insecure dashboard in prod
+ingressRoute:
+  dashboard:
+    enabled: false  # 🔒 Disable by default; enable via separate secure ingress if needed
+
+additionalArguments:
+  - "--providers.kubernetescrd.namespaces=auth-service,payment-service,infrastructure"
+  - "--accesslog=true"
+  - "--accesslog.format=json"
+  - "--metrics.prometheus=true"
+  - "--metrics.prometheus.entryPoint=metrics"
+  - "--entryPoints.metrics.address=:9100"
+  - "--serverstransport.insecureskipverify=false"  # ✅ Verify backend TLS
+
+ports:
+  web:
+    port: 80
+    expose: true
+    redirectTo:
+      port: websecure  # ✅ Force HTTPS
+  websecure:
+    port: 443
+    expose: true
+    tls:
+      enabled: true
+      options: "default"  # ✅ Use TLSOptions CRD for strong ciphers
+
+# ✅ TLS configuration via cert-manager
+tlsOptions:
+  default:
+    minVersion: VersionTLS12
+    cipherSuites:
+      - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+      - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+
+# ✅ Monitoring
+metrics:
+  prometheus:
+    entryPoint: metrics
+
+# ✅ Security headers via Middleware CRDs (define separately)
+# Example: add middleware reference in IngressRoute for HSTS, CSP, etc.

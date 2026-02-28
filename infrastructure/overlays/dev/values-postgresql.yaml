@@ -1,0 +1,34 @@
+# gitops-platform/infrastructure/overlays/dev/values-postgresql.yaml
+# Extracted from your original values.yaml - references existing secret
+
+global:
+  postgresql:
+    auth:
+      existingSecret: postgres-credentials  # ✅ Uses your base secret
+
+auth:
+  existingSecret: postgres-credentials  # Bitnami chart field
+  secretKeys:
+    userPasswordKey: POSTGRES_PASSWORD
+    adminPasswordKey: POSTGRES_PASSWORD
+
+primary:
+  persistence:
+    enabled: true
+    size: 20Gi
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 500m
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+
+initdbScripts:
+  create-databases.sql: |
+    CREATE DATABASE authdb;
+    CREATE DATABASE paymentdb;
+
+# Dev-only: disable TLS for easier local testing
+tls:
+  enabled: false

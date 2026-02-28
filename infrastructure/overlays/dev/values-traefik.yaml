@@ -1,0 +1,49 @@
+# gitops-platform/infrastructure/overlays/dev/values-traefik.yaml
+# Extracted from your original values.yaml
+
+deployment:
+  replicas: 1
+
+image:
+  name: traefik
+  tag: v2.11
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+
+logs:
+  general:
+    level: DEBUG
+  access:
+    enabled: true
+
+# Enable dashboard for dev (insecure - dev only!)
+ingressRoute:
+  dashboard:
+    enabled: true
+    matchRule: Host(`traefik.dev.local`)
+    entryPoints:
+      - web
+    middlewares: []
+    tls: {}
+
+additionalArguments:
+  - "--api.insecure=true"
+  - "--api.dashboard=true"
+  - "--accesslog=true"
+  - "--providers.kubernetescrd.namespaces=auth-service,payment-service,infrastructure"
+
+ports:
+  web:
+    port: 80
+    expose: true
+  websecure:
+    port: 443
+    expose: true
+    tls:
+      enabled: false  # Dev-only: disable TLS
+
+# Dev-only: allow insecure backend connections
+serversTransport:
+  insecureSkipVerify: true

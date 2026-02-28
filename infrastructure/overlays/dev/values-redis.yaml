@@ -1,0 +1,31 @@
+# gitops-platform/infrastructure/overlays/dev/values-redis.yaml
+# Extracted from your original values.yaml, references existing secret
+
+architecture: standalone
+
+image:
+  registry: docker.io
+  repository: redis
+  tag: 7-alpine
+  pullPolicy: IfNotPresent
+
+auth:
+  enabled: true
+  existingSecret: redis-credentials  # ✅ Uses your base secret
+  existingSecretPasswordKey: REDIS_PASSWORD
+
+master:
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 200m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+# Dev-only: disable TLS
+tls:
+  enabled: false

@@ -1,0 +1,51 @@
+# gitops-platform/infrastructure/overlays/staging/values-kafka.yaml
+# Staging config: KRaft, persistence, basic auth
+
+replicaCount: 2  # ✅ Test HA with 2 nodes
+
+image:
+  registry: docker.io
+  repository: apache/kafka
+  tag: 4.1.1
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: true
+  size: 50Gi
+
+resources:
+  requests:
+    memory: 2Gi
+    cpu: 1000m
+  limits:
+    memory: 4Gi
+    cpu: 2000m
+
+kraft:
+  enabled: true
+  processRoles: "broker,controller"
+  controllerQuorumVoters: "1@kafka-0.kafka-headless.infrastructure.svc.cluster.local:9093,2@kafka-1.kafka-headless.infrastructure.svc.cluster.local:9093"
+
+listeners:
+  client:
+    protocol: SASL_PLAIN  # ✅ Test auth without TLS complexity
+    containerPort: 9092
+  controller:
+    protocol: PLAINTEXT
+    containerPort: 9093
+
+sasl:
+  enabled: true
+  existingSecret: kafka-credentials
+
+# ✅ TLS disabled for staging simplicity (enable to test prod config)
+tls:
+  enabled: false
+
+metrics:
+  enabled: true
+
+config:
+  log:
+    retention:
+      hours: 72  # 3 days

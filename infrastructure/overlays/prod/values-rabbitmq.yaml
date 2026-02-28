@@ -1,0 +1,64 @@
+# gitops-platform/infrastructure/overlays/prod/values-rabbitmq.yaml
+# Production config: HA, persistence, TLS, monitoring
+
+replicaCount: 3  # ✅ HA cluster
+
+image:
+  registry: docker.io
+  repository: rabbitmq
+  tag: 3.13-management
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: true
+  size: 30Gi
+  storageClass: "gp3"
+
+resources:
+  requests:
+    memory: 1Gi
+    cpu: 500m
+  limits:
+    memory: 2Gi
+    cpu: 1000m
+
+auth:
+  existingSecret: rabbitmq-credentials
+  existingSecretPasswordKey: RABBITMQ_PASS
+  existingSecretErlangCookieKey: RABBITMQ_ERLANG_COOKIE
+
+extraPlugins: "rabbitmq_management rabbitmq_prometheus rabbitmq_shovel"
+
+extraConfiguration: |
+  default_vhost = microservice_one
+  cluster_formation.peer_discovery_backend = k8s
+  cluster_formation.k8s.host = kubernetes.default.svc.cluster.local
+  cluster_formation.k8s.address_type = hostname
+  cluster_formation.node_cleanup.only_log_warning = true
+
+# ✅ Load queue/exchange definitions from existing secret
+loadDefinition:
+  enabled: true
+  existingSecret: rabbitmq-credentials
+  existingSecretKey: load-definition
+
+# ✅ Production: enable TLS
+tls:
+  enabled: true
+  failIfNoPeerCert: true
+  caCertificateSecret: "rabbitmq-ca-cert"
+  certificateSecret: "rabbitmq-tls-cert"
+  keySecret: "rabbitmq-tls-cert"
+
+# ✅ Monitoring
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+
+# ✅ Resource limits for queue protection
+extraEnvVars:
+  - name: RABBITMQ_VM_MEMORY_HIGH_WATERMARK
+    value: "0.6"
+  - name: RABBITMQ_DISK_FREE_LIMIT
+    value: "2GB"

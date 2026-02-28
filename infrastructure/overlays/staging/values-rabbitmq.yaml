@@ -1,0 +1,50 @@
+# gitops-platform/infrastructure/overlays/staging/values-rabbitmq.yaml
+# Staging config: HA test, persistence, basic monitoring
+
+replicaCount: 2  # ✅ Test clustering with 2 nodes
+
+image:
+  registry: docker.io
+  repository: rabbitmq
+  tag: 3.13-management
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: true
+  size: 25Gi
+
+resources:
+  requests:
+    memory: 768Mi
+    cpu: 400m
+  limits:
+    memory: 1.5Gi
+    cpu: 800m
+
+auth:
+  existingSecret: rabbitmq-credentials
+  existingSecretPasswordKey: RABBITMQ_PASS
+  existingSecretErlangCookieKey: RABBITMQ_ERLANG_COOKIE
+
+extraPlugins: "rabbitmq_management rabbitmq_prometheus"
+
+extraConfiguration: |
+  default_vhost = microservice_one
+  cluster_formation.peer_discovery_backend = k8s
+  cluster_formation.k8s.host = kubernetes.default.svc.cluster.local
+  cluster_formation.k8s.address_type = hostname
+
+loadDefinition:
+  enabled: true
+  existingSecret: rabbitmq-credentials
+  existingSecretKey: load-definition
+
+tls:
+  enabled: false  # ✅ Disable for staging simplicity
+
+metrics:
+  enabled: true
+
+extraEnvVars:
+  - name: RABBITMQ_VM_MEMORY_HIGH_WATERMARK
+    value: "0.7"

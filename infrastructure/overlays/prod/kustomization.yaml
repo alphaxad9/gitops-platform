@@ -5,7 +5,7 @@ kind: Kustomization
 namespace: infrastructure
 
 resources:
-  - ../../base
+  - ../../base  # ✅ Brings in your existing secrets & configmaps
 
 labels:
   - pairs:
@@ -13,46 +13,51 @@ labels:
       managed-by: gitops
       criticality: high
     includeSelectors: false
-configMapGenerator:
-  - name: platform-endpoints
-    behavior: merge
-    literals:
-      - ENVIRONMENT=prod
-      - LOG_LEVEL=WARNING
-      - BACKUP_ENABLED=true
 
+# ✅ Use patches for static base ConfigMaps
+patches:
+  - target:
+      kind: ConfigMap
+      name: platform-endpoints
+    patch: |
+      - op: add
+        path: /data/ENVIRONMENT
+        value: prod
+      - op: add
+        path: /data/LOG_LEVEL
+        value: WARNING
+      - op: add
+        path: /data/BACKUP_ENABLED
+        value: "true"
+
+# ✅ Separate valuesFile per chart + valid semver versions
 helmCharts:
   - name: postgresql
     repo: https://charts.bitnami.com/bitnami
-    version: 12.x.x
+    version: "12.1.2"
     releaseName: postgresql
-    
-    valuesFile: values.yaml
+    valuesFile: values-postgresql.yaml
 
   - name: kafka
     repo: https://charts.bitnami.com/bitnami
-    version: 22.x.x
+    version: "22.1.4"
     releaseName: kafka
-    
-    valuesFile: values.yaml
+    valuesFile: values-kafka.yaml
 
   - name: redis
     repo: https://charts.bitnami.com/bitnami
-    version: 17.x.x
+    version: "17.11.3"
     releaseName: redis
-    
-    valuesFile: values.yaml
+    valuesFile: values-redis.yaml
 
   - name: rabbitmq
     repo: https://charts.bitnami.com/bitnami
-    version: 12.x.x
+    version: "12.5.2"
     releaseName: rabbitmq
-    
-    valuesFile: values.yaml
+    valuesFile: values-rabbitmq.yaml
 
   - name: traefik
     repo: https://helm.traefik.io/traefik
-    version: 25.x.x
+    version: "25.0.0"
     releaseName: traefik
-    
-    valuesFile: values.yaml
+    valuesFile: values-traefik.yaml
