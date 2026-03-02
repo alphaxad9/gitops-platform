@@ -1,10 +1,17 @@
 # gitops-platform/infrastructure/overlays/staging/values-kafka.yaml
-# Staging config: Production-like but smaller, Bitnami image
+# Staging config: Production-like, KRaft, Bitnami image
+
+image:
+  registry: docker.io
+  repository: bitnami/kafka
+  tag: 3.4.0-debian-11-r33
+  pullPolicy: IfNotPresent
 
 replicaCount: 2  # Test HA with 2 nodes
 
 kraft:
   enabled: true
+  controllerQuorumVoters: "0@kafka-0.kafka-headless.infrastructure.svc.cluster.local:9093,1@kafka-1.kafka-headless.infrastructure.svc.cluster.local:9093"
 
 listeners:
   client:
@@ -20,7 +27,7 @@ listeners:
 persistence:
   enabled: true
   size: 50Gi
-  # storageClass: "gp3"  # Uncomment if using specific storage class
+  # storageClass: "gp3"  # Uncomment if using specific class
 
 resources:
   requests:
@@ -31,7 +38,7 @@ resources:
     cpu: 2000m
 
 tls:
-  enabled: false  # Enable in prod; test TLS in staging if needed
+  enabled: false  # Enable in prod; test in staging if needed
 
 autoCreateTopicsEnable: true
 
@@ -40,11 +47,4 @@ logLevel: INFO
 metrics:
   enabled: true
   serviceMonitor:
-    enabled: true  # Enable if using Prometheus Operator
-
-# ✅ Optional: Enable SASL auth for staging testing
-# auth:
-#   clientProtocol: sasl_plaintext
-#   interBrokerProtocol: plaintext
-#   existingSecret: kafka-credentials
-#   existingSecretPasswordKey: KAFKA_PASSWORD
+    enabled: true

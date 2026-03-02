@@ -1,39 +1,42 @@
 # gitops-platform/infrastructure/overlays/prod/values-traefik.yaml
-# Production config: TLS, security headers, monitoring
+# Production config: HA, TLS, security headers, monitoring
+
+image:
+  name: traefik
+  tag: v2.11  # Pin to exact patch version in prod: v2.11.0
+  pullPolicy: IfNotPresent
 
 deployment:
-  replicas: 2  # ✅ HA: multiple Traefik pods
+  replicas: 2  # HA: multiple replicas
   podDisruptionBudget:
     enabled: true
     minAvailable: 1
 
-image:
-  name: traefik
-  tag: v2.11
-  pullPolicy: IfNotPresent
-
 service:
   type: LoadBalancer
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"  # ✅ Example for AWS
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:..."  # ✅ ACM cert
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"  # Example for AWS
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
 
 logs:
   general:
-    level: WARN  # ✅ Less verbose in prod
+    level: ERROR  # Less verbose in prod
   access:
     enabled: true
-    format: json  # ✅ Structured logs for ingestion
+    format: json
+    bufferingSize: 100
 
-# ✅ Disable insecure dashboard in prod
+# ✅ Disable insecure dashboard in prod (enable via separate secure ingress if needed)
 ingressRoute:
   dashboard:
-    enabled: false  # 🔒 Disable by default; enable via separate secure ingress if needed
+    enabled: false
 
 additionalArguments:
   - "--providers.kubernetescrd.namespaces=auth-service,payment-service,infrastructure"
+  - "--providers.kubernetesingress.namespaces=auth-service,payment-service,infrastructure"
   - "--accesslog=true"
   - "--accesslog.format=json"
+  - "--accesslog.bufferingsize=100"
   - "--metrics.prometheus=true"
   - "--metrics.prometheus.entryPoint=metrics"
   - "--entryPoints.metrics.address=:9100"
@@ -44,26 +47,63 @@ ports:
     port: 80
     expose: true
     redirectTo:
-      port: websecure  # ✅ Force HTTPS
+      port: websecure
+      scheme: https
+      permanent: true
   websecure:
     port: 443
     expose: true
     tls:
       enabled: true
-      options: "default"  # ✅ Use TLSOptions CRD for strong ciphers
+      options: "default"
+  metrics:
+    port: 9100
+    expose: true
 
-# ✅ TLS configuration via cert-manager
+# ✅ Strong TLS configuration
 tlsOptions:
   default:
     minVersion: VersionTLS12
     cipherSuites:
       - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
       - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+      - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+      - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
 
-# ✅ Monitoring
+# ✅ Let's Encrypt for automatic certs (if using)
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: prod-admin@example.com
+      storage: /data/acme.json
+      httpChallenge:
+        entryPoint: web
+
+# ✅ Metrics
 metrics:
   prometheus:
+    enabled: true
     entryPoint: metrics
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
 
-# ✅ Security headers via Middleware CRDs (define separately)
-# Example: add middleware reference in IngressRoute for HSTS, CSP, etc.
+# ✅ Resources for prod
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 200m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+
+# ✅ Anti-affinity to spread across nodes
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+          topologyKey: kubernetes.io/hostname

@@ -1,13 +1,13 @@
 # gitops-platform/infrastructure/overlays/staging/values-redis.yaml
-# Staging config: replication, persistence, no Sentinel
-
-architecture: replication
+# Staging config: Replication, persistence, no Sentinel
 
 image:
   registry: docker.io
-  repository: redis
-  tag: 7-alpine
+  repository: bitnami/redis
+  tag: latest
   pullPolicy: IfNotPresent
+
+architecture: replication
 
 auth:
   enabled: true
@@ -17,30 +17,43 @@ auth:
 master:
   persistence:
     enabled: true
-    size: 15Gi
+    size: 20Gi
   resources:
     requests:
-      memory: 512Mi
-      cpu: 250m
+      memory: 256Mi
+      cpu: 200m
     limits:
-      memory: 1Gi
-      cpu: 500m
+      memory: 512Mi
+      cpu: 400m
 
 replica:
-  replicaCount: 1  # ✅ Single replica for staging
+  replicaCount: 1
   persistence:
     enabled: true
-    size: 15Gi
+    size: 20Gi
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+      cpu: 200m
 
+# ✅ Skip Sentinel in staging for simplicity
 sentinel:
-  enabled: false  # ✅ Skip Sentinel in staging for simplicity
+  enabled: false
 
 tls:
-  enabled: false  # ✅ Disable for staging; test in prod
+  enabled: false  # Enable in prod; test in staging if needed
+
+logLevel: info
 
 metrics:
   enabled: true
+  serviceMonitor:
+    enabled: true
 
+# ✅ Memory config for staging
 config:
-  maxmemory: "800mb"
+  maxmemory: "400mb"
   maxmemory-policy: "allkeys-lru"

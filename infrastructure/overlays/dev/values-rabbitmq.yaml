@@ -1,43 +1,59 @@
 # gitops-platform/infrastructure/overlays/dev/values-rabbitmq.yaml
-# Extracted from your original values.yaml, references existing secret
+# Dev config: Single node, no persistence, Bitnami image
+
+# ✅ Use Bitnami image (chart default) or specify exact tag
+image:
+  registry: docker.io
+  repository: bitnami/rabbitmq
+  tag: latest  # Or pin to specific: 3.13.2-debian-11-r0
+  pullPolicy: IfNotPresent
 
 replicaCount: 1
 
-image:
-  registry: docker.io
-  repository: rabbitmq
-  tag: 3.13-management
-  pullPolicy: IfNotPresent
-
+# ✅ Persistence disabled for fast dev iteration
 persistence:
-  enabled: true
-  size: 20Gi
+  enabled: false
+  # size: 20Gi  # Uncomment for staging/prod
 
+# ✅ Minimal resources for dev
 resources:
   requests:
-    memory: 512Mi
-    cpu: 500m
+    memory: 256Mi
+    cpu: 100m
   limits:
-    memory: 1Gi
-    cpu: 1000m
+    memory: 512Mi
+    cpu: 250m
 
+# ✅ Auth: Reference your existing base secret
 auth:
-  existingSecret: rabbitmq-credentials  # ✅ Uses your base secret
+  existingSecret: rabbitmq-credentials
   existingSecretPasswordKey: RABBITMQ_PASS
   existingSecretErlangCookieKey: RABBITMQ_ERLANG_COOKIE
 
-extraPlugins: "rabbitmq_management"
+# ✅ Plugins for management UI
+extraPlugins: "rabbitmq_management rabbitmq_prometheus"
 
+# ✅ Vhost configuration
 extraConfiguration: |
   default_vhost = microservice_one
 
-# Load queue/exchange definitions from your base secret
+# ✅ Load queue/exchange definitions from your base secret
 loadDefinition:
   enabled: true
   existingSecret: rabbitmq-credentials
   existingSecretKey: load-definition
 
-# Dev-only: enable management UI without TLS
+# ✅ Dev-only: disable TLS, enable management UI
+tls:
+  enabled: false
+
 management:
   tls:
     enabled: false
+
+# ✅ Logging for debugging
+logLevel: debug
+
+# ✅ Metrics (optional)
+metrics:
+  enabled: false

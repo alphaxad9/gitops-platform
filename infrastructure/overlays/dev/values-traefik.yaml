@@ -1,24 +1,26 @@
 # gitops-platform/infrastructure/overlays/dev/values-traefik.yaml
-# Extracted from your original values.yaml
+# Dev config: Single replica, dashboard enabled, no TLS
+
+# ✅ Use Traefik image (chart default) or specify exact tag
+image:
+  name: traefik
+  tag: v2.11  # Your specified version
+  pullPolicy: IfNotPresent
 
 deployment:
   replicas: 1
 
-image:
-  name: traefik
-  tag: v2.11
-  pullPolicy: IfNotPresent
-
 service:
-  type: LoadBalancer
+  type: LoadBalancer  # Works in cloud; use NodePort for Kind/minikube
 
+# ✅ Dev logging
 logs:
   general:
     level: DEBUG
   access:
     enabled: true
 
-# Enable dashboard for dev (insecure - dev only!)
+# ✅ Enable dashboard for dev (insecure - dev only!)
 ingressRoute:
   dashboard:
     enabled: true
@@ -28,11 +30,13 @@ ingressRoute:
     middlewares: []
     tls: {}
 
+# ✅ Dev arguments: enable dashboard, access logs, debug
 additionalArguments:
-  - "--api.insecure=true"
+  - "--api.insecure=true"  # ⚠️ Dev-only: no auth on dashboard
   - "--api.dashboard=true"
   - "--accesslog=true"
   - "--providers.kubernetescrd.namespaces=auth-service,payment-service,infrastructure"
+  - "--providers.kubernetesingress.namespaces=auth-service,payment-service,infrastructure"
 
 ports:
   web:
@@ -44,6 +48,20 @@ ports:
     tls:
       enabled: false  # Dev-only: disable TLS
 
-# Dev-only: allow insecure backend connections
+# ✅ Dev-only: allow insecure backend connections
 serversTransport:
   insecureSkipVerify: true
+
+# ✅ Resources for dev
+resources:
+  requests:
+    memory: 64Mi
+    cpu: 50m
+  limits:
+    memory: 128Mi
+    cpu: 100m
+
+# ✅ Metrics (optional)
+metrics:
+  prometheus:
+    enabled: false
