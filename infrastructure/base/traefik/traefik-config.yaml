@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-config
+  namespace: infrastructure
+  labels:
+    component: infrastructure
+    managed-by: gitops
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/part-of: microservices-platform
+data:
+  traefik.yaml: |
+    # Traefik Static Configuration
+    # This config is mounted into the Traefik container
+    
+    # API and Dashboard configuration
+    api:
+      dashboard: true
+      debug: true
+      insecure: false  # Set to true only for dev, false for staging/prod
+    
+    # EntryPoints configuration
+    entryPoints:
+      web:
+        address: ":80"
+        http:
+          redirections:
+            entryPoint:
+              to: websecure
+              scheme: https
+              permanent: true
+      websecure:
+        address: ":443"
+    
+    # Let's Encrypt configuration
+    certificatesResolvers:
+      letsencrypt:
+        acme:
+          email: admin@example.com  # Change to your email
+          storage: /data/acme.json
+          httpChallenge:
+            entryPoint: web
+          # Use staging server for dev to avoid rate limits
+          # caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+    
+    # Providers configuration
+    providers:
+      kubernetesCRD:
+        enabled: true
+        namespaces:
+          - auth-service
+          - payment-service
+          - infrastructure
+        allowCrossNamespace: true
+        allowEmptyServices: false
+      kubernetesIngress:
+        enabled: true
+        namespaces:
+          - auth-service
+          - payment-service
+          - infrastructure
+        allowCrossNamespace: true
+    
+    # Logging configuration
+    log:
+      level: INFO  # DEBUG for dev, INFO for staging/prod
+      format: json  # json for better log aggregation
+    
+    # Access logs
+    accessLog:
+      enabled: true
+      format: json
+      bufferingSize: 100
+      filters:
+        statusCodes:
+          - "200-299"
+          - "300-399"
+          - "400-499"
+          - "500-599"
+      fields:
+        defaultMode: keep
+        headers:
+          defaultMode: drop
+          names:
+            User-Agent: keep
+            Authorization: redact
+            Cookie: redact
+    
+    # Metrics configuration (for Prometheus)
+    metrics:
+      prometheus:
+        addEntryPointsLabels: true
+        addServicesLabels: true
+        entryPoint: metrics
+    
+    # Additional entry point for metrics
+    # entryPoints:
+    #   metrics:
+    #     address: ":9100"
+    
+    # Global HTTP configuration
+    global:
+      sendAnonymousUsage: false  # Set to false for privacy
+    
+    # Servers transport configuration
+    serversTransport:
+      insecureSkipVerify: false  # Set to true only for dev with self-signed certs
+      maxIdleConnsPerHost: 200
+    
+    # Experimental features
+    experimental:
+      kubernetesGateway:
+        enabled: false  # Enable if using Gateway API

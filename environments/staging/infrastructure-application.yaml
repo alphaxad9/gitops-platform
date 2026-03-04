@@ -1,8 +1,8 @@
-# gitops-platform/environments/staging/infrastructure-application.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: infrastructure
+  namespace: argocd
   annotations:
     environment: staging
     argocd.argoproj.io/sync-wave: "-10"
@@ -12,13 +12,8 @@ spec:
   source:
     repoURL: placeholder-repo  # Will be replaced by kustomize patch
     targetRevision: placeholder-rev  # Will be replaced by kustomize patch
-    path: infrastructure  # Point to Helm root, NOT overlays/staging
+    path: infrastructure/overlays/staging  # Now points to pure Kustomize!
     
-    helm:
-      valueFiles:
-        - values.yaml                    # Base values
-        - overlays/staging/values.yaml   # Staging overrides
-        
   destination:
     server: https://kubernetes.default.svc
     namespace: infrastructure

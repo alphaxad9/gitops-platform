@@ -1,27 +1,21 @@
-# gitops-platform/infrastructure/overlays/dev/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: infrastructure
-
 resources:
-  - ../../base
-
-labels:
-  - pairs:
-      environment: dev
-      managed-by: gitops
-    includeSelectors: false
+- ../../base
 
 patches:
-  - target:
-      kind: ConfigMap
-      name: platform-endpoints
-    patch: |
-      - op: add
-        path: /data/ENVIRONMENT
-        value: dev
-      - op: add
-        path: /data/LOG_LEVEL
-        value: DEBUG
-# ✅ helmCharts block REMOVED - we deploy charts directly with Helm
+- target:
+    kind: StatefulSet
+    name: postgres
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 128Mi
+- target:
+    kind: StatefulSet
+    name: redis
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 64Mi

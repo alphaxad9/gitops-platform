@@ -1,39 +1,23 @@
-# gitops-platform/environments/dev/infrastructure-application.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: infrastructure
+  namespace: argocd
   annotations:
     environment: dev
     argocd.argoproj.io/sync-wave: "-10"
 spec:
   project: default
-  
   source:
-    repoURL: placeholder-repo  # Will be replaced by kustomize patch
-    targetRevision: placeholder-rev  # Will be replaced by kustomize patch
-    path: infrastructure  # Point to Helm root, NOT overlays/dev
-    
-    helm:
-      valueFiles:
-        - values.yaml                 # Base values
-        - overlays/dev/values.yaml    # Dev overrides
-        
+    repoURL: https://github.com/alphaxad9/gitops-platform.git
+    targetRevision: HEAD
+    path: infrastructure/overlays/dev  # Now points to pure Kustomize!
   destination:
     server: https://kubernetes.default.svc
     namespace: infrastructure
-    
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ApplyOutOfSyncOnly=true
-      - ServerSideApply=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m

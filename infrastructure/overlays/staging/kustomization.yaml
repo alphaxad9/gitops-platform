@@ -1,4 +1,3 @@
-# gitops-platform/infrastructure/overlays/staging/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -14,6 +13,7 @@ labels:
     includeSelectors: false
 
 patches:
+  # Platform endpoints ConfigMap patches
   - target:
       kind: ConfigMap
       name: platform-endpoints
@@ -24,3 +24,100 @@ patches:
       - op: add
         path: /data/LOG_LEVEL
         value: INFO
+
+  # PostgreSQL staging resources (moderate)
+  - target:
+      kind: StatefulSet
+      name: postgres
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 512Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 500m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 1Gi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 1000m
+
+  # Redis staging resources
+  - target:
+      kind: StatefulSet
+      name: redis
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 256Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 200m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 512Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 400m
+
+  # RabbitMQ staging resources
+  - target:
+      kind: StatefulSet
+      name: rabbitmq
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 512Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 250m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 1Gi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 500m
+
+  # Increase storage for staging (moderate)
+  - target:
+      kind: StatefulSet
+      name: postgres
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 50Gi
+
+  - target:
+      kind: StatefulSet
+      name: redis
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 20Gi
+
+  - target:
+      kind: StatefulSet
+      name: rabbitmq
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 30Gi
+
+  # Kafka (Strimzi) staging resources
+  - target:
+      kind: Kafka
+      name: kafka-cluster
+    patch: |-
+      - op: replace
+        path: /spec/kafka/storage/size
+        value: 50Gi
+      - op: replace
+        path: /spec/kafka/replicas
+        value: 2
+      - op: replace
+        path: /spec/zookeeper/storage/size
+        value: 25Gi
+      - op: replace
+        path: /spec/zookeeper/replicas
+        value: 2

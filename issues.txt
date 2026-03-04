@@ -1,150 +1,16 @@
-(ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n infrastructure
-NAME                                      READY   STATUS                       RESTARTS      AGE
-platform-infra-kafka-controller-0         0/1     Init:ErrImagePull            0             44s
-platform-infra-postgresql-0               0/1     CreateContainerConfigError   0             44s
-platform-infra-rabbitmq-0                 0/1     ErrImagePull                 0             44s
-platform-infra-redis-master-0             0/1     CreateContainerConfigError   0             44s
-platform-infra-traefik-55fd7c97bf-ds88k   0/1     Error                        2 (29s ago)   44s
-ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl describe pod platform-infra-kafka-controller-0 -n  infrastructure
-Name:             platform-infra-kafka-controller-0
-Namespace:        infrastructure
-Priority:         0
-Service Account:  platform-infra-kafka
-Node:             payment-service-control-plane/172.18.0.3
-Start Time:       Wed, 04 Mar 2026 16:38:44 +0200
-Labels:           app.kubernetes.io/component=controller-eligible
-                  app.kubernetes.io/instance=platform-infra
-                  app.kubernetes.io/managed-by=Helm
-                  app.kubernetes.io/name=kafka
-                  app.kubernetes.io/part-of=kafka
-                  app.kubernetes.io/version=3.6.1
-                  apps.kubernetes.io/pod-index=0
-                  controller-revision-hash=platform-infra-kafka-controller-6f5444cc74
-                  helm.sh/chart=kafka-26.11.4
-                  statefulset.kubernetes.io/pod-name=platform-infra-kafka-controller-0
-Annotations:      checksum/configuration: 1bbe5f251d8821c8fca95f59065cdf05049ab29041478825387baefc15f23498
-Status:           Pending
-SeccompProfile:   RuntimeDefault
-IP:               10.244.0.35
-IPs:
-  IP:           10.244.0.35
-Controlled By:  StatefulSet/platform-infra-kafka-controller
-Init Containers:
-  kafka-init:
-    Container ID:  
-    Image:         docker.io/bitnami/kafka:3.4.0-debian-11-r48
-    Image ID:      
-    Port:          <none>
-    Host Port:     <none>
-    Command:
-      /bin/bash
-    Args:
-      -ec
-      /scripts/kafka-init.sh
-      
-    State:          Waiting
-      Reason:       ErrImagePull
-    Ready:          False
-    Restart Count:  0
-    Environment:
-      BITNAMI_DEBUG:     false
-      MY_POD_NAME:       platform-infra-kafka-controller-0 (v1:metadata.name)
-      KAFKA_VOLUME_DIR:  /bitnami/kafka
-      KAFKA_MIN_ID:      0
-    Mounts:
-      /bitnami/kafka from data (rw)
-      /config from kafka-config (rw)
-      /configmaps from kafka-configmaps (rw)
-      /scripts from scripts (rw)
-      /secret-config from kafka-secret-config (rw)
-      /tmp from tmp (rw)
-Containers:
-  kafka:
-    Container ID:   
-    Image:          docker.io/bitnami/kafka:3.4.0-debian-11-r48
-    Image ID:       
-    Ports:          9093/TCP (controller), 9092/TCP (client), 9094/TCP (interbroker)
-    Host Ports:     0/TCP (controller), 0/TCP (client), 0/TCP (interbroker)
-    State:          Waiting
-      Reason:       PodInitializing
-    Ready:          False
-    Restart Count:  0
-    Liveness:       tcp-socket :controller delay=10s timeout=5s period=10s #success=1 #failure=3
-    Readiness:      tcp-socket :controller delay=5s timeout=5s period=10s #success=1 #failure=6
-    Environment:
-      BITNAMI_DEBUG:           false
-      KAFKA_HEAP_OPTS:         -Xmx1024m -Xms1024m
-      KAFKA_KRAFT_CLUSTER_ID:  <set to the key 'kraft-cluster-id' in secret 'platform-infra-kafka-kraft-cluster-id'>  Optional: false
-    Mounts:
-      /bitnami/kafka from data (rw)
-      /opt/bitnami/kafka/config/server.properties from kafka-config (rw,path="server.properties")
-      /opt/bitnami/kafka/logs from logs (rw)
-      /tmp from tmp (rw)
-Conditions:
-  Type                        Status
-  PodReadyToStartContainers   True 
-  Initialized                 False 
-  Ready                       False 
-  ContainersReady             False 
-  PodScheduled                True 
-Volumes:
-  data:
-    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
-    ClaimName:  data-platform-infra-kafka-controller-0
-    ReadOnly:   false
-  kafka-configmaps:
-    Type:      ConfigMap (a volume populated by a ConfigMap)
-    Name:      platform-infra-kafka-controller-configuration
-    Optional:  false
-  kafka-secret-config:
-    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
-    Medium:     
-    SizeLimit:  <unset>
-  kafka-config:
-    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
-    Medium:     
-    SizeLimit:  <unset>
-  tmp:
-    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
-    Medium:     
-    SizeLimit:  <unset>
-  scripts:
-    Type:      ConfigMap (a volume populated by a ConfigMap)
-    Name:      platform-infra-kafka-scripts
-    Optional:  false
-  logs:
-    Type:        EmptyDir (a temporary directory that shares a pod's lifetime)
-    Medium:      
-    SizeLimit:   <unset>
-QoS Class:       BestEffort
-Node-Selectors:  <none>
-Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
-                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
-Events:
-  Type     Reason     Age                From               Message
-  ----     ------     ----               ----               -------
-  Normal   Scheduled  64s                default-scheduler  Successfully assigned infrastructure/platform-infra-kafka-controller-0 to payment-service-control-plane
-  Normal   Pulling    20s (x3 over 63s)  kubelet            Pulling image "docker.io/bitnami/kafka:3.4.0-debian-11-r48"
-  Warning  Failed     18s (x3 over 61s)  kubelet            Failed to pull image "docker.io/bitnami/kafka:3.4.0-debian-11-r48": rpc error: code = NotFound desc = failed to pull and unpack image "docker.io/bitnami/kafka:3.4.0-debian-11-r48": failed to resolve reference "docker.io/bitnami/kafka:3.4.0-debian-11-r48": docker.io/bitnami/kafka:3.4.0-debian-11-r48: not found
-  Warning  Failed     18s (x3 over 61s)  kubelet            Error: ErrImagePull
-  Normal   BackOff    4s (x3 over 60s)   kubelet            Back-off pulling image "docker.io/bitnami/kafka:3.4.0-debian-11-r48"
-  Warning  Failed     4s (x3 over 60s)   kubelet            Error: ImagePullBackOff
-ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl logs platform-infra-kafka-controller-0 -n infrastructure
-Defaulted container "kafka" out of: kafka, kafka-init (init)
-Error from server (BadRequest): container "kafka" in pod "platform-infra-kafka-controller-0" is waiting to start: PodInitializing
-ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ 
-) and i have # gitops-platform/infrastructure/overlays/dev/values.yaml
+now i have (# gitops-platform/infrastructure/overlays/dev/values.yaml
 # Combined values file for all infrastructure components
-# Development configuration - MINIMIZED for lightweight PC
+# Development configuration - Using LOCAL images only
 
 # ============================================
-# PostgreSQL Values - MINIMIZED
+# PostgreSQL Values - USING LOCAL POSTGRES:15-ALPINE
 # ============================================
 postgresql:
+  # CHANGED: Using local postgres:15-alpine (you have this!)
   image:
     registry: docker.io
-    repository: bitnami/postgresql
-    tag: latest
+    repository: postgres
+    tag: 15-alpine
     pullPolicy: IfNotPresent
 
   auth:
@@ -157,9 +23,9 @@ postgresql:
 
   primary:
     persistence:
-      enabled: false  # No disk usage
+      enabled: false
 
-    resources:  # MINIMAL
+    resources:
       requests:
         memory: 128Mi
         cpu: 100m
@@ -173,29 +39,30 @@ postgresql:
       CREATE DATABASE paymentdb;
 
   tls:
-    enabled: false  # Disable for speed
+    enabled: false
 
   logLevel: DEBUG
 
   metrics:
-    enabled: false  # Disable metrics
+    enabled: false
 
 # ============================================
-# RabbitMQ Values - MINIMIZED
+# RabbitMQ Values - USING LOCAL RABBITMQ:3-MANAGEMENT-ALPINE
 # ============================================
 rabbitmq:
+  # CHANGED: Using local rabbitmq:3-management-alpine (you have this!)
   image:
     registry: docker.io
-    repository: bitnami/rabbitmq
-    tag: latest
+    repository: rabbitmq
+    tag: 3-management-alpine
     pullPolicy: IfNotPresent
 
-  replicaCount: 1  # Single node
+  replicaCount: 1
 
   persistence:
-    enabled: false  # No disk usage
+    enabled: false
 
-  resources:  # MINIMAL
+  resources:
     requests:
       memory: 128Mi
       cpu: 50m
@@ -208,13 +75,13 @@ rabbitmq:
     existingSecretPasswordKey: RABBITMQ_PASS
     existingSecretErlangCookieKey: RABBITMQ_ERLANG_COOKIE
 
-  extraPlugins: ""  # NO plugins - lighter
+  extraPlugins: ""
 
   extraConfiguration: |
     default_vhost = microservice_one
 
   loadDefinition:
-    enabled: false  # Disable to save memory
+    enabled: false
 
   tls:
     enabled: false
@@ -226,16 +93,17 @@ rabbitmq:
   logLevel: debug
 
   metrics:
-    enabled: false  # No metrics
+    enabled: false
 
 # ============================================
-# Redis Values - MINIMIZED
+# Redis Values - USING LOCAL REDIS:7-ALPINE
 # ============================================
 redis:
+  # CHANGED: Using local redis:7-alpine (you have this!)
   image:
     registry: docker.io
-    repository: bitnami/redis
-    tag: latest
+    repository: redis
+    tag: 7-alpine
     pullPolicy: IfNotPresent
 
   architecture: standalone
@@ -247,9 +115,9 @@ redis:
 
   master:
     persistence:
-      enabled: false  # No disk
+      enabled: false
 
-    resources:  # MINIMAL
+    resources:
       requests:
         memory: 64Mi
         cpu: 50m
@@ -261,7 +129,7 @@ redis:
     enabled: false
 
   replica:
-    replicaCount: 0  # NO replicas
+    replicaCount: 0
 
   logLevel: debug
 
@@ -269,35 +137,34 @@ redis:
     enabled: false
 
 # ============================================
-# Kafka Values - FIXED FOR SINGLE CONTROLLER
+# Kafka Values - USING LOCAL APACHE/KAFKA:4.1.1
 # ============================================
 kafka:
-  enabled: true
+  # CHANGED: Using local apache/kafka:4.1.1 (you have this!)
   image:
     registry: docker.io
-    repository: bitnami/kafka
-    tag: 3.4.0-debian-11-r48
+    repository: apache/kafka
+    tag: 4.1.1
     pullPolicy: IfNotPresent
 
-  replicaCount: 1  # Force single broker
-  
+  enabled: true
+  replicaCount: 1
+
   # KRaft mode with SINGLE controller
   kraft:
     enabled: true
     clusterId: "MkU3OEVBNTcwNTJENDM2Qk"
     controllerQuorumVoters: "0@platform-infra-kafka-controller-0.platform-infra-kafka-controller-headless.infrastructure.svc.cluster.local:9093"
-  
-  # Explicitly set controller count to 1
+
+  # Explicitly set controller count to 1, broker count to 0 for combined mode
   controller:
     replicaCount: 1
-  
-  # No separate brokers (combined in KRaft)
   broker:
     replicaCount: 0
 
   listeners:
     client:
-      protocol: PLAINTEXT  # NO TLS for dev
+      protocol: PLAINTEXT
       containerPort: 9092
       name: CLIENT
     controller:
@@ -335,27 +202,28 @@ kafka:
       cpu: 400m
 
   tls:
-    enabled: false  # NO TLS
+    enabled: false
 
   auth:
     clientProtocol: plaintext
     interBrokerProtocol: plaintext
-    enabled: false  # NO auth for dev
+    enabled: false
 
   autoCreateTopicsEnable: true
 
   logLevel: WARN
 
   metrics:
-    enabled: false  # NO metrics
+    enabled: false
 
   zookeeper:
     enabled: false
-
+    
 # ============================================
-# Traefik Values - MINIMIZED
+# Traefik Values - USING LOCAL TRAEFIK:V2.11 (unchanged)
 # ============================================
 traefik:
+  # KEEP AS IS - you have traefik:v2.11 locally
   image:
     name: traefik
     tag: v2.11
@@ -402,7 +270,7 @@ traefik:
   serversTransport:
     insecureSkipVerify: true
 
-  resources:  # MINIMAL
+  resources:
     requests:
       memory: 32Mi
       cpu: 25m
@@ -412,4 +280,236 @@ traefik:
 
   metrics:
     prometheus:
-      enabled: false
+      enabled: false) is this true ((You're right to push for clarity! Let me explain what needs to change to **completely remove Bitnami** from your project.
+
+## 🔍 **The Problem: Bitnami Charts + Non-Bitnami Images Don't Mix**
+
+The Bitnami Helm charts (the ones in your `infrastructure/charts/` folder) are **hardcoded** to expect Bitnami's specific image structure. When you try to swap in standard images like `postgres:15-alpine` or `apache/kafka:4.1.1`, you'll likely hit these issues:
+
+| Component | What Breaks | Why |
+|-----------|-------------|-----|
+| **PostgreSQL** | Environment variables | Bitnami chart uses `POSTGRES_PASSWORD`, official image uses `POSTGRES_PASSWORD` (same) but entrypoint scripts differ  |
+| **Kafka** | Startup scripts | Bitnami Kafka has custom init scripts that expect Bitnami's filesystem layout  |
+| **Redis** | Configuration paths | Bitnami Redis looks for config in different locations |
+| **RabbitMQ** | Plugin management | Bitnami chart tries to enable Bitnami-specific plugins that don't exist in official image  |
+
+The search results confirm this: multiple organizations have faced the same issue when migrating away from Bitnami .
+
+## 🎯 **What You Need to Change (Complete Bitnami Removal)**
+
+To **truly remove Bitnami**, you need to replace **BOTH**:
+1. **The Bitnami Helm charts** (in `infrastructure/charts/`)
+2. **The Bitnami images** (already done in your values.yaml)
+
+### 📋 **Files to Change/Replace:**
+
+| Current File | Bitnami Component | What to Replace With |
+|--------------|-------------------|---------------------|
+| `infrastructure/charts/postgresql-15.5.38.tgz` | PostgreSQL Helm chart | Your own PostgreSQL manifests OR alternative chart like [CloudNativePG](https://cloudnative-pg.io/) or [CloudPirates PostgreSQL](https://www.cloudpirates.io/knowledge/blog/unsere-open-source-helm-charts-als-bitnami-alternative)  |
+| `infrastructure/charts/kafka-26.11.4.tgz` | Kafka Helm chart | [Strimzi](https://strimzi.io/) Kafka Operator (production-grade) OR your own StatefulSet |
+| `infrastructure/charts/redis-18.19.4.tgz` | Redis Helm chart | Your own Redis StatefulSet (simple!) OR [CloudPirates Redis](https://www.cloudpirates.io/knowledge/blog/unsere-open-source-helm-charts-als-bitnami-alternative)  |
+| `infrastructure/charts/rabbitmq-13.0.3.tgz` | RabbitMQ Helm chart | [RabbitMQ Cluster Operator](https://www.rabbitmq.com/kubernetes/operator/operator-overview.html) OR [CloudPirates RabbitMQ](https://www.cloudpirates.io/knowledge/blog/unsere-open-source-helm-charts-als-bitnami-alternative)  |
+| `infrastructure/Chart.yaml` | Dependencies list | Remove all Bitnami dependencies, keep only Traefik |
+
+## 📝 **Your New `infrastructure/Chart.yaml` (Bitnami-Free)**
+
+```yaml
+apiVersion: v2
+name: platform-infrastructure
+description: GitOps-managed infrastructure components
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+dependencies:
+  # ONLY Traefik remains - Bitnami dependencies REMOVED completely
+  - name: traefik
+    version: "25.x.x"
+    repository: "https://helm.traefik.io/traefik"
+    condition: traefik.enabled
+```
+
+## 🚀 **Your Options for Replacement**
+
+### **Option 1: Quick & Simple (Your Own Manifests)**
+
+Create your own Kubernetes manifests for each component. This gives you **complete control** and **no Bitnami dependency**.
+
+Example for Redis (create `infrastructure/templates/redis.yaml`):
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceName: redis
+  replicas: {{ .Values.redis.replicaCount }}
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: {{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}
+        ports:
+        - containerPort: 6379
+        args: ["--requirepass", "$(REDIS_PASSWORD)"]
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.redis.auth.existingSecret }}
+              key: {{ .Values.redis.auth.existingSecretPasswordKey }}
+```
+
+### **Option 2: Production-Grade (Operators)**
+
+Use Kubernetes operators for production-grade features:
+
+| Component | Recommended Operator | Installation |
+|-----------|---------------------|--------------|
+| **PostgreSQL** | [CloudNativePG](https://cloudnative-pg.io/) | `kubectl apply -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.26/releases/cnpg-1.26.0.yaml` |
+| **Kafka** | [Strimzi](https://strimzi.io/) | `helm install strimzi strimzi/strimzi-kafka-operator` |
+| **RabbitMQ** | [RabbitMQ Cluster Operator](https://www.rabbitmq.com/kubernetes/operator/operator-overview.html) | `kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml` |
+| **Redis** | (Simple StatefulSet is fine) | Your own manifest |
+
+### **Option 3: Alternative Helm Charts (Community Alternatives)**
+
+Several community projects now provide Bitnami alternatives :
+
+| Component | Alternative Chart | Repository |
+|-----------|------------------|------------|
+| **PostgreSQL** | [CloudPirates PostgreSQL](https://artifacthub.io/packages/helm/cloudpirates/postgresql) | `oci://registry-1.docker.io/cloudpirates/postgresql` |
+| **Redis** | [CloudPirates Redis](https://artifacthub.io/packages/helm/cloudpirates/redis) | `oci://registry-1.docker.io/cloudpirates/redis` |
+| **RabbitMQ** | [CloudPirates RabbitMQ](https://artifacthub.io/packages/helm/cloudpirates/rabbitmq) | `oci://registry-1.docker.io/cloudpirates/rabbitmq` |
+
+These charts use **official upstream images** (not Bitnami) and follow security best practices .
+
+## ✅ **What to Do Next**
+
+1. **Delete the Bitnami charts** from `infrastructure/charts/`
+2. **Update your `Chart.yaml`** to remove Bitnami dependencies (keep only Traefik)
+3. **Choose your replacement approach** for each component:
+   - For a **quick fix**: Create your own simple manifests (Option 1)
+   - For **production learning**: Install operators (Option 2)
+   - For **Helm familiarity**: Try community alternative charts (Option 3)
+4. **Update your values.yaml** to match your chosen approach
+
+The key insight: **You can't just change the images**—you must also change the charts/manifests that deploy them .
+
+Which approach would you prefer? I can provide the complete files for any option you choose!)) what can i do remember i have (ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ tree
+.
+├── applicationset-crd.yaml
+├── environments
+│   ├── dev
+│   │   ├── auth-application.yaml
+│   │   ├── infrastructure-application.yaml
+│   │   ├── kustomization.yaml
+│   │   └── payment-application.yaml
+│   ├── prod
+│   │   ├── auth-application.yaml
+│   │   ├── infrastructure-application.yaml
+│   │   ├── kustomization.yaml
+│   │   └── payment-application.yaml
+│   └── staging
+│       ├── auth-application.yaml
+│       ├── infrastructure-application.yaml
+│       ├── kustomization.yaml
+│       └── payment-application.yaml
+├── infrastructure
+│   ├── base
+│   │   ├── configmaps
+│   │   │   ├── platform-endpoints.yaml
+│   │   │   └── traefik-config.yaml
+│   │   ├── kustomization.yaml
+│   │   └── secrets
+│   │       ├── auth-secrets.yaml
+│   │       ├── kafka-credentials.yaml
+│   │       ├── payment-secrets.yaml
+│   │       ├── postgres-credentials.yaml
+│   │       ├── rabbitmq-credentials.yaml
+│   │       └── redis-credentials.yaml
+│   ├── Chart.lock
+│   ├── charts
+│   │   ├── kafka-26.11.4.tgz
+│   │   ├── postgresql-15.5.38.tgz
+│   │   ├── rabbitmq-13.0.3.tgz
+│   │   ├── redis-18.19.4.tgz
+│   │   └── traefik-25.0.0.tgz
+│   ├── Chart.yaml
+│   ├── overlays
+│   │   ├── dev
+│   │   │   ├── kustomization.yaml
+│   │   │   └── values.yaml
+│   │   ├── prod
+│   │   │   ├── kustomization.yaml
+│   │   │   └── values.yaml
+│   │   └── staging
+│   │       ├── kustomization.yaml
+│   │       └── values.yaml
+│   └── values.yaml
+├── issues.txt
+├── notes.txt
+├── rendered-dev.yaml
+├── services
+│   ├── auth-service
+│   │   ├── base
+│   │   │   ├── auth-sa.yaml
+│   │   │   ├── auth-secrets.yaml
+│   │   │   ├── kafka-credentials.yaml
+│   │   │   ├── kustomization.yaml
+│   │   │   ├── postgres-credentials.yaml
+│   │   │   ├── rabbitmq-credentials.yaml
+│   │   │   └── redis-credentials.yaml
+│   │   └── overlays
+│   │       ├── dev
+│   │       │   └── kustomization.yaml
+│   │       ├── prod
+│   │       │   └── kustomization.yaml
+│   │       └── staging
+│   │           └── kustomization.yaml
+│   ├── base
+│   │   ├── kustomization.yaml
+│   │   └── service-template
+│   │       ├── configmap-template.yaml
+│   │       ├── deployment.yaml
+│   │       ├── kustomization.yaml
+│   │       ├── pvc.yaml
+│   │       └── service.yaml
+│   └── payment-service
+│       ├── base
+│       │   ├── kafka-credentials.yaml
+│       │   ├── kustomization.yaml
+│       │   ├── payment-sa.yaml
+│       │   ├── payment-secrets.yaml
+│       │   ├── postgres-credentials.yaml
+│       │   ├── rabbitmq-credentials.yaml
+│       │   └── redis-credentials.yaml
+│       └── overlays
+│           ├── dev
+│           │   └── kustomization.yaml
+│           ├── prod
+│           │   └── kustomization.yaml
+│           └── staging
+│               └── kustomization.yaml
+├── structure.txt
+└── tests.txt
+
+28 directories, 67 files
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ 
+) and (apiVersion: v2
+name: platform-infrastructure
+description: GitOps-managed infrastructure components
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: traefik
+    version: "25.x.x"
+    repository: "https://helm.traefik.io/traefik"
+    condition: traefik.enabled) i want to remove bitnami completely 10000%, if its the only option i quit, what do i have to do now?

@@ -1,4 +1,3 @@
-# gitops-platform/infrastructure/overlays/prod/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -15,6 +14,7 @@ labels:
     includeSelectors: false
 
 patches:
+  # Platform endpoints ConfigMap patches
   - target:
       kind: ConfigMap
       name: platform-endpoints
@@ -28,3 +28,100 @@ patches:
       - op: add
         path: /data/BACKUP_ENABLED
         value: "true"
+
+  # PostgreSQL production resources
+  - target:
+      kind: StatefulSet
+      name: postgres
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 2Gi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 1000m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 4Gi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 2000m
+
+  # Redis production resources
+  - target:
+      kind: StatefulSet
+      name: redis
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 512Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 250m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 1Gi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 500m
+
+  # RabbitMQ production resources
+  - target:
+      kind: StatefulSet
+      name: rabbitmq
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 1Gi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 500m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 2Gi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 1000m
+
+  # Increase storage for production
+  - target:
+      kind: StatefulSet
+      name: postgres
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 100Gi
+
+  - target:
+      kind: StatefulSet
+      name: redis
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 50Gi
+
+  - target:
+      kind: StatefulSet
+      name: rabbitmq
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 50Gi
+
+  # Kafka (Strimzi) production resources
+  - target:
+      kind: Kafka
+      name: kafka-cluster
+    patch: |-
+      - op: replace
+        path: /spec/kafka/storage/size
+        value: 100Gi
+      - op: replace
+        path: /spec/kafka/replicas
+        value: 3
+      - op: replace
+        path: /spec/zookeeper/storage/size
+        value: 50Gi
+      - op: replace
+        path: /spec/zookeeper/replicas
+        value: 3
