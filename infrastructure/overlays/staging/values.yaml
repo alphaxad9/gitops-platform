@@ -1,0 +1,308 @@
+# gitops-platform/infrastructure/overlays/staging/values.yaml
+# Combined values file for all infrastructure components
+# Staging configuration - Production-like but scaled down
+
+# ============================================
+# PostgreSQL Values
+# ============================================
+postgresql:
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  auth:
+    existingSecret: postgres-credentials
+    secretKeys:
+      userPasswordKey: POSTGRES_PASSWORD
+
+  architecture: replication  # Test read replicas
+
+  primary:
+    persistence:
+      enabled: true
+      size: 50Gi
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 500m
+      limits:
+        memory: 1Gi
+        cpu: 1000m
+
+  readReplicas:
+    replicaCount: 1
+    persistence:
+      enabled: true
+      size: 50Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+  initdbScripts:
+    create-databases.sql: |
+      CREATE DATABASE authdb;
+      CREATE DATABASE paymentdb;
+      CREATE DATABASE bookingdb;
+      CREATE DATABASE roomdb;
+      CREATE DATABASE walletdb;
+
+  tls:
+    enabled: false  # Enable in prod; test in staging if needed
+
+  logLevel: INFO
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+  # ✅ Basic backups for staging
+  backup:
+    enabled: true
+    cronJob:
+      schedule: "0 4 * * *"  # Daily at 4 AM
+      retention: "3d"
+
+# ============================================
+# RabbitMQ Values
+# ============================================
+rabbitmq:
+  image:
+    registry: docker.io
+    repository: bitnami/rabbitmq
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  replicaCount: 2  # Test clustering
+
+  persistence:
+    enabled: true
+    size: 30Gi
+    # storageClass: "gp3"  # Uncomment if using specific class
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+  auth:
+    existingSecret: rabbitmq-credentials
+    existingSecretPasswordKey: RABBITMQ_PASS
+    existingSecretErlangCookieKey: RABBITMQ_ERLANG_COOKIE
+
+  extraPlugins: "rabbitmq_management rabbitmq_prometheus rabbitmq_peer_discovery_k8s"
+
+  extraConfiguration: |
+    default_vhost = microservice_one
+    cluster_formation.peer_discovery_backend = rabbit_peer_discovery_k8s
+    cluster_formation.k8s.host = kubernetes.default.svc.cluster.local
+    cluster_formation.k8s.address_type = hostname
+
+  loadDefinition:
+    enabled: true
+    existingSecret: rabbitmq-credentials
+    existingSecretKey: load-definition
+
+  tls:
+    enabled: false  # Enable in prod; test in staging if needed
+
+  logLevel: info
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+# ============================================
+# Redis Values
+# ============================================
+redis:
+  image:
+    registry: docker.io
+    repository: bitnami/redis
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  architecture: replication
+
+  auth:
+    enabled: true
+    existingSecret: redis-credentials
+    existingSecretPasswordKey: REDIS_PASSWORD
+
+  master:
+    persistence:
+      enabled: true
+      size: 20Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 200m
+      limits:
+        memory: 512Mi
+        cpu: 400m
+
+  replica:
+    replicaCount: 1
+    persistence:
+      enabled: true
+      size: 20Gi
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 256Mi
+        cpu: 200m
+
+  # ✅ Skip Sentinel in staging for simplicity
+  sentinel:
+    enabled: false
+
+  tls:
+    enabled: false  # Enable in prod; test in staging if needed
+
+  logLevel: info
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+  # ✅ Memory config for staging
+  config:
+    maxmemory: "400mb"
+    maxmemory-policy: "allkeys-lru"
+
+# ============================================
+# Kafka Values
+# ============================================
+kafka:
+  image:
+    registry: docker.io
+    repository: bitnami/kafka
+    tag: 3.4.0-debian-11-r33
+    pullPolicy: IfNotPresent
+
+  replicaCount: 2  # Test HA with 2 nodes
+
+  kraft:
+    enabled: true
+    controllerQuorumVoters: "0@kafka-0.kafka-headless.infrastructure.svc.cluster.local:9093,1@kafka-1.kafka-headless.infrastructure.svc.cluster.local:9093"
+
+  listeners:
+    client:
+      protocol: PLAINTEXT
+      containerPort: 9092
+    controller:
+      protocol: PLAINTEXT
+      containerPort: 9093
+    interbroker:
+      protocol: PLAINTEXT
+      containerPort: 9094
+
+  persistence:
+    enabled: true
+    size: 50Gi
+    # storageClass: "gp3"  # Uncomment if using specific class
+
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 1000m
+    limits:
+      memory: 4Gi
+      cpu: 2000m
+
+  tls:
+    enabled: false  # Enable in prod; test in staging if needed
+
+  autoCreateTopicsEnable: true
+
+  logLevel: INFO
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+# ============================================
+# Traefik Values
+# ============================================
+traefik:
+  image:
+    name: traefik
+    tag: v2.11
+    pullPolicy: IfNotPresent
+
+  deployment:
+    replicas: 1
+
+  service:
+    type: LoadBalancer
+
+  logs:
+    general:
+      level: INFO
+    access:
+      enabled: true
+      format: json
+
+  # ✅ Dashboard enabled but restricted to staging hostname
+  ingressRoute:
+    dashboard:
+      enabled: true
+      matchRule: Host(`traefik.staging.local`)
+      entryPoints:
+        - websecure
+      middlewares: []
+      tls: {}
+
+  additionalArguments:
+    - "--providers.kubernetescrd.namespaces=auth-service,payment-service,infrastructure"
+    - "--providers.kubernetesingress.namespaces=auth-service,payment-service,infrastructure"
+    - "--accesslog=true"
+    - "--accesslog.format=json"
+    - "--metrics.prometheus=true"
+    - "--serverstransport.insecureskipverify=false"
+
+  ports:
+    web:
+      port: 80
+      expose: true
+      redirectTo:
+        port: websecure
+    websecure:
+      port: 443
+      expose: true
+      tls:
+        enabled: true
+        options: "default"
+
+  # ✅ TLS options for staging
+  tlsOptions:
+    default:
+      minVersion: VersionTLS12
+
+  # ✅ Metrics for monitoring
+  metrics:
+    prometheus:
+      enabled: true
+      entryPoint: metrics
+
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+      cpu: 200m

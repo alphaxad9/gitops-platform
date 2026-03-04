@@ -5,15 +5,24 @@ metadata:
   name: infrastructure
   annotations:
     environment: staging
+    argocd.argoproj.io/sync-wave: "-10"
 spec:
   project: default
+  
   source:
     repoURL: placeholder-repo  # Will be replaced by kustomize patch
     targetRevision: placeholder-rev  # Will be replaced by kustomize patch
-    path: infrastructure/overlays/staging
+    path: infrastructure  # Point to Helm root, NOT overlays/staging
+    
+    helm:
+      valueFiles:
+        - values.yaml                    # Base values
+        - overlays/staging/values.yaml   # Staging overrides
+        
   destination:
     server: https://kubernetes.default.svc
     namespace: infrastructure
+    
   syncPolicy:
     automated:
       prune: true

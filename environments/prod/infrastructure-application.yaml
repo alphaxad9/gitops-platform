@@ -5,15 +5,24 @@ metadata:
   name: infrastructure
   annotations:
     environment: prod
+    argocd.argoproj.io/sync-wave: "-10"
 spec:
   project: default
+  
   source:
     repoURL: placeholder-repo  # Will be replaced by kustomize patch
     targetRevision: placeholder-rev  # Will be replaced by kustomize patch
-    path: infrastructure/overlays/prod
+    path: infrastructure   # Point to Helm root, NOT overlays/prod
+    
+    helm:
+      valueFiles:
+        - values.yaml                  # Base values
+        - overlays/prod/values.yaml    # Production overrides
+        
   destination:
     server: https://kubernetes.default.svc
     namespace: infrastructure
+    
   syncPolicy:
     automated:
       prune: true

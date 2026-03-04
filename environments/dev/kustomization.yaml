@@ -35,10 +35,11 @@ patches:
       kind: Application
     patch: |-
       - op: add
-        path: /metadata/annotations
-        value:
-          argocd.argoproj.io/sync-options: Prune=true
-          argocd.argoproj.io/managed-by: argocd
+        path: /metadata/annotations/argocd.argoproj.io~1sync-options
+        value: Prune=true
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1managed-by
+        value: argocd
       - op: replace
         path: /spec/source/repoURL
         value: https://github.com/alphaxad9/gitops-platform.git
