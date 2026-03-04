@@ -1,75 +1,17 @@
-(ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ helm repo remove bitnami
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
-kubectl cluster-info
-kubectl get nodes
-kubectl create namespace infrastructure
-helm dependency update infrastructure/
-ls infrastructure/charts/
-
-# i also run dry run
-helm install platform-infra ./infrastructure \
-  -n infrastructure \
-  -f infrastructure/overlays/dev/values.yaml
-
-kubectl get pods -n infrastructure
-Error: no repo named "bitnami" found
-Error: looks like "https://charts.bitnami.com/bitnami" is not a valid chart repository or cannot be reached: context deadline exceeded (Client.Timeout or context cancellation while reading body)
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "traefik" chart repository
-Update Complete. ⎈Happy Helming!⎈
-Kubernetes control plane is running at https://127.0.0.1:46041
-CoreDNS is running at https://127.0.0.1:46041/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-
-To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
-NAME                            STATUS   ROLES           AGE   VERSION
-payment-service-control-plane   Ready    control-plane   12d   v1.30.0
-Error from server (AlreadyExists): namespaces "infrastructure" already exists
-Getting updates for unmanaged Helm repositories...
-...Unable to get an update from the "https://charts.bitnami.com/bitnami" chart repository:
-	context deadline exceeded (Client.Timeout or context cancellation while reading body)
-...Unable to get an update from the "https://charts.bitnami.com/bitnami" chart repository:
-	context deadline exceeded (Client.Timeout or context cancellation while reading body)
-...Unable to get an update from the "https://charts.bitnami.com/bitnami" chart repository:
-	context deadline exceeded (Client.Timeout or context cancellation while reading body)
-...Unable to get an update from the "https://charts.bitnami.com/bitnami" chart repository:
-	context deadline exceeded (Client.Timeout or context cancellation while reading body)
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "traefik" chart repository
-Update Complete. ⎈Happy Helming!⎈
-Error: no cached repository for helm-manager-54d2620bbb6f1bb3f35d4c7f945bfa25077949488dcbb0a4d01c90f2c35baa59 found. (try 'helm repo update'): open /home/ishimwe/.cache/helm/repository/helm-manager-54d2620bbb6f1bb3f35d4c7f945bfa25077949488dcbb0a4d01c90f2c35baa59-index.yaml: no such file or directory
-kafka-26.11.4.tgz  postgresql-15.5.38.tgz  rabbitmq-13.0.3.tgz  redis-18.19.4.tgz  traefik-25.0.0.tgz
-Error: INSTALLATION FAILED: cannot re-use a name that is still in use
-NAME                                      READY   STATUS              RESTARTS          AGE
-platform-infra-kafka-controller-0         0/1     Init:0/1            0                 16m
-platform-infra-kafka-controller-1         0/1     Init:0/1            0                 16m
-platform-infra-kafka-controller-2         0/1     Init:0/1            0                 16m
-platform-infra-postgresql-0               0/1     ContainerCreating   0                 16m
-platform-infra-rabbitmq-0                 0/1     ContainerCreating   0                 16m
-platform-infra-redis-master-0             0/1     ContainerCreating   0                 16m
-platform-infra-traefik-55fd7c97bf-7wtjn   0/1     CrashLoopBackOff    7 (4m40s ago)     16m
-rabbitmq-0                                1/1     Running             15 (71m ago)      4d3h
-redis-master-0                            0/1     CrashLoopBackOff    415 (2m53s ago)   4d3h
-traefik-6b554f8c9d-4fm9z                  0/1     CrashLoopBackOff    381 (3m6s ago)    4d3h
-ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n infrastructure
-NAME                                      READY   STATUS              RESTARTS        AGE
-platform-infra-kafka-controller-0         0/1     Init:0/1            0               24m
-platform-infra-kafka-controller-1         0/1     Init:0/1            0               24m
-platform-infra-kafka-controller-2         0/1     Init:0/1            0               24m
-platform-infra-postgresql-0               0/1     ContainerCreating   0               24m
-platform-infra-rabbitmq-0                 0/1     ContainerCreating   0               24m
-platform-infra-redis-master-0             0/1     ContainerCreating   0               24m
-platform-infra-traefik-55fd7c97bf-7wtjn   0/1     CrashLoopBackOff    9 (2m4s ago)    24m
-rabbitmq-0                                1/1     Running             15 (79m ago)    4d3h
-redis-master-0                            0/1     CrashLoopBackOff    417 (35s ago)   4d3h
-traefik-6b554f8c9d-4fm9z                  0/1     CrashLoopBackOff    383 (56s ago)   4d3h
-ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl describe pod platform-infra-kafka-controller-0 -n infrastructure
+(ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n infrastructure
+NAME                                      READY   STATUS                       RESTARTS      AGE
+platform-infra-kafka-controller-0         0/1     Init:ErrImagePull            0             44s
+platform-infra-postgresql-0               0/1     CreateContainerConfigError   0             44s
+platform-infra-rabbitmq-0                 0/1     ErrImagePull                 0             44s
+platform-infra-redis-master-0             0/1     CreateContainerConfigError   0             44s
+platform-infra-traefik-55fd7c97bf-ds88k   0/1     Error                        2 (29s ago)   44s
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl describe pod platform-infra-kafka-controller-0 -n  infrastructure
 Name:             platform-infra-kafka-controller-0
 Namespace:        infrastructure
 Priority:         0
-Service Account:  kafka
+Service Account:  platform-infra-kafka
 Node:             payment-service-control-plane/172.18.0.3
-Start Time:       Wed, 04 Mar 2026 13:04:24 +0200
+Start Time:       Wed, 04 Mar 2026 16:38:44 +0200
 Labels:           app.kubernetes.io/component=controller-eligible
                   app.kubernetes.io/instance=platform-infra
                   app.kubernetes.io/managed-by=Helm
@@ -77,15 +19,16 @@ Labels:           app.kubernetes.io/component=controller-eligible
                   app.kubernetes.io/part-of=kafka
                   app.kubernetes.io/version=3.6.1
                   apps.kubernetes.io/pod-index=0
-                  controller-revision-hash=platform-infra-kafka-controller-6869c8798f
+                  controller-revision-hash=platform-infra-kafka-controller-6f5444cc74
                   helm.sh/chart=kafka-26.11.4
                   statefulset.kubernetes.io/pod-name=platform-infra-kafka-controller-0
-Annotations:      checksum/configuration: 65234c0c496ce2ddbb1c117cac6ca514ccafbc97d25b01b8e68fcf38e2afab3b
+Annotations:      checksum/configuration: 1bbe5f251d8821c8fca95f59065cdf05049ab29041478825387baefc15f23498
 Status:           Pending
 SeccompProfile:   RuntimeDefault
-IP:               
-IPs:              <none>
-Controlled By:    StatefulSet/platform-infra-kafka-controller
+IP:               10.244.0.35
+IPs:
+  IP:           10.244.0.35
+Controlled By:  StatefulSet/platform-infra-kafka-controller
 Init Containers:
   kafka-init:
     Container ID:  
@@ -100,7 +43,7 @@ Init Containers:
       /scripts/kafka-init.sh
       
     State:          Waiting
-      Reason:       PodInitializing
+      Reason:       ErrImagePull
     Ready:          False
     Restart Count:  0
     Environment:
@@ -139,7 +82,7 @@ Containers:
       /tmp from tmp (rw)
 Conditions:
   Type                        Status
-  PodReadyToStartContainers   False 
+  PodReadyToStartContainers   True 
   Initialized                 False 
   Ready                       False 
   ContainersReady             False 
@@ -178,12 +121,295 @@ Node-Selectors:  <none>
 Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
                  node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
 Events:
-  Type     Reason       Age                From               Message
-  ----     ------       ----               ----               -------
-  Normal   Scheduled    24m                default-scheduler  Successfully assigned infrastructure/platform-infra-kafka-controller-0 to payment-service-control-plane
-  Warning  FailedMount  8s (x20 over 24m)  kubelet            MountVolume.SetUp failed for volume "kafka-configmaps" : configmap "platform-infra-kafka-controller-configuration" not found
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  64s                default-scheduler  Successfully assigned infrastructure/platform-infra-kafka-controller-0 to payment-service-control-plane
+  Normal   Pulling    20s (x3 over 63s)  kubelet            Pulling image "docker.io/bitnami/kafka:3.4.0-debian-11-r48"
+  Warning  Failed     18s (x3 over 61s)  kubelet            Failed to pull image "docker.io/bitnami/kafka:3.4.0-debian-11-r48": rpc error: code = NotFound desc = failed to pull and unpack image "docker.io/bitnami/kafka:3.4.0-debian-11-r48": failed to resolve reference "docker.io/bitnami/kafka:3.4.0-debian-11-r48": docker.io/bitnami/kafka:3.4.0-debian-11-r48: not found
+  Warning  Failed     18s (x3 over 61s)  kubelet            Error: ErrImagePull
+  Normal   BackOff    4s (x3 over 60s)   kubelet            Back-off pulling image "docker.io/bitnami/kafka:3.4.0-debian-11-r48"
+  Warning  Failed     4s (x3 over 60s)   kubelet            Error: ImagePullBackOff
 ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl logs platform-infra-kafka-controller-0 -n infrastructure
 Defaulted container "kafka" out of: kafka, kafka-init (init)
 Error from server (BadRequest): container "kafka" in pod "platform-infra-kafka-controller-0" is waiting to start: PodInitializing
 ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ 
-) lets start with (platform-infra-kafka-controller-0) what is the solution
+) and i have # gitops-platform/infrastructure/overlays/dev/values.yaml
+# Combined values file for all infrastructure components
+# Development configuration - MINIMIZED for lightweight PC
+
+# ============================================
+# PostgreSQL Values - MINIMIZED
+# ============================================
+postgresql:
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  auth:
+    existingSecret: postgres-credentials
+    secretKeys:
+      userPasswordKey: POSTGRES_PASSWORD
+      adminPasswordKey: POSTGRES_PASSWORD
+
+  architecture: standalone
+
+  primary:
+    persistence:
+      enabled: false  # No disk usage
+
+    resources:  # MINIMAL
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 256Mi
+        cpu: 200m
+
+  initdbScripts:
+    create-databases.sql: |
+      CREATE DATABASE authdb;
+      CREATE DATABASE paymentdb;
+
+  tls:
+    enabled: false  # Disable for speed
+
+  logLevel: DEBUG
+
+  metrics:
+    enabled: false  # Disable metrics
+
+# ============================================
+# RabbitMQ Values - MINIMIZED
+# ============================================
+rabbitmq:
+  image:
+    registry: docker.io
+    repository: bitnami/rabbitmq
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  replicaCount: 1  # Single node
+
+  persistence:
+    enabled: false  # No disk usage
+
+  resources:  # MINIMAL
+    requests:
+      memory: 128Mi
+      cpu: 50m
+    limits:
+      memory: 256Mi
+      cpu: 100m
+
+  auth:
+    existingSecret: rabbitmq-credentials
+    existingSecretPasswordKey: RABBITMQ_PASS
+    existingSecretErlangCookieKey: RABBITMQ_ERLANG_COOKIE
+
+  extraPlugins: ""  # NO plugins - lighter
+
+  extraConfiguration: |
+    default_vhost = microservice_one
+
+  loadDefinition:
+    enabled: false  # Disable to save memory
+
+  tls:
+    enabled: false
+
+  management:
+    tls:
+      enabled: false
+
+  logLevel: debug
+
+  metrics:
+    enabled: false  # No metrics
+
+# ============================================
+# Redis Values - MINIMIZED
+# ============================================
+redis:
+  image:
+    registry: docker.io
+    repository: bitnami/redis
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  architecture: standalone
+
+  auth:
+    enabled: true
+    existingSecret: redis-credentials
+    existingSecretPasswordKey: REDIS_PASSWORD
+
+  master:
+    persistence:
+      enabled: false  # No disk
+
+    resources:  # MINIMAL
+      requests:
+        memory: 64Mi
+        cpu: 50m
+      limits:
+        memory: 128Mi
+        cpu: 100m
+
+  tls:
+    enabled: false
+
+  replica:
+    replicaCount: 0  # NO replicas
+
+  logLevel: debug
+
+  metrics:
+    enabled: false
+
+# ============================================
+# Kafka Values - FIXED FOR SINGLE CONTROLLER
+# ============================================
+kafka:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/kafka
+    tag: 3.4.0-debian-11-r48
+    pullPolicy: IfNotPresent
+
+  replicaCount: 1  # Force single broker
+  
+  # KRaft mode with SINGLE controller
+  kraft:
+    enabled: true
+    clusterId: "MkU3OEVBNTcwNTJENDM2Qk"
+    controllerQuorumVoters: "0@platform-infra-kafka-controller-0.platform-infra-kafka-controller-headless.infrastructure.svc.cluster.local:9093"
+  
+  # Explicitly set controller count to 1
+  controller:
+    replicaCount: 1
+  
+  # No separate brokers (combined in KRaft)
+  broker:
+    replicaCount: 0
+
+  listeners:
+    client:
+      protocol: PLAINTEXT  # NO TLS for dev
+      containerPort: 9092
+      name: CLIENT
+    controller:
+      protocol: PLAINTEXT
+      containerPort: 9093
+      name: CONTROLLER
+    interbroker:
+      protocol: PLAINTEXT
+      containerPort: 9094
+      name: INTERNAL
+
+  listenerNames:
+    - CLIENT
+    - CONTROLLER
+    - INTERNAL
+
+  listenerSecurityProtocolMap: |
+    CONTROLLER:PLAINTEXT
+    INTERNAL:PLAINTEXT
+    CLIENT:PLAINTEXT
+
+  advertisedListeners:
+    CLIENT: "CLIENT://{{ .Release.Name }}-{{ .StatefulSet.PodIndex }}.{{ .Release.Name }}-controller-headless.{{ .Release.Namespace }}.svc.cluster.local:9092"
+
+  persistence:
+    enabled: true
+    size: 2Gi
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 200m
+    limits:
+      memory: 1Gi
+      cpu: 400m
+
+  tls:
+    enabled: false  # NO TLS
+
+  auth:
+    clientProtocol: plaintext
+    interBrokerProtocol: plaintext
+    enabled: false  # NO auth for dev
+
+  autoCreateTopicsEnable: true
+
+  logLevel: WARN
+
+  metrics:
+    enabled: false  # NO metrics
+
+  zookeeper:
+    enabled: false
+
+# ============================================
+# Traefik Values - MINIMIZED
+# ============================================
+traefik:
+  image:
+    name: traefik
+    tag: v2.11
+    pullPolicy: IfNotPresent
+
+  deployment:
+    replicas: 1
+
+  service:
+    type: LoadBalancer
+
+  logs:
+    general:
+      level: DEBUG
+    access:
+      enabled: true
+
+  ingressRoute:
+    dashboard:
+      enabled: true
+      matchRule: Host(`traefik.dev.local`)
+      entryPoints:
+        - web
+      middlewares: []
+      tls: {}
+
+  additionalArguments:
+    - "--api.insecure=true"
+    - "--api.dashboard=true"
+    - "--accesslog=true"
+    - "--providers.kubernetescrd.namespaces=auth-service,payment-service,infrastructure"
+    - "--providers.kubernetesingress.namespaces=auth-service,payment-service,infrastructure"
+
+  ports:
+    web:
+      port: 80
+      expose: true
+    websecure:
+      port: 443
+      expose: true
+      tls:
+        enabled: false
+
+  serversTransport:
+    insecureSkipVerify: true
+
+  resources:  # MINIMAL
+    requests:
+      memory: 32Mi
+      cpu: 25m
+    limits:
+      memory: 64Mi
+      cpu: 50m
+
+  metrics:
+    prometheus:
+      enabled: false

@@ -136,33 +136,31 @@ redis:
 # ============================================
 # Kafka Values - FIXED FOR SINGLE CONTROLLER
 # ============================================
+# ============================================
+# Kafka Values - FIXED (Using Chart Default Image)
+# ============================================
 kafka:
-  enabled: true
-  image:
-    registry: docker.io
-    repository: bitnami/kafka
-    tag: 3.4.0-debian-11-r48
-    pullPolicy: IfNotPresent
+  # REMOVED the custom 'image:' block to use the chart's default compatible image.
+  # The chart version is 26.11.4, which expects Kafka 3.6.x.
 
-  replicaCount: 1  # Force single broker
-  
+  enabled: true
+  replicaCount: 1  # Single node for dev
+
   # KRaft mode with SINGLE controller
   kraft:
     enabled: true
     clusterId: "MkU3OEVBNTcwNTJENDM2Qk"
     controllerQuorumVoters: "0@platform-infra-kafka-controller-0.platform-infra-kafka-controller-headless.infrastructure.svc.cluster.local:9093"
-  
-  # Explicitly set controller count to 1
+
+  # Explicitly set controller count to 1, broker count to 0 for combined mode
   controller:
     replicaCount: 1
-  
-  # No separate brokers (combined in KRaft)
   broker:
     replicaCount: 0
 
   listeners:
     client:
-      protocol: PLAINTEXT  # NO TLS for dev
+      protocol: PLAINTEXT  # NO TLS for dev simplicity
       containerPort: 9092
       name: CLIENT
     controller:
@@ -189,9 +187,9 @@ kafka:
 
   persistence:
     enabled: true
-    size: 2Gi
+    size: 2Gi  # Minimal storage for dev
 
-  resources:
+  resources:  # Minimal resources for dev
     requests:
       memory: 512Mi
       cpu: 200m
@@ -205,9 +203,9 @@ kafka:
   auth:
     clientProtocol: plaintext
     interBrokerProtocol: plaintext
-    enabled: false  # NO auth for dev
+    enabled: false  # NO auth for dev simplicity
 
-  autoCreateTopicsEnable: true
+  autoCreateTopicsEnable: true  # Useful for dev
 
   logLevel: WARN
 
@@ -216,7 +214,7 @@ kafka:
 
   zookeeper:
     enabled: false
-
+    
 # ============================================
 # Traefik Values - MINIMIZED
 # ============================================
