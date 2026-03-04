@@ -134,25 +134,35 @@ redis:
     enabled: false
 
 # ============================================
-# Kafka Values - ULTRA MINIMIZED (option 1: keep but tiny)
+# Kafka Values - FIXED FOR SINGLE CONTROLLER
 # ============================================
 kafka:
+  enabled: true
   image:
     registry: docker.io
     repository: bitnami/kafka
     tag: 3.4.0-debian-11-r48
     pullPolicy: IfNotPresent
 
-  replicaCount: 1  # SINGLE broker
-
+  replicaCount: 1  # Force single broker
+  
+  # KRaft mode with SINGLE controller
   kraft:
     enabled: true
     clusterId: "MkU3OEVBNTcwNTJENDM2Qk"
-    controllerQuorumVoters: "0@kafka-0.kafka-headless.infrastructure.svc.cluster.local:9093"
+    controllerQuorumVoters: "0@platform-infra-kafka-controller-0.platform-infra-kafka-controller-headless.infrastructure.svc.cluster.local:9093"
+  
+  # Explicitly set controller count to 1
+  controller:
+    replicaCount: 1
+  
+  # No separate brokers (combined in KRaft)
+  broker:
+    replicaCount: 0
 
   listeners:
     client:
-      protocol: PLAINTEXT  # NO TLS - simpler
+      protocol: PLAINTEXT  # NO TLS for dev
       containerPort: 9092
       name: CLIENT
     controller:
@@ -175,16 +185,13 @@ kafka:
     CLIENT:PLAINTEXT
 
   advertisedListeners:
-    CLIENT: "CLIENT://{{ .Release.Name }}-{{ .StatefulSet.PodIndex }}.{{ .Release.Name }}-headless.{{ .Release.Namespace }}.svc.cluster.local:9092"
-    INTERNAL: "INTERNAL://{{ .Release.Name }}-{{ .StatefulSet.PodIndex }}.{{ .Release.Name }}-headless.{{ .Release.Namespace }}.svc.cluster.local:9094"
+    CLIENT: "CLIENT://{{ .Release.Name }}-{{ .StatefulSet.PodIndex }}.{{ .Release.Name }}-controller-headless.{{ .Release.Namespace }}.svc.cluster.local:9092"
 
   persistence:
     enabled: true
-    size: 1Gi  # Tiny
-    accessModes:
-      - ReadWriteOnce
+    size: 2Gi
 
-  resources:  # MINIMAL (Kafka needs at least this to run)
+  resources:
     requests:
       memory: 512Mi
       cpu: 200m
@@ -196,52 +203,16 @@ kafka:
     enabled: false  # NO TLS
 
   auth:
-    clientProtocol: plaintext  # NO auth
+    clientProtocol: plaintext
     interBrokerProtocol: plaintext
-    existingSecret: kafka-credentials
-    existingSecretPasswordKey: KAFKA_PASSWORD
-    clientUsers: []  # No users
-    saslMechanisms: ""
+    enabled: false  # NO auth for dev
 
-  autoCreateTopicsEnable: true  # Auto-create for dev
+  autoCreateTopicsEnable: true
 
   logLevel: WARN
 
   metrics:
     enabled: false  # NO metrics
-
-  config:
-    log:
-      retention:
-        hours: 24  # Keep only 1 day
-        bytes: 536870912  # 512MB
-    num:
-      partitions: 1
-    default:
-      replication:
-        factor: 1
-
-  podDisruptionBudget:
-    enabled: false  # NO PDB for dev
-
-  affinity: {}  # NO affinity rules
-
-  updateStrategy:
-    type: RollingUpdate
-
-  serviceAccount:
-    create: true
-    name: kafka
-
-  headless:
-    service:
-      ports:
-        - name: tcp-client
-          port: 9092
-        - name: tcp-internal
-          port: 9094
-        - name: tcp-controller
-          port: 9093
 
   zookeeper:
     enabled: false
