@@ -55,13 +55,20 @@ spec:
       serviceAccountName: strimzi-cluster-operator
       containers:
       - name: strimzi-cluster-operator
-        image: quay.io/strimzi/operator:latest
+        image: quay.io/strimzi/operator:0.39.0  # Fixed: pinned version
         args:
         - /opt/strimzi/bin/run.sh
         env:
         - name: STRIMZI_NAMESPACE
-          value: infrastructure
+          value: "*"  # Fixed: watches all namespaces
         - name: STRIMZI_FULL_RECONCILIATION_INTERVAL_MS
           value: "120000"
         - name: STRIMZI_LOG_LEVEL
           value: INFO
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "400m"

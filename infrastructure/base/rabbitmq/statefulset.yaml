@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: rabbitmq
-        image: rabbitmq:3-management-alpine  # Using your local image!
+        image: rabbitmq:3-management-alpine
         ports:
         - containerPort: 5672
           name: amqp
@@ -28,7 +28,7 @@ spec:
           name: management
         env:
         - name: RABBITMQ_DEFAULT_USER
-          value: "guest"  # Change in prod!
+          value: "guest"
         - name: RABBITMQ_DEFAULT_PASS
           valueFrom:
             secretKeyRef:

@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: postgres:15-alpine  # Using your local image!
+        image: postgres:15-alpine
         ports:
         - containerPort: 5432
           name: postgres
