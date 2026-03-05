@@ -1,0 +1,15 @@
+kubectl describe pod postgres-0 -n infrastructure
+kubectl logs postgres-0 -n infrastructure
+
+kubectl describe pod rabbitmq-0 -n infrastructure
+kubectl logs rabbitmq-0 -n infrastructure
+
+
+
+
+# Try loading images with your cluster name
+kind load docker-image postgres:15 --name payment-service
+kind load docker-image rabbitmq:3-management --name payment-service
+kind load docker-image redis:7 --name payment-service
+kind load docker-image traefik:v2.11 --name payment-service
+kind load docker-image apache/kafka:4.1.1 --name payment-service

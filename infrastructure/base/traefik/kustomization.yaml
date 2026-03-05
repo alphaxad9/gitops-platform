@@ -3,4 +3,5 @@ kind: Kustomization
 
 resources:
 - traefik-config.yaml
-- manifests/traefik.yaml  # Now using pre-rendered manifests instead of helmCharts
+- deployment.yaml
+- service.yaml
