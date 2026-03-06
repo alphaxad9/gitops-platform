@@ -1,8 +1,12 @@
-kubectl describe pod postgres-0 -n infrastructure
-kubectl logs postgres-0 -n infrastructure
+kubectl describe pod strimzi-cluster-operator-68d64c7648-xqptp -n kafka-operator
+kubectl logs strimzi-cluster-operator-68d64c7648-xqptp -n kafka-operator
 
-kubectl describe pod rabbitmq-0 -n infrastructure
-kubectl logs rabbitmq-0 -n infrastructure
+kubectl describe pod strimzi-cluster-operator-6dd747dfcd-qglcm -n kafka-operator
+kubectl logs strimzi-cluster-operator-6dd747dfcd-qglcm -n kafka-operator
+
+
+kubectl describe pod strimzi-cluster-operator-77b84778c5-m9nhs -n kafka-operator
+kubectl logs strimzi-cluster-operator-77b84778c5-m9nhs -n kafka-operator
 
 
 
@@ -13,3 +17,12 @@ kind load docker-image rabbitmq:3-management --name payment-service
 kind load docker-image redis:7 --name payment-service
 kind load docker-image traefik:v2.11 --name payment-service
 kind load docker-image apache/kafka:4.1.1 --name payment-service
+
+
+
+
+
+
+
+
+
