@@ -1,5 +1,5 @@
-kubectl describe pod strimzi-cluster-operator-68d64c7648-xqptp -n kafka-operator
-kubectl logs strimzi-cluster-operator-68d64c7648-xqptp -n kafka-operator
+kubectl describe pod strimzi-cluster-operator-7cbd6664c9-rbdl9 -n kafka-operator
+kubectl logs strimzi-cluster-operator-7cbd6664c9-rbdl9 -n kafka-operator
 
 kubectl describe pod strimzi-cluster-operator-6dd747dfcd-qglcm -n kafka-operator
 kubectl logs strimzi-cluster-operator-6dd747dfcd-qglcm -n kafka-operator
