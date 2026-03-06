@@ -8,8 +8,7 @@ metadata:
 spec:
   kafka:
     replicas: 1
-    version: 4.1.1
-    image: apache/kafka:4.1.1
+    version: 3.6.0  # ⚠️ IMPORTANT: Strimzi 0.38.0/0.51.0 doesn't support Kafka 4.x yet
     storage:
       type: persistent-claim
       size: 5Gi
@@ -20,13 +19,20 @@ spec:
       transaction.state.log.min.isr: 1
       default.replication.factor: 1
       min.insync.replicas: 1
+      inter.broker.protocol.version: "3.6"
+      log.message.format.version: "3.6"
+    # ❌ REMOVE the image line - Strimzi uses its own images
+    # image: apache/kafka:4.1.1
+    
   zookeeper:
     replicas: 1
     storage:
       type: persistent-claim
       size: 5Gi
       deleteClaim: false
-    image: apache/kafka:4.1.1  
+    # ❌ REMOVE this image line too
+    # image: apache/kafka:4.1.1
+    
   entityOperator:
     topicOperator: {}
     userOperator: {}
