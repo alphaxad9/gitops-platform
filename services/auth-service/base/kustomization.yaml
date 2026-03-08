@@ -22,13 +22,13 @@ configMapGenerator:
       - SERVICE_NAME=auth
       - DB_NAME=authdb
       - DJANGO_SETTINGS_MODULE=my_backend.settings
+      - DJANGO_ALLOWED_HOSTS=auth-service,auth-service.auth-service.svc.cluster.local,localhost,127.0.0.1
       - KAFKA_GROUP_ID=my_backend_id
       - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
       - LOG_LEVEL=INFO
       - RABBITMQ_QUEUE=microservice_one.events
       - RABBITMQ_VHOST=microservice_one
       - KAFKA_TOPIC=microservice_one.events
-      # FIX THESE HOSTNAMES:
       - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
       - POSTGRES_PORT=5432
       - DB_HOST=postgres.infrastructure.svc.cluster.local
@@ -43,7 +43,7 @@ images:
     newTag: "0.0.5"
 
 patches:
-  # ✅ Patch postgres-credentials with POSTGRES_* keys (Django standard)
+  # ✅ Patch postgres-credentials with POSTGRES_* keys
   - target:
       kind: Secret
       name: postgres-credentials
@@ -94,7 +94,7 @@ patches:
         path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
         value: auth-secrets
 
-  # ADD securityContext to fix volume permissions (CRITICAL FIX)
+  # ADD securityContext to fix volume permissions
   - target:
       kind: Deployment
       name: auth-service
@@ -106,7 +106,28 @@ patches:
           runAsGroup: 1000
           fsGroup: 1000
 
-  # ADD keys volume and volumeMount for auth-service ONLY
+  # ADD Host header to all probes (PRODUCTION FIX)
+  - target:
+      kind: Deployment
+      name: auth-service
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: auth-service
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: auth-service
+      - op: add
+        path: /spec/template/spec/containers/0/startupProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: auth-service
+
+  # ADD keys volume and volumeMount
   - target:
       kind: Deployment
       name: auth-service

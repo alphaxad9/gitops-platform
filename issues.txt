@@ -25,4 +25,19 @@ kind load docker-image apache/kafka:4.1.1 --name payment-service
 
 
 
+(# Build the new image with version 0.0.4
+docker build -t alphaxad9/auth-service:0.0.4 .
 
+# Also tag as latest
+docker tag alphaxad9/auth-service:0.0.4 alphaxad9/auth-service:latest
+
+# Push to Docker Hub
+docker push alphaxad9/auth-service:0.0.4
+docker push alphaxad9/auth-service:latest
+
+kind load docker-image alphaxad9/auth-service:0.0.4 --name payment-service
+
+# Verify it's loaded
+docker exec -it payment-service-control-plane crictl images | grep auth-service
+
+)
