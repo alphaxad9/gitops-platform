@@ -1,15 +1,15 @@
-kubectl describe pod strimzi-cluster-operator-7cbd6664c9-rbdl9 -n kafka-operator
-kubectl logs strimzi-cluster-operator-7cbd6664c9-rbdl9 -n kafka-operator
+kubectl describe pod auth-service-dd4ff6fc7-nfcm6 -n auth-service
+kubectl logs auth-service-58b7d7d47-ccmwp auth-service
 
-kubectl describe pod strimzi-cluster-operator-6dd747dfcd-qglcm -n kafka-operator
-kubectl logs strimzi-cluster-operator-6dd747dfcd-qglcm -n kafka-operator
+kubectl describe pod auth-service-dd4ff6fc7-nfcm6 -n auth-service
+kubectl logs auth-service-7f7f7cb9ff-lhw4f -n auth-service
 
 
 kubectl describe pod strimzi-cluster-operator-77b84778c5-m9nhs -n kafka-operator
 kubectl logs strimzi-cluster-operator-77b84778c5-m9nhs -n kafka-operator
 
 
-
+kubectl logs pods -n auth-service
 
 # Try loading images with your cluster name
 kind load docker-image postgres:15 --name payment-service
