@@ -94,6 +94,18 @@ patches:
         path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
         value: auth-secrets
 
+  # ADD securityContext to fix volume permissions (CRITICAL FIX)
+  - target:
+      kind: Deployment
+      name: auth-service
+    patch: |-
+      - op: add
+        path: /spec/template/spec/securityContext
+        value:
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+
   # ADD keys volume and volumeMount for auth-service ONLY
   - target:
       kind: Deployment
