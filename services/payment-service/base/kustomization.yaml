@@ -1,8 +1,11 @@
-# gitops-platform/services/payment-service/base/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 namespace: payment-service
+
+# 👇 Disable hash suffix so ConfigMap name stays "payment-config"
+generatorOptions:
+  disableNameSuffixHash: true
 
 resources:
   - ../../base/service-template
@@ -19,24 +22,42 @@ configMapGenerator:
       - SERVICE_NAME=payment
       - DB_NAME=paymentdb
       - DJANGO_SETTINGS_MODULE=payment_service.settings
+      - DJANGO_ALLOWED_HOSTS=payment-service,payment-service.payment-service.svc.cluster.local,localhost,127.0.0.1
+      - KAFKA_GROUP_ID=payment_service_id
       - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
       - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
       - LOG_LEVEL=INFO
       - RABBITMQ_QUEUE=microservice_one.events
-      - RABBITMQ_VHOST=microservice_one     
+      - RABBITMQ_VHOST=microservice_one
       - KAFKA_TOPIC=microservice_one.events
+      - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
+      - POSTGRES_PORT=5432
+      - DB_HOST=postgres.infrastructure.svc.cluster.local
+      - DB_PORT=5432
+      - RABBITMQ_HOST=rabbitmq.infrastructure.svc.cluster.local
+      - REDIS_HOST=redis.infrastructure.svc.cluster.local
+      - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
 
 images:
   - name: placeholder
     newName: alphaxad9/payment-service
-    newTag: "0.0.3"
+    newTag: "0.0.4"
 
 patches:
-  # Patch postgres-credentials with payment-specific values
+  # ✅ Patch postgres-credentials with POSTGRES_* keys (Django standard)
   - target:
       kind: Secret
       name: postgres-credentials
     patch: |-
+      - op: replace
+        path: /stringData/POSTGRES_DB
+        value: paymentdb
+      - op: replace
+        path: /stringData/POSTGRES_USER
+        value: ishimwe
+      - op: replace
+        path: /stringData/POSTGRES_PASSWORD
+        value: "2025New+"
       - op: replace
         path: /stringData/DB_NAME
         value: paymentdb
@@ -82,6 +103,39 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
         value: payment-secrets
+
+  # ADD securityContext to fix volume permissions
+  - target:
+      kind: Deployment
+      name: payment-service
+    patch: |-
+      - op: add
+        path: /spec/template/spec/securityContext
+        value:
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+
+  # ADD Host header to all probes (PRODUCTION FIX)
+  - target:
+      kind: Deployment
+      name: payment-service
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: payment-service
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: payment-service
+      - op: add
+        path: /spec/template/spec/containers/0/startupProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: payment-service
 
   # REMOVE the keys volume and volumeMount for payment-service (UPDATED with descriptive comments)
   - target:
