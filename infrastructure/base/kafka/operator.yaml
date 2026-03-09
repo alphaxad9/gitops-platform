@@ -5,20 +5,28 @@ metadata:
   namespace: kafka-operator
   labels:
     app: strimzi
+    app.kubernetes.io/name: strimzi-cluster-operator
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/part-of: kafka
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: strimzi-cluster-operator
+      app.kubernetes.io/name: strimzi-cluster-operator
+      app.kubernetes.io/component: operator
   template:
     metadata:
       labels:
-        name: strimzi-cluster-operator
+        app.kubernetes.io/name: strimzi-cluster-operator
+        app.kubernetes.io/component: operator
+        app.kubernetes.io/part-of: kafka
     spec:
       serviceAccountName: strimzi-cluster-operator
       containers:
       - name: strimzi-cluster-operator
         image: quay.io/strimzi/operator:0.38.0
+        command:
+          - /opt/strimzi/bin/cluster_operator_run.sh
         env:
         - name: STRIMZI_NAMESPACE
           value: "*"
