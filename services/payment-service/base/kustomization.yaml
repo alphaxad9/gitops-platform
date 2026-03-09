@@ -30,14 +30,21 @@ configMapGenerator:
       - RABBITMQ_QUEUE=microservice_one.events
       - RABBITMQ_VHOST=microservice_one
       - KAFKA_TOPIC=microservice_one.events
+      # Database settings - using both POSTGRES_* and DB_* for compatibility
       - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
       - POSTGRES_PORT=5432
+      - POSTGRES_DB=paymentdb
+      - POSTGRES_USER=ishimwe
+      - POSTGRES_PASSWORD=2025New+
       - DB_HOST=postgres.infrastructure.svc.cluster.local
       - DB_PORT=5432
+      - DB_NAME=paymentdb
+      - DB_USER=ishimwe
+      - DB_PASSWORD=2025New+
+      # Message broker connections
       - RABBITMQ_HOST=rabbitmq.infrastructure.svc.cluster.local
       - REDIS_HOST=redis.infrastructure.svc.cluster.local
       - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
-
 images:
   - name: placeholder
     newName: alphaxad9/payment-service
