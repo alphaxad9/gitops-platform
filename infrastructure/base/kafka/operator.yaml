@@ -23,13 +23,13 @@ rules:
   resources: ["rolebindings"]
   verbs: ["create", "get", "list", "watch", "update", "delete", "patch"]
 - apiGroups: ["apps"]
-  resources: ["deployments"]
+  resources: ["deployments", "replicasets", "statefulsets"]
   verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
 - apiGroups: [""]
-  resources: ["pods", "services", "configmaps", "secrets"]
+  resources: ["pods", "services", "configmaps", "secrets", "persistentvolumeclaims"]
   verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
 - apiGroups: ["kafka.strimzi.io"]
-  resources: ["kafkas", "kafkanodepools", "kafkatopics", "kafkausers"]
+  resources: ["kafkas", "kafkanodepools", "kafkatopics", "kafkausers", "kafkaconnects", "kafkaconnectors", "kafkamirrormakers", "kafkamirrormaker2s", "kafkabridges"]
   verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -76,7 +76,7 @@ spec:
       serviceAccountName: strimzi-cluster-operator
       containers:
       - name: strimzi-cluster-operator
-        image: quay.io/strimzi/operator:0.38.0
+        image: quay.io/strimzi/operator:0.41.0
         command:
           - /opt/strimzi/bin/cluster_operator_run.sh
         env:
@@ -88,27 +88,29 @@ spec:
           value: INFO
         - name: STRIMZI_FEATURE_GATES
           value: +UseKRaft
-        # Kafka version mappings - CRITICAL for operator to know which images to use
+        # Kafka version mappings for 4.x
         - name: STRIMZI_KAFKA_IMAGES
           value: |
-            3.5.0=quay.io/strimzi/kafka:0.38.0-kafka-3.5.0
-            3.6.0=quay.io/strimzi/kafka:0.38.0-kafka-3.6.0
+            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
+            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
         - name: STRIMZI_KAFKA_CONNECT_IMAGES
           value: |
-            3.5.0=quay.io/strimzi/kafka:0.38.0-kafka-3.5.0
-            3.6.0=quay.io/strimzi/kafka:0.38.0-kafka-3.6.0
+            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
+            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
         - name: STRIMZI_KAFKA_MIRROR_MAKER_2_IMAGES
           value: |
-            3.5.0=quay.io/strimzi/kafka:0.38.0-kafka-3.5.0
-            3.6.0=quay.io/strimzi/kafka:0.38.0-kafka-3.6.0
+            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
+            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
         - name: STRIMZI_DEFAULT_TOPIC_OPERATOR_IMAGE
-          value: quay.io/strimzi/operator:0.38.0
+          value: quay.io/strimzi/operator:0.41.0
         - name: STRIMZI_DEFAULT_USER_OPERATOR_IMAGE
-          value: quay.io/strimzi/operator:0.38.0
+          value: quay.io/strimzi/operator:0.41.0
         - name: STRIMZI_DEFAULT_KAFKA_INIT_IMAGE
-          value: quay.io/strimzi/operator:0.38.0
+          value: quay.io/strimzi/operator:0.41.0
         - name: STRIMZI_DEFAULT_KAFKA_BRIDGE_IMAGE
-          value: quay.io/strimzi/kafka-bridge:0.28.0
+          value: quay.io/strimzi/kafka-bridge:0.29.0
+        - name: STRIMZI_DEFAULT_CRUISE_CONTROL_IMAGE
+          value: quay.io/strimzi/cruise-control:0.41.0
         resources:
           requests:
             memory: "256Mi"
