@@ -30,28 +30,21 @@ configMapGenerator:
       - RABBITMQ_QUEUE=microservice_one.events
       - RABBITMQ_VHOST=microservice_one
       - KAFKA_TOPIC=microservice_one.events
-      # Database settings - using both POSTGRES_* and DB_* for compatibility
       - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
       - POSTGRES_PORT=5432
-      - POSTGRES_DB=paymentdb
-      - POSTGRES_USER=ishimwe
-      - POSTGRES_PASSWORD=2025New+
       - DB_HOST=postgres.infrastructure.svc.cluster.local
       - DB_PORT=5432
-      - DB_NAME=paymentdb
-      - DB_USER=ishimwe
-      - DB_PASSWORD=2025New+
-      # Message broker connections
       - RABBITMQ_HOST=rabbitmq.infrastructure.svc.cluster.local
       - REDIS_HOST=redis.infrastructure.svc.cluster.local
       - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
+
 images:
   - name: placeholder
     newName: alphaxad9/payment-service
     newTag: "0.0.4"
 
 patches:
-  # ✅ Patch postgres-credentials with POSTGRES_* keys (Django standard)
+  # ✅ Patch postgres-credentials with POSTGRES_* keys
   - target:
       kind: Secret
       name: postgres-credentials
@@ -144,17 +137,7 @@ patches:
           - name: Host
             value: payment-service
 
-  # REMOVE the keys volume and volumeMount for payment-service (UPDATED with descriptive comments)
-  - target:
-      kind: Deployment
-      name: payment-service
-    patch: |-
-      # Remove volumeMount that mounts to /app/keys (index may need adjustment)
-      - op: remove
-        path: /spec/template/spec/containers/0/volumeMounts/2
-      # Remove volume that references payment-secrets for keys
-      - op: remove
-        path: /spec/template/spec/volumes/2
+  # REMOVED the broken patch that was causing errors
 
   # Patch service name and labels
   - target:
