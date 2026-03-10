@@ -88,15 +88,21 @@ spec:
           value: INFO
         - name: STRIMZI_FEATURE_GATES
           value: +UseKRaft
-        # ADD THESE IMAGE MAPPINGS - CRITICAL for operator to know which images to use
+        # ADD MULTIPLE VERSIONS for future compatibility
         - name: STRIMZI_KAFKA_IMAGES
           value: |
+            3.9.0=quay.io/strimzi/kafka:0.51.0-kafka-3.9.0
+            4.0.0=quay.io/strimzi/kafka:0.51.0-kafka-4.0.0
             4.1.0=quay.io/strimzi/kafka:0.51.0-kafka-4.1.0
         - name: STRIMZI_KAFKA_CONNECT_IMAGES
           value: |
+            3.9.0=quay.io/strimzi/kafka:0.51.0-kafka-3.9.0
+            4.0.0=quay.io/strimzi/kafka:0.51.0-kafka-4.0.0
             4.1.0=quay.io/strimzi/kafka:0.51.0-kafka-4.1.0
         - name: STRIMZI_KAFKA_MIRROR_MAKER_2_IMAGES
           value: |
+            3.9.0=quay.io/strimzi/kafka:0.51.0-kafka-3.9.0
+            4.0.0=quay.io/strimzi/kafka:0.51.0-kafka-4.0.0
             4.1.0=quay.io/strimzi/kafka:0.51.0-kafka-4.1.0
         - name: STRIMZI_DEFAULT_TOPIC_OPERATOR_IMAGE
           value: quay.io/strimzi/operator:0.51.0
