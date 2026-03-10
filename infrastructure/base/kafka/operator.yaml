@@ -88,9 +88,16 @@ spec:
           value: INFO
         - name: STRIMZI_FEATURE_GATES
           value: +UseKRaft
-        # REMOVED: All manual image mappings - let Strimzi use its internal defaults
-        # REMOVED: STRIMZI_KAFKA_IMAGES, STRIMZI_KAFKA_CONNECT_IMAGES, STRIMZI_KAFKA_MIRROR_MAKER_2_IMAGES
-        # REMOVED: STRIMZI_DEFAULT_TOPIC_OPERATOR_IMAGE, STRIMZI_DEFAULT_USER_OPERATOR_IMAGE, STRIMZI_DEFAULT_KAFKA_INIT_IMAGE
+        # ✅ CRITICAL: Add Kafka image mapping for version 4.1.0
+        - name: STRIMZI_KAFKA_IMAGES
+          value: |
+            4.1.0=quay.io/strimzi/kafka:0.51.0-kafka-4.1.0
+        - name: STRIMZI_DEFAULT_TOPIC_OPERATOR_IMAGE
+          value: quay.io/strimzi/operator:0.51.0
+        - name: STRIMZI_DEFAULT_USER_OPERATOR_IMAGE
+          value: quay.io/strimzi/operator:0.51.0
+        - name: STRIMZI_DEFAULT_KAFKA_INIT_IMAGE
+          value: quay.io/strimzi/operator:0.51.0
         resources:
           requests:
             memory: "256Mi"

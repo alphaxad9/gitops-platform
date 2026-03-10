@@ -1,56 +1,280 @@
-((BackOff
-Back-off restarting failed container strimzi-cluster-operator in pod strimzi-cluster-operator-6c7bf8f595-gjm5q_kafka-operator(b911702d-cfb5-4da3-84f4-db8d6a4f006d)
-7
-1m ago
-Today at 5:33 PM
-15s ago
-Today at 5:35 PM ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl apply -f infrastructure/base/kafka/operator.yaml
+(ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl delete deployment strimzi-cluster-operator -n kafka-operator
+deployment.apps "strimzi-cluster-operator" deleted from kafka-operator namespace
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n kafka-operator
+No resources found in kafka-operator namespace.
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ # Check for any remaining ReplicaSets
+kubectl get replicasets -n kafka-operator
 
-# 2. Restart the operator to pick up changes
-kubectl rollout restart deployment strimzi-cluster-operator -n kafka-operator
-
-# 3. Wait for operator to be ready
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=strimzi-cluster-operator -n kafka-operator --timeout=120s
-
-# 4. Delete the old Kafka cluster (to recreate with correct config)
-kubectl delete kafka kafka-cluster -n kafka-operator
-
-# 5. Apply the fixed Kafka cluster (with storage removed)
-kubectl apply -f infrastructure/base/kafka/kafka-cluster.yaml
-
-# 6. Watch all pods come up
-kubectl get pods -n kafka-operator
+# If you see any strimzi-cluster-operator replicasets, delete them
+kubectl delete replicasets -n kafka-operator -l app.kubernetes.io/name=strimzi-cluster-operator
+No resources found in kafka-operator namespace.
+No resources found
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl apply -f infrastructure/base/kafka/operator.yaml
 serviceaccount/strimzi-cluster-operator unchanged
-Warning: resource clusterroles/strimzi-cluster-operator-namespaced is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
-clusterrole.rbac.authorization.k8s.io/strimzi-cluster-operator-namespaced configured
+clusterrole.rbac.authorization.k8s.io/strimzi-cluster-operator-namespaced unchanged
 clusterrolebinding.rbac.authorization.k8s.io/strimzi-cluster-operator unchanged
-Warning: resource deployments/strimzi-cluster-operator is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
-deployment.apps/strimzi-cluster-operator configured
-deployment.apps/strimzi-cluster-operator restarted
-pod/strimzi-cluster-operator-5849c545-22xb8 condition met
-pod/strimzi-cluster-operator-6446fccdf-64lwj condition met
-Error from server (NotFound): pods "strimzi-cluster-operator-859c8cd475-dp2wk" not found
-kafka.kafka.strimzi.io "kafka-cluster" deleted from kafka-operator namespace
+deployment.apps/strimzi-cluster-operator created
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n kafka-operator
+NAME                                       READY   STATUS    RESTARTS     AGE
+strimzi-cluster-operator-56985f575-7bxhn   1/1     Running   1 (3s ago)   10s
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl describe pod -n kafka-operator -l app.kubernetes.io/name=strimzi-cluster-operator
+Name:             strimzi-cluster-operator-56985f575-7bxhn
+Namespace:        kafka-operator
+Priority:         0
+Service Account:  strimzi-cluster-operator
+Node:             payment-service-control-plane/172.18.0.4
+Start Time:       Tue, 10 Mar 2026 10:29:20 +0200
+Labels:           app.kubernetes.io/component=operator
+                  app.kubernetes.io/name=strimzi-cluster-operator
+                  app.kubernetes.io/part-of=kafka
+                  pod-template-hash=56985f575
+Annotations:      <none>
+Status:           Running
+IP:               10.244.0.36
+IPs:
+  IP:           10.244.0.36
+Controlled By:  ReplicaSet/strimzi-cluster-operator-56985f575
+Containers:
+  strimzi-cluster-operator:
+    Container ID:  containerd://2ffae8eedf0f5bebecf8f2dbd82e9c0bd186a19dc63ea582d08cf9a657f11e54
+    Image:         quay.io/strimzi/operator:0.51.0
+    Image ID:      quay.io/strimzi/operator@sha256:ef3e406aa09449dd0241d53cdc81e15e58bf59b51f2425fb64384a179d676b1d
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      /opt/strimzi/bin/cluster_operator_run.sh
+    State:          Terminated
+      Reason:       Error
+      Exit Code:    1
+      Started:      Tue, 10 Mar 2026 10:29:28 +0200
+      Finished:     Tue, 10 Mar 2026 10:29:34 +0200
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    1
+      Started:      Tue, 10 Mar 2026 10:29:20 +0200
+      Finished:     Tue, 10 Mar 2026 10:29:27 +0200
+    Ready:          False
+    Restart Count:  1
+    Limits:
+      cpu:     400m
+      memory:  512Mi
+    Requests:
+      cpu:     200m
+      memory:  256Mi
+    Environment:
+      STRIMZI_NAMESPACE:                        kafka-operator
+      STRIMZI_FULL_RECONCILIATION_INTERVAL_MS:  120000
+      STRIMZI_LOG_LEVEL:                        INFO
+      STRIMZI_FEATURE_GATES:                    +UseKRaft
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-8m4b4 (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-8m4b4:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  26s                default-scheduler  Successfully assigned kafka-operator/strimzi-cluster-operator-56985f575-7bxhn to payment-service-control-plane
+  Normal   Pulled     19s (x2 over 26s)  kubelet            Container image "quay.io/strimzi/operator:0.51.0" already present on machine
+  Normal   Created    18s (x2 over 26s)  kubelet            Created container strimzi-cluster-operator
+  Normal   Started    18s (x2 over 26s)  kubelet            Started container strimzi-cluster-operator
+  Warning  BackOff    11s                kubelet            Back-off restarting failed container strimzi-cluster-operator in pod strimzi-cluster-operator-56985f575-7bxhn_kafka-operator(eafc8c12-370c-4849-9a92-b3508193f83b)
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl logs -f deployment/strimzi-cluster-operator -n kafka-operator
+Auto-detected KUBERNETES_SERVICE_DNS_DOMAIN: cluster.local
+Configuration file log4j2.properties not found. Using default static logging setting. Dynamic updates of logging configuration will not work.
++ exec /usr/bin/tini -w -e 143 -- java -Dvertx.cacheDirBase=/tmp/vertx-cache -Djava.security.egd=file:/dev/./urandom -XX:+ExitOnOutOfMemoryError -XX:MinRAMPercentage=15 -XX:MaxRAMPercentage=20 -classpath :lib/io.strimzi.cluster-operator-0.51.0.jar:lib/io.strimzi.api-0.51.0.jar:lib/io.fabric8.kubernetes-model-apiextensions-7.5.2.jar:lib/io.strimzi.config-model-0.51.0.jar:lib/io.strimzi.operator-common-0.51.0.jar:lib/io.strimzi.crd-annotations-0.51.0.jar:lib/org.quartz-scheduler.quartz-2.5.0.jar:lib/jakarta.xml.bind.jakarta.xml.bind-api-4.0.2.jar:lib/jakarta.activation.jakarta.activation-api-2.1.3.jar:lib/org.eclipse.jetty.jetty-server-12.0.22.jar:lib/org.eclipse.jetty.jetty-io-12.0.22.jar:lib/org.eclipse.jetty.jetty-util-12.0.22.jar:lib/org.eclipse.jetty.jetty-http-12.0.22.jar:lib/javax.servlet.javax.servlet-api-3.1.0.jar:lib/io.fabric8.openshift-client-7.5.2.jar:lib/io.fabric8.openshift-client-api-7.5.2.jar:lib/io.fabric8.openshift-model-autoscaling-7.5.2.jar:lib/io.fabric8.openshift-model-operator-7.5.2.jar:lib/io.fabric8.openshift-model-operatorhub-7.5.2.jar:lib/io.fabric8.openshift-model-machine-7.5.2.jar:lib/io.fabric8.openshift-model-whereabouts-7.5.2.jar:lib/io.fabric8.openshift-model-monitoring-7.5.2.jar:lib/io.fabric8.openshift-model-storageversionmigrator-7.5.2.jar:lib/io.fabric8.openshift-model-tuned-7.5.2.jar:lib/io.fabric8.openshift-model-console-7.5.2.jar:lib/io.fabric8.openshift-model-config-7.5.2.jar:lib/io.fabric8.openshift-model-machineconfiguration-7.5.2.jar:lib/io.fabric8.openshift-model-miscellaneous-7.5.2.jar:lib/io.fabric8.openshift-model-hive-7.5.2.jar:lib/io.fabric8.openshift-model-installer-7.5.2.jar:lib/io.fabric8.kubernetes-client-7.5.2.jar:lib/io.fabric8.kubernetes-httpclient-jdk-7.5.2.jar:lib/io.fabric8.kubernetes-client-api-7.5.2.jar:lib/io.fabric8.kubernetes-model-gatewayapi-7.5.2.jar:lib/io.fabric8.kubernetes-model-resource-7.5.2.jar:lib/io.fabric8.kubernetes-model-admissionregistration-7.5.2.jar:lib/io.fabric8.kubernetes-model-autoscaling-7.5.2.jar:lib/io.fabric8.kubernetes-model-batch-7.5.2.jar:lib/io.fabric8.kubernetes-model-certificates-7.5.2.jar:lib/io.fabric8.kubernetes-model-discovery-7.5.2.jar:lib/io.fabric8.kubernetes-model-extensions-7.5.2.jar:lib/io.fabric8.kubernetes-model-flowcontrol-7.5.2.jar:lib/io.fabric8.kubernetes-model-metrics-7.5.2.jar:lib/io.fabric8.kubernetes-model-scheduling-7.5.2.jar:lib/io.fabric8.kubernetes-model-node-7.5.2.jar:lib/org.slf4j.slf4j-api-2.0.17.jar:lib/org.snakeyaml.snakeyaml-engine-2.10.jar:lib/com.fasterxml.jackson.datatype.jackson-datatype-jsr310-2.18.3.jar:lib/io.fabric8.kubernetes-model-core-7.5.2.jar:lib/io.fabric8.kubernetes-model-common-7.5.2.jar:lib/io.fabric8.kubernetes-model-events-7.5.2.jar:lib/io.fabric8.kubernetes-model-policy-7.5.2.jar:lib/io.fabric8.kubernetes-model-rbac-7.5.2.jar:lib/io.fabric8.kubernetes-model-apps-7.5.2.jar:lib/io.fabric8.kubernetes-model-storageclass-7.5.2.jar:lib/io.fabric8.kubernetes-model-networking-7.5.2.jar:lib/io.fabric8.kubernetes-model-coordination-7.5.2.jar:lib/io.fabric8.openshift-model-7.5.2.jar:lib/io.fabric8.zjsonpatch-0.3.0.jar:lib/com.fasterxml.jackson.core.jackson-core-2.18.3.jar:lib/com.fasterxml.jackson.core.jackson-databind-2.18.3.jar:lib/com.fasterxml.jackson.core.jackson-annotations-2.18.3.jar:lib/com.fasterxml.jackson.dataformat.jackson-dataformat-yaml-2.18.3.jar:lib/org.yaml.snakeyaml-2.5.jar:lib/io.vertx.vertx-core-5.0.8.jar:lib/io.vertx.vertx-core-logging-5.0.8.jar:lib/io.netty.netty-common-4.2.10.Final.jar:lib/io.netty.netty-buffer-4.2.10.Final.jar:lib/io.netty.netty-handler-4.2.10.Final.jar:lib/io.netty.netty-codec-base-4.2.10.Final.jar:lib/io.netty.netty-handler-proxy-4.2.10.Final.jar:lib/io.netty.netty-codec-socks-4.2.10.Final.jar:lib/io.netty.netty-codec-http-4.2.10.Final.jar:lib/io.netty.netty-codec-compression-4.2.10.Final.jar:lib/io.netty.netty-codec-http2-4.2.10.Final.jar:lib/io.netty.netty-resolver-4.2.10.Final.jar:lib/io.netty.netty-resolver-dns-4.2.10.Final.jar:lib/io.netty.netty-codec-dns-4.2.10.Final.jar:lib/io.strimzi.certificate-manager-0.51.0.jar:lib/org.apache.logging.log4j.log4j-core-2.25.3.jar:lib/org.apache.logging.log4j.log4j-api-2.25.3.jar:lib/org.apache.logging.log4j.log4j-slf4j2-impl-2.25.3.jar:lib/org.apache.logging.log4j.log4j-layout-template-json-2.25.3.jar:lib/io.strimzi.kafka-oauth-server-0.17.1.jar:lib/io.strimzi.kafka-oauth-server-plain-0.17.1.jar:lib/io.strimzi.kafka-oauth-client-0.17.1.jar:lib/io.strimzi.kafka-oauth-common-0.17.1.jar:lib/com.nimbusds.nimbus-jose-jwt-10.0.2.jar:lib/com.jayway.jsonpath.json-path-2.9.0.jar:lib/net.minidev.json-smart-2.5.2.jar:lib/net.minidev.accessors-smart-2.5.2.jar:lib/org.ow2.asm.asm-9.7.1.jar:lib/org.apache.kafka.kafka-clients-4.2.0.jar:lib/com.github.luben.zstd-jni-1.5.6-10.jar:lib/at.yawk.lz4.lz4-java-1.10.1.jar:lib/org.xerial.snappy.snappy-java-1.1.10.7.jar:lib/org.apache.kafka.kafka-server-common-4.2.0.jar:lib/com.yammer.metrics.metrics-core-2.2.0.jar:lib/net.sf.jopt-simple.jopt-simple-5.0.4.jar:lib/org.pcollections.pcollections-4.0.2.jar:lib/io.netty.netty-transport-4.2.10.Final.jar:lib/io.netty.netty-transport-native-epoll-4.2.10.Final-linux-x86_64.jar:lib/io.netty.netty-transport-native-unix-common-4.2.10.Final.jar:lib/io.netty.netty-transport-classes-epoll-4.2.10.Final.jar:lib/io.netty.netty-transport-native-epoll-4.2.10.Final-linux-aarch_64.jar:lib/io.micrometer.micrometer-core-1.14.5.jar:lib/io.micrometer.micrometer-commons-1.14.5.jar:lib/io.micrometer.micrometer-observation-1.14.5.jar:lib/org.hdrhistogram.HdrHistogram-2.2.2.jar:lib/org.latencyutils.LatencyUtils-2.0.3.jar:lib/io.micrometer.micrometer-registry-prometheus-1.14.5.jar:lib/io.prometheus.prometheus-metrics-core-1.3.6.jar:lib/io.prometheus.prometheus-metrics-model-1.3.6.jar:lib/io.prometheus.prometheus-metrics-config-1.3.6.jar:lib/io.prometheus.prometheus-metrics-tracer-common-1.3.6.jar:lib/io.prometheus.prometheus-metrics-exposition-formats-1.3.6.jar:lib/io.prometheus.prometheus-metrics-exposition-textformats-1.3.6.jar:lib/io.vertx.vertx-micrometer-metrics-5.0.8.jar io.strimzi.operator.cluster.Main
+2026-03-10 08:29:54 INFO  Main:64 - ClusterOperator 0.51.0 is starting
+2026-03-10 08:29:54 INFO  Util:121 - Using config:
+	PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+	container: oci
+	KUBERNETES_PORT: tcp://10.96.0.1:443
+	JAVA_HOME: /usr/lib/jvm/jre-21
+	JAVA_OPTS:  -Dvertx.cacheDirBase=/tmp/vertx-cache -Djava.security.egd=file:/dev/./urandom  -XX:+ExitOnOutOfMemoryError -XX:MinRAMPercentage=15 -XX:MaxRAMPercentage=20
+	STRIMZI_FULL_RECONCILIATION_INTERVAL_MS: 120000
+	KUBERNETES_SERVICE_HOST: 10.96.0.1
+	JAVA_CLASSPATH: :lib/io.strimzi.cluster-operator-0.51.0.jar:lib/io.strimzi.api-0.51.0.jar:lib/io.fabric8.kubernetes-model-apiextensions-7.5.2.jar:lib/io.strimzi.config-model-0.51.0.jar:lib/io.strimzi.operator-common-0.51.0.jar:lib/io.strimzi.crd-annotations-0.51.0.jar:lib/org.quartz-scheduler.quartz-2.5.0.jar:lib/jakarta.xml.bind.jakarta.xml.bind-api-4.0.2.jar:lib/jakarta.activation.jakarta.activation-api-2.1.3.jar:lib/org.eclipse.jetty.jetty-server-12.0.22.jar:lib/org.eclipse.jetty.jetty-io-12.0.22.jar:lib/org.eclipse.jetty.jetty-util-12.0.22.jar:lib/org.eclipse.jetty.jetty-http-12.0.22.jar:lib/javax.servlet.javax.servlet-api-3.1.0.jar:lib/io.fabric8.openshift-client-7.5.2.jar:lib/io.fabric8.openshift-client-api-7.5.2.jar:lib/io.fabric8.openshift-model-autoscaling-7.5.2.jar:lib/io.fabric8.openshift-model-operator-7.5.2.jar:lib/io.fabric8.openshift-model-operatorhub-7.5.2.jar:lib/io.fabric8.openshift-model-machine-7.5.2.jar:lib/io.fabric8.openshift-model-whereabouts-7.5.2.jar:lib/io.fabric8.openshift-model-monitoring-7.5.2.jar:lib/io.fabric8.openshift-model-storageversionmigrator-7.5.2.jar:lib/io.fabric8.openshift-model-tuned-7.5.2.jar:lib/io.fabric8.openshift-model-console-7.5.2.jar:lib/io.fabric8.openshift-model-config-7.5.2.jar:lib/io.fabric8.openshift-model-machineconfiguration-7.5.2.jar:lib/io.fabric8.openshift-model-miscellaneous-7.5.2.jar:lib/io.fabric8.openshift-model-hive-7.5.2.jar:lib/io.fabric8.openshift-model-installer-7.5.2.jar:lib/io.fabric8.kubernetes-client-7.5.2.jar:lib/io.fabric8.kubernetes-httpclient-jdk-7.5.2.jar:lib/io.fabric8.kubernetes-client-api-7.5.2.jar:lib/io.fabric8.kubernetes-model-gatewayapi-7.5.2.jar:lib/io.fabric8.kubernetes-model-resource-7.5.2.jar:lib/io.fabric8.kubernetes-model-admissionregistration-7.5.2.jar:lib/io.fabric8.kubernetes-model-autoscaling-7.5.2.jar:lib/io.fabric8.kubernetes-model-batch-7.5.2.jar:lib/io.fabric8.kubernetes-model-certificates-7.5.2.jar:lib/io.fabric8.kubernetes-model-discovery-7.5.2.jar:lib/io.fabric8.kubernetes-model-extensions-7.5.2.jar:lib/io.fabric8.kubernetes-model-flowcontrol-7.5.2.jar:lib/io.fabric8.kubernetes-model-metrics-7.5.2.jar:lib/io.fabric8.kubernetes-model-scheduling-7.5.2.jar:lib/io.fabric8.kubernetes-model-node-7.5.2.jar:lib/org.slf4j.slf4j-api-2.0.17.jar:lib/org.snakeyaml.snakeyaml-engine-2.10.jar:lib/com.fasterxml.jackson.datatype.jackson-datatype-jsr310-2.18.3.jar:lib/io.fabric8.kubernetes-model-core-7.5.2.jar:lib/io.fabric8.kubernetes-model-common-7.5.2.jar:lib/io.fabric8.kubernetes-model-events-7.5.2.jar:lib/io.fabric8.kubernetes-model-policy-7.5.2.jar:lib/io.fabric8.kubernetes-model-rbac-7.5.2.jar:lib/io.fabric8.kubernetes-model-apps-7.5.2.jar:lib/io.fabric8.kubernetes-model-storageclass-7.5.2.jar:lib/io.fabric8.kubernetes-model-networking-7.5.2.jar:lib/io.fabric8.kubernetes-model-coordination-7.5.2.jar:lib/io.fabric8.openshift-model-7.5.2.jar:lib/io.fabric8.zjsonpatch-0.3.0.jar:lib/com.fasterxml.jackson.core.jackson-core-2.18.3.jar:lib/com.fasterxml.jackson.core.jackson-databind-2.18.3.jar:lib/com.fasterxml.jackson.core.jackson-annotations-2.18.3.jar:lib/com.fasterxml.jackson.dataformat.jackson-dataformat-yaml-2.18.3.jar:lib/org.yaml.snakeyaml-2.5.jar:lib/io.vertx.vertx-core-5.0.8.jar:lib/io.vertx.vertx-core-logging-5.0.8.jar:lib/io.netty.netty-common-4.2.10.Final.jar:lib/io.netty.netty-buffer-4.2.10.Final.jar:lib/io.netty.netty-handler-4.2.10.Final.jar:lib/io.netty.netty-codec-base-4.2.10.Final.jar:lib/io.netty.netty-handler-proxy-4.2.10.Final.jar:lib/io.netty.netty-codec-socks-4.2.10.Final.jar:lib/io.netty.netty-codec-http-4.2.10.Final.jar:lib/io.netty.netty-codec-compression-4.2.10.Final.jar:lib/io.netty.netty-codec-http2-4.2.10.Final.jar:lib/io.netty.netty-resolver-4.2.10.Final.jar:lib/io.netty.netty-resolver-dns-4.2.10.Final.jar:lib/io.netty.netty-codec-dns-4.2.10.Final.jar:lib/io.strimzi.certificate-manager-0.51.0.jar:lib/org.apache.logging.log4j.log4j-core-2.25.3.jar:lib/org.apache.logging.log4j.log4j-api-2.25.3.jar:lib/org.apache.logging.log4j.log4j-slf4j2-impl-2.25.3.jar:lib/org.apache.logging.log4j.log4j-layout-template-json-2.25.3.jar:lib/io.strimzi.kafka-oauth-server-0.17.1.jar:lib/io.strimzi.kafka-oauth-server-plain-0.17.1.jar:lib/io.strimzi.kafka-oauth-client-0.17.1.jar:lib/io.strimzi.kafka-oauth-common-0.17.1.jar:lib/com.nimbusds.nimbus-jose-jwt-10.0.2.jar:lib/com.jayway.jsonpath.json-path-2.9.0.jar:lib/net.minidev.json-smart-2.5.2.jar:lib/net.minidev.accessors-smart-2.5.2.jar:lib/org.ow2.asm.asm-9.7.1.jar:lib/org.apache.kafka.kafka-clients-4.2.0.jar:lib/com.github.luben.zstd-jni-1.5.6-10.jar:lib/at.yawk.lz4.lz4-java-1.10.1.jar:lib/org.xerial.snappy.snappy-java-1.1.10.7.jar:lib/org.apache.kafka.kafka-server-common-4.2.0.jar:lib/com.yammer.metrics.metrics-core-2.2.0.jar:lib/net.sf.jopt-simple.jopt-simple-5.0.4.jar:lib/org.pcollections.pcollections-4.0.2.jar:lib/io.netty.netty-transport-4.2.10.Final.jar:lib/io.netty.netty-transport-native-epoll-4.2.10.Final-linux-x86_64.jar:lib/io.netty.netty-transport-native-unix-common-4.2.10.Final.jar:lib/io.netty.netty-transport-classes-epoll-4.2.10.Final.jar:lib/io.netty.netty-transport-native-epoll-4.2.10.Final-linux-aarch_64.jar:lib/io.micrometer.micrometer-core-1.14.5.jar:lib/io.micrometer.micrometer-commons-1.14.5.jar:lib/io.micrometer.micrometer-observation-1.14.5.jar:lib/org.hdrhistogram.HdrHistogram-2.2.2.jar:lib/org.latencyutils.LatencyUtils-2.0.3.jar:lib/io.micrometer.micrometer-registry-prometheus-1.14.5.jar:lib/io.prometheus.prometheus-metrics-core-1.3.6.jar:lib/io.prometheus.prometheus-metrics-model-1.3.6.jar:lib/io.prometheus.prometheus-metrics-config-1.3.6.jar:lib/io.prometheus.prometheus-metrics-tracer-common-1.3.6.jar:lib/io.prometheus.prometheus-metrics-exposition-formats-1.3.6.jar:lib/io.prometheus.prometheus-metrics-exposition-textformats-1.3.6.jar:lib/io.vertx.vertx-micrometer-metrics-5.0.8.jar
+	STRIMZI_HOME: /opt/strimzi
+	TINI_VERSION: v0.19.0
+	PWD: /opt/strimzi
+	JAVA_MAIN: io.strimzi.operator.cluster.Main
+	KUBERNETES_PORT_443_TCP: tcp://10.96.0.1:443
+	KUBERNETES_PORT_443_TCP_ADDR: 10.96.0.1
+	STRIMZI_VERSION: 0.51.0
+	STRIMZI_NAMESPACE: kafka-operator
+	TINI_SHA256_S390X: 931b70a182af879ca249ae9de87ef68423121b38d235c78997fafc680ceab32d
+	KUBERNETES_PORT_443_TCP_PROTO: tcp
+	STRIMZI_FEATURE_GATES: +UseKRaft
+	KUBERNETES_SERVICE_PORT: 443
+	TINI_SHA256_ARM64: 07952557df20bfd2a95f9bef198b445e006171969499a1d361bd9e6f8e5e0e81
+	STRIMZI_LOG_LEVEL: INFO
+	TINI_SHA256_PPC64LE: 3f658420974768e40810001a038c29d003728c5fe86da211cff5059e48cfdfde
+	TINI_SHA256_AMD64: 93dcc18adc78c65a028a84799ecf8ad40c936fdfc5f2a57b1acda5a8117fa82c
+	KUBERNETES_SERVICE_DNS_DOMAIN: cluster.local
+	HOSTNAME: strimzi-cluster-operator-56985f575-7bxhn
+	KUBERNETES_PORT_443_TCP_PORT: 443
+	KUBERNETES_SERVICE_PORT_HTTPS: 443
+	STRIMZI_OPERATOR_NAME: strimzi-cluster-operator-56985f575-7bxhn
+	SHLVL: 0
+	HOME: /home/strimzi
+	MALLOC_ARENA_MAX: 2
+
+Exception in thread "main" io.strimzi.operator.common.InvalidConfigurationException: Failed to parse default container image configuration for Kafka from environment variable STRIMZI_KAFKA_IMAGES
+	at io.strimzi.operator.cluster.ClusterOperatorConfig.parseKafkaVersions(ClusterOperatorConfig.java:364)
+	at io.strimzi.operator.cluster.ClusterOperatorConfig.buildFromMap(ClusterOperatorConfig.java:286)
+	at io.strimzi.operator.cluster.Main.main(Main.java:66)
+Caused by: io.strimzi.operator.cluster.model.NoImageException: No image for version 4.1.0 in {}
+	at io.strimzi.operator.cluster.model.KafkaVersion$Lookup.image(KafkaVersion.java:220)
+	at io.strimzi.operator.cluster.model.KafkaVersion$Lookup.validateImages(KafkaVersion.java:256)
+	at io.strimzi.operator.cluster.model.KafkaVersion$Lookup.validateKafkaImages(KafkaVersion.java:273)
+	at io.strimzi.operator.cluster.ClusterOperatorConfig.parseKafkaVersions(ClusterOperatorConfig.java:354)
+	... 2 more
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl apply -f infrastructure/base/kafka/kafka-cluster.yaml
 kafkanodepool.kafka.strimzi.io/controller unchanged
 kafkanodepool.kafka.strimzi.io/broker unchanged
-Error from server (BadRequest): error when creating "infrastructure/base/kafka/kafka-cluster.yaml": Kafka in version "v1" cannot be handled as a Kafka: strict decoding error: unknown field "spec.entityOperator.topicOperator.reconciliationIntervalSeconds", unknown field "spec.entityOperator.userOperator.reconciliationIntervalSeconds"
-NAME                                       READY   STATUS        RESTARTS        AGE
-kafka-cluster-broker-pool-0                1/1     Running       11 (6h9m ago)   3d7h
-kafka-cluster-controller-pool-1            1/1     Running       11 (6h9m ago)   3d7h
-strimzi-cluster-operator-5849c545-22xb8    1/1     Running       0               4s
-strimzi-cluster-operator-6446fccdf-64lwj   0/1     Terminating   0               5s
+kafka.kafka.strimzi.io/kafka-cluster unchanged
 ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n kafka-operator
-NAME                                        READY   STATUS    RESTARTS        AGE
-kafka-cluster-broker-pool-0                 1/1     Running   11 (6h9m ago)   3d7h
-kafka-cluster-controller-pool-1             1/1     Running   11 (6h9m ago)   3d7h
-strimzi-cluster-operator-6c7bf8f595-gjm5q   1/1     Running   0               6s
-ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n kafka-operator
-NAME                                        READY   STATUS    RESTARTS        AGE
-kafka-cluster-broker-pool-0                 1/1     Running   11 (6h9m ago)   3d7h
-kafka-cluster-controller-pool-1             1/1     Running   11 (6h9m ago)   3d7h
-strimzi-cluster-operator-6c7bf8f595-gjm5q   1/1     Running   1               11s
+NAME                                       READY   STATUS             RESTARTS      AGE
+strimzi-cluster-operator-56985f575-7bxhn   0/1     CrashLoopBackOff   2 (20s ago)   55s
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl describe pod strimzi-cluster-operator-56985f575-7bxhn -n kafka-operator
+kubectl logs strimzi-cluster-operator-56985f575-7bxhn -n kafka-operator
+Name:             strimzi-cluster-operator-56985f575-7bxhn
+Namespace:        kafka-operator
+Priority:         0
+Service Account:  strimzi-cluster-operator
+Node:             payment-service-control-plane/172.18.0.4
+Start Time:       Tue, 10 Mar 2026 10:29:20 +0200
+Labels:           app.kubernetes.io/component=operator
+                  app.kubernetes.io/name=strimzi-cluster-operator
+                  app.kubernetes.io/part-of=kafka
+                  pod-template-hash=56985f575
+Annotations:      <none>
+Status:           Running
+IP:               10.244.0.36
+IPs:
+  IP:           10.244.0.36
+Controlled By:  ReplicaSet/strimzi-cluster-operator-56985f575
+Containers:
+  strimzi-cluster-operator:
+    Container ID:  containerd://96de698a1b32a2acb3de4d9d13805cab2782bb6e3d3ff506f4b0ec8f2cc28c19
+    Image:         quay.io/strimzi/operator:0.51.0
+    Image ID:      quay.io/strimzi/operator@sha256:ef3e406aa09449dd0241d53cdc81e15e58bf59b51f2425fb64384a179d676b1d
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      /opt/strimzi/bin/cluster_operator_run.sh
+    State:          Waiting
+      Reason:       CrashLoopBackOff
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    1
+      Started:      Tue, 10 Mar 2026 10:30:19 +0200
+      Finished:     Tue, 10 Mar 2026 10:30:26 +0200
+    Ready:          False
+    Restart Count:  3
+    Limits:
+      cpu:     400m
+      memory:  512Mi
+    Requests:
+      cpu:     200m
+      memory:  256Mi
+    Environment:
+      STRIMZI_NAMESPACE:                        kafka-operator
+      STRIMZI_FULL_RECONCILIATION_INTERVAL_MS:  120000
+      STRIMZI_LOG_LEVEL:                        INFO
+      STRIMZI_FEATURE_GATES:                    +UseKRaft
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-8m4b4 (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-8m4b4:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  91s                default-scheduler  Successfully assigned kafka-operator/strimzi-cluster-operator-56985f575-7bxhn to payment-service-control-plane
+  Normal   Pulled     32s (x4 over 91s)  kubelet            Container image "quay.io/strimzi/operator:0.51.0" already present on machine
+  Normal   Created    32s (x4 over 91s)  kubelet            Created container strimzi-cluster-operator
+  Normal   Started    31s (x4 over 91s)  kubelet            Started container strimzi-cluster-operator
+  Warning  BackOff    9s (x5 over 76s)   kubelet            Back-off restarting failed container strimzi-cluster-operator in pod strimzi-cluster-operator-56985f575-7bxhn_kafka-operator(eafc8c12-370c-4849-9a92-b3508193f83b)
+Auto-detected KUBERNETES_SERVICE_DNS_DOMAIN: cluster.local
+Configuration file log4j2.properties not found. Using default static logging setting. Dynamic updates of logging configuration will not work.
++ exec /usr/bin/tini -w -e 143 -- java -Dvertx.cacheDirBase=/tmp/vertx-cache -Djava.security.egd=file:/dev/./urandom -XX:+ExitOnOutOfMemoryError -XX:MinRAMPercentage=15 -XX:MaxRAMPercentage=20 -classpath :lib/io.strimzi.cluster-operator-0.51.0.jar:lib/io.strimzi.api-0.51.0.jar:lib/io.fabric8.kubernetes-model-apiextensions-7.5.2.jar:lib/io.strimzi.config-model-0.51.0.jar:lib/io.strimzi.operator-common-0.51.0.jar:lib/io.strimzi.crd-annotations-0.51.0.jar:lib/org.quartz-scheduler.quartz-2.5.0.jar:lib/jakarta.xml.bind.jakarta.xml.bind-api-4.0.2.jar:lib/jakarta.activation.jakarta.activation-api-2.1.3.jar:lib/org.eclipse.jetty.jetty-server-12.0.22.jar:lib/org.eclipse.jetty.jetty-io-12.0.22.jar:lib/org.eclipse.jetty.jetty-util-12.0.22.jar:lib/org.eclipse.jetty.jetty-http-12.0.22.jar:lib/javax.servlet.javax.servlet-api-3.1.0.jar:lib/io.fabric8.openshift-client-7.5.2.jar:lib/io.fabric8.openshift-client-api-7.5.2.jar:lib/io.fabric8.openshift-model-autoscaling-7.5.2.jar:lib/io.fabric8.openshift-model-operator-7.5.2.jar:lib/io.fabric8.openshift-model-operatorhub-7.5.2.jar:lib/io.fabric8.openshift-model-machine-7.5.2.jar:lib/io.fabric8.openshift-model-whereabouts-7.5.2.jar:lib/io.fabric8.openshift-model-monitoring-7.5.2.jar:lib/io.fabric8.openshift-model-storageversionmigrator-7.5.2.jar:lib/io.fabric8.openshift-model-tuned-7.5.2.jar:lib/io.fabric8.openshift-model-console-7.5.2.jar:lib/io.fabric8.openshift-model-config-7.5.2.jar:lib/io.fabric8.openshift-model-machineconfiguration-7.5.2.jar:lib/io.fabric8.openshift-model-miscellaneous-7.5.2.jar:lib/io.fabric8.openshift-model-hive-7.5.2.jar:lib/io.fabric8.openshift-model-installer-7.5.2.jar:lib/io.fabric8.kubernetes-client-7.5.2.jar:lib/io.fabric8.kubernetes-httpclient-jdk-7.5.2.jar:lib/io.fabric8.kubernetes-client-api-7.5.2.jar:lib/io.fabric8.kubernetes-model-gatewayapi-7.5.2.jar:lib/io.fabric8.kubernetes-model-resource-7.5.2.jar:lib/io.fabric8.kubernetes-model-admissionregistration-7.5.2.jar:lib/io.fabric8.kubernetes-model-autoscaling-7.5.2.jar:lib/io.fabric8.kubernetes-model-batch-7.5.2.jar:lib/io.fabric8.kubernetes-model-certificates-7.5.2.jar:lib/io.fabric8.kubernetes-model-discovery-7.5.2.jar:lib/io.fabric8.kubernetes-model-extensions-7.5.2.jar:lib/io.fabric8.kubernetes-model-flowcontrol-7.5.2.jar:lib/io.fabric8.kubernetes-model-metrics-7.5.2.jar:lib/io.fabric8.kubernetes-model-scheduling-7.5.2.jar:lib/io.fabric8.kubernetes-model-node-7.5.2.jar:lib/org.slf4j.slf4j-api-2.0.17.jar:lib/org.snakeyaml.snakeyaml-engine-2.10.jar:lib/com.fasterxml.jackson.datatype.jackson-datatype-jsr310-2.18.3.jar:lib/io.fabric8.kubernetes-model-core-7.5.2.jar:lib/io.fabric8.kubernetes-model-common-7.5.2.jar:lib/io.fabric8.kubernetes-model-events-7.5.2.jar:lib/io.fabric8.kubernetes-model-policy-7.5.2.jar:lib/io.fabric8.kubernetes-model-rbac-7.5.2.jar:lib/io.fabric8.kubernetes-model-apps-7.5.2.jar:lib/io.fabric8.kubernetes-model-storageclass-7.5.2.jar:lib/io.fabric8.kubernetes-model-networking-7.5.2.jar:lib/io.fabric8.kubernetes-model-coordination-7.5.2.jar:lib/io.fabric8.openshift-model-7.5.2.jar:lib/io.fabric8.zjsonpatch-0.3.0.jar:lib/com.fasterxml.jackson.core.jackson-core-2.18.3.jar:lib/com.fasterxml.jackson.core.jackson-databind-2.18.3.jar:lib/com.fasterxml.jackson.core.jackson-annotations-2.18.3.jar:lib/com.fasterxml.jackson.dataformat.jackson-dataformat-yaml-2.18.3.jar:lib/org.yaml.snakeyaml-2.5.jar:lib/io.vertx.vertx-core-5.0.8.jar:lib/io.vertx.vertx-core-logging-5.0.8.jar:lib/io.netty.netty-common-4.2.10.Final.jar:lib/io.netty.netty-buffer-4.2.10.Final.jar:lib/io.netty.netty-handler-4.2.10.Final.jar:lib/io.netty.netty-codec-base-4.2.10.Final.jar:lib/io.netty.netty-handler-proxy-4.2.10.Final.jar:lib/io.netty.netty-codec-socks-4.2.10.Final.jar:lib/io.netty.netty-codec-http-4.2.10.Final.jar:lib/io.netty.netty-codec-compression-4.2.10.Final.jar:lib/io.netty.netty-codec-http2-4.2.10.Final.jar:lib/io.netty.netty-resolver-4.2.10.Final.jar:lib/io.netty.netty-resolver-dns-4.2.10.Final.jar:lib/io.netty.netty-codec-dns-4.2.10.Final.jar:lib/io.strimzi.certificate-manager-0.51.0.jar:lib/org.apache.logging.log4j.log4j-core-2.25.3.jar:lib/org.apache.logging.log4j.log4j-api-2.25.3.jar:lib/org.apache.logging.log4j.log4j-slf4j2-impl-2.25.3.jar:lib/org.apache.logging.log4j.log4j-layout-template-json-2.25.3.jar:lib/io.strimzi.kafka-oauth-server-0.17.1.jar:lib/io.strimzi.kafka-oauth-server-plain-0.17.1.jar:lib/io.strimzi.kafka-oauth-client-0.17.1.jar:lib/io.strimzi.kafka-oauth-common-0.17.1.jar:lib/com.nimbusds.nimbus-jose-jwt-10.0.2.jar:lib/com.jayway.jsonpath.json-path-2.9.0.jar:lib/net.minidev.json-smart-2.5.2.jar:lib/net.minidev.accessors-smart-2.5.2.jar:lib/org.ow2.asm.asm-9.7.1.jar:lib/org.apache.kafka.kafka-clients-4.2.0.jar:lib/com.github.luben.zstd-jni-1.5.6-10.jar:lib/at.yawk.lz4.lz4-java-1.10.1.jar:lib/org.xerial.snappy.snappy-java-1.1.10.7.jar:lib/org.apache.kafka.kafka-server-common-4.2.0.jar:lib/com.yammer.metrics.metrics-core-2.2.0.jar:lib/net.sf.jopt-simple.jopt-simple-5.0.4.jar:lib/org.pcollections.pcollections-4.0.2.jar:lib/io.netty.netty-transport-4.2.10.Final.jar:lib/io.netty.netty-transport-native-epoll-4.2.10.Final-linux-x86_64.jar:lib/io.netty.netty-transport-native-unix-common-4.2.10.Final.jar:lib/io.netty.netty-transport-classes-epoll-4.2.10.Final.jar:lib/io.netty.netty-transport-native-epoll-4.2.10.Final-linux-aarch_64.jar:lib/io.micrometer.micrometer-core-1.14.5.jar:lib/io.micrometer.micrometer-commons-1.14.5.jar:lib/io.micrometer.micrometer-observation-1.14.5.jar:lib/org.hdrhistogram.HdrHistogram-2.2.2.jar:lib/org.latencyutils.LatencyUtils-2.0.3.jar:lib/io.micrometer.micrometer-registry-prometheus-1.14.5.jar:lib/io.prometheus.prometheus-metrics-core-1.3.6.jar:lib/io.prometheus.prometheus-metrics-model-1.3.6.jar:lib/io.prometheus.prometheus-metrics-config-1.3.6.jar:lib/io.prometheus.prometheus-metrics-tracer-common-1.3.6.jar:lib/io.prometheus.prometheus-metrics-exposition-formats-1.3.6.jar:lib/io.prometheus.prometheus-metrics-exposition-textformats-1.3.6.jar:lib/io.vertx.vertx-micrometer-metrics-5.0.8.jar io.strimzi.operator.cluster.Main
+2026-03-10 08:30:24 INFO  Main:64 - ClusterOperator 0.51.0 is starting
+2026-03-10 08:30:24 INFO  Util:121 - Using config:
+	PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+	container: oci
+	KUBERNETES_PORT: tcp://10.96.0.1:443
+	JAVA_HOME: /usr/lib/jvm/jre-21
+	JAVA_OPTS:  -Dvertx.cacheDirBase=/tmp/vertx-cache -Djava.security.egd=file:/dev/./urandom  -XX:+ExitOnOutOfMemoryError -XX:MinRAMPercentage=15 -XX:MaxRAMPercentage=20
+	STRIMZI_FULL_RECONCILIATION_INTERVAL_MS: 120000
+	KUBERNETES_SERVICE_HOST: 10.96.0.1
+	JAVA_CLASSPATH: :lib/io.strimzi.cluster-operator-0.51.0.jar:lib/io.strimzi.api-0.51.0.jar:lib/io.fabric8.kubernetes-model-apiextensions-7.5.2.jar:lib/io.strimzi.config-model-0.51.0.jar:lib/io.strimzi.operator-common-0.51.0.jar:lib/io.strimzi.crd-annotations-0.51.0.jar:lib/org.quartz-scheduler.quartz-2.5.0.jar:lib/jakarta.xml.bind.jakarta.xml.bind-api-4.0.2.jar:lib/jakarta.activation.jakarta.activation-api-2.1.3.jar:lib/org.eclipse.jetty.jetty-server-12.0.22.jar:lib/org.eclipse.jetty.jetty-io-12.0.22.jar:lib/org.eclipse.jetty.jetty-util-12.0.22.jar:lib/org.eclipse.jetty.jetty-http-12.0.22.jar:lib/javax.servlet.javax.servlet-api-3.1.0.jar:lib/io.fabric8.openshift-client-7.5.2.jar:lib/io.fabric8.openshift-client-api-7.5.2.jar:lib/io.fabric8.openshift-model-autoscaling-7.5.2.jar:lib/io.fabric8.openshift-model-operator-7.5.2.jar:lib/io.fabric8.openshift-model-operatorhub-7.5.2.jar:lib/io.fabric8.openshift-model-machine-7.5.2.jar:lib/io.fabric8.openshift-model-whereabouts-7.5.2.jar:lib/io.fabric8.openshift-model-monitoring-7.5.2.jar:lib/io.fabric8.openshift-model-storageversionmigrator-7.5.2.jar:lib/io.fabric8.openshift-model-tuned-7.5.2.jar:lib/io.fabric8.openshift-model-console-7.5.2.jar:lib/io.fabric8.openshift-model-config-7.5.2.jar:lib/io.fabric8.openshift-model-machineconfiguration-7.5.2.jar:lib/io.fabric8.openshift-model-miscellaneous-7.5.2.jar:lib/io.fabric8.openshift-model-hive-7.5.2.jar:lib/io.fabric8.openshift-model-installer-7.5.2.jar:lib/io.fabric8.kubernetes-client-7.5.2.jar:lib/io.fabric8.kubernetes-httpclient-jdk-7.5.2.jar:lib/io.fabric8.kubernetes-client-api-7.5.2.jar:lib/io.fabric8.kubernetes-model-gatewayapi-7.5.2.jar:lib/io.fabric8.kubernetes-model-resource-7.5.2.jar:lib/io.fabric8.kubernetes-model-admissionregistration-7.5.2.jar:lib/io.fabric8.kubernetes-model-autoscaling-7.5.2.jar:lib/io.fabric8.kubernetes-model-batch-7.5.2.jar:lib/io.fabric8.kubernetes-model-certificates-7.5.2.jar:lib/io.fabric8.kubernetes-model-discovery-7.5.2.jar:lib/io.fabric8.kubernetes-model-extensions-7.5.2.jar:lib/io.fabric8.kubernetes-model-flowcontrol-7.5.2.jar:lib/io.fabric8.kubernetes-model-metrics-7.5.2.jar:lib/io.fabric8.kubernetes-model-scheduling-7.5.2.jar:lib/io.fabric8.kubernetes-model-node-7.5.2.jar:lib/org.slf4j.slf4j-api-2.0.17.jar:lib/org.snakeyaml.snakeyaml-engine-2.10.jar:lib/com.fasterxml.jackson.datatype.jackson-datatype-jsr310-2.18.3.jar:lib/io.fabric8.kubernetes-model-core-7.5.2.jar:lib/io.fabric8.kubernetes-model-common-7.5.2.jar:lib/io.fabric8.kubernetes-model-events-7.5.2.jar:lib/io.fabric8.kubernetes-model-policy-7.5.2.jar:lib/io.fabric8.kubernetes-model-rbac-7.5.2.jar:lib/io.fabric8.kubernetes-model-apps-7.5.2.jar:lib/io.fabric8.kubernetes-model-storageclass-7.5.2.jar:lib/io.fabric8.kubernetes-model-networking-7.5.2.jar:lib/io.fabric8.kubernetes-model-coordination-7.5.2.jar:lib/io.fabric8.openshift-model-7.5.2.jar:lib/io.fabric8.zjsonpatch-0.3.0.jar:lib/com.fasterxml.jackson.core.jackson-core-2.18.3.jar:lib/com.fasterxml.jackson.core.jackson-databind-2.18.3.jar:lib/com.fasterxml.jackson.core.jackson-annotations-2.18.3.jar:lib/com.fasterxml.jackson.dataformat.jackson-dataformat-yaml-2.18.3.jar:lib/org.yaml.snakeyaml-2.5.jar:lib/io.vertx.vertx-core-5.0.8.jar:lib/io.vertx.vertx-core-logging-5.0.8.jar:lib/io.netty.netty-common-4.2.10.Final.jar:lib/io.netty.netty-buffer-4.2.10.Final.jar:lib/io.netty.netty-handler-4.2.10.Final.jar:lib/io.netty.netty-codec-base-4.2.10.Final.jar:lib/io.netty.netty-handler-proxy-4.2.10.Final.jar:lib/io.netty.netty-codec-socks-4.2.10.Final.jar:lib/io.netty.netty-codec-http-4.2.10.Final.jar:lib/io.netty.netty-codec-compression-4.2.10.Final.jar:lib/io.netty.netty-codec-http2-4.2.10.Final.jar:lib/io.netty.netty-resolver-4.2.10.Final.jar:lib/io.netty.netty-resolver-dns-4.2.10.Final.jar:lib/io.netty.netty-codec-dns-4.2.10.Final.jar:lib/io.strimzi.certificate-manager-0.51.0.jar:lib/org.apache.logging.log4j.log4j-core-2.25.3.jar:lib/org.apache.logging.log4j.log4j-api-2.25.3.jar:lib/org.apache.logging.log4j.log4j-slf4j2-impl-2.25.3.jar:lib/org.apache.logging.log4j.log4j-layout-template-json-2.25.3.jar:lib/io.strimzi.kafka-oauth-server-0.17.1.jar:lib/io.strimzi.kafka-oauth-server-plain-0.17.1.jar:lib/io.strimzi.kafka-oauth-client-0.17.1.jar:lib/io.strimzi.kafka-oauth-common-0.17.1.jar:lib/com.nimbusds.nimbus-jose-jwt-10.0.2.jar:lib/com.jayway.jsonpath.json-path-2.9.0.jar:lib/net.minidev.json-smart-2.5.2.jar:lib/net.minidev.accessors-smart-2.5.2.jar:lib/org.ow2.asm.asm-9.7.1.jar:lib/org.apache.kafka.kafka-clients-4.2.0.jar:lib/com.github.luben.zstd-jni-1.5.6-10.jar:lib/at.yawk.lz4.lz4-java-1.10.1.jar:lib/org.xerial.snappy.snappy-java-1.1.10.7.jar:lib/org.apache.kafka.kafka-server-common-4.2.0.jar:lib/com.yammer.metrics.metrics-core-2.2.0.jar:lib/net.sf.jopt-simple.jopt-simple-5.0.4.jar:lib/org.pcollections.pcollections-4.0.2.jar:lib/io.netty.netty-transport-4.2.10.Final.jar:lib/io.netty.netty-transport-native-epoll-4.2.10.Final-linux-x86_64.jar:lib/io.netty.netty-transport-native-unix-common-4.2.10.Final.jar:lib/io.netty.netty-transport-classes-epoll-4.2.10.Final.jar:lib/io.netty.netty-transport-native-epoll-4.2.10.Final-linux-aarch_64.jar:lib/io.micrometer.micrometer-core-1.14.5.jar:lib/io.micrometer.micrometer-commons-1.14.5.jar:lib/io.micrometer.micrometer-observation-1.14.5.jar:lib/org.hdrhistogram.HdrHistogram-2.2.2.jar:lib/org.latencyutils.LatencyUtils-2.0.3.jar:lib/io.micrometer.micrometer-registry-prometheus-1.14.5.jar:lib/io.prometheus.prometheus-metrics-core-1.3.6.jar:lib/io.prometheus.prometheus-metrics-model-1.3.6.jar:lib/io.prometheus.prometheus-metrics-config-1.3.6.jar:lib/io.prometheus.prometheus-metrics-tracer-common-1.3.6.jar:lib/io.prometheus.prometheus-metrics-exposition-formats-1.3.6.jar:lib/io.prometheus.prometheus-metrics-exposition-textformats-1.3.6.jar:lib/io.vertx.vertx-micrometer-metrics-5.0.8.jar
+	STRIMZI_HOME: /opt/strimzi
+	TINI_VERSION: v0.19.0
+	PWD: /opt/strimzi
+	JAVA_MAIN: io.strimzi.operator.cluster.Main
+	KUBERNETES_PORT_443_TCP: tcp://10.96.0.1:443
+	KUBERNETES_PORT_443_TCP_ADDR: 10.96.0.1
+	STRIMZI_VERSION: 0.51.0
+	STRIMZI_NAMESPACE: kafka-operator
+	TINI_SHA256_S390X: 931b70a182af879ca249ae9de87ef68423121b38d235c78997fafc680ceab32d
+	KUBERNETES_PORT_443_TCP_PROTO: tcp
+	STRIMZI_FEATURE_GATES: +UseKRaft
+	KUBERNETES_SERVICE_PORT: 443
+	TINI_SHA256_ARM64: 07952557df20bfd2a95f9bef198b445e006171969499a1d361bd9e6f8e5e0e81
+	STRIMZI_LOG_LEVEL: INFO
+	TINI_SHA256_PPC64LE: 3f658420974768e40810001a038c29d003728c5fe86da211cff5059e48cfdfde
+	TINI_SHA256_AMD64: 93dcc18adc78c65a028a84799ecf8ad40c936fdfc5f2a57b1acda5a8117fa82c
+	KUBERNETES_SERVICE_DNS_DOMAIN: cluster.local
+	HOSTNAME: strimzi-cluster-operator-56985f575-7bxhn
+	KUBERNETES_PORT_443_TCP_PORT: 443
+	KUBERNETES_SERVICE_PORT_HTTPS: 443
+	STRIMZI_OPERATOR_NAME: strimzi-cluster-operator-56985f575-7bxhn
+	SHLVL: 0
+	HOME: /home/strimzi
+	MALLOC_ARENA_MAX: 2
+
+Exception in thread "main" io.strimzi.operator.common.InvalidConfigurationException: Failed to parse default container image configuration for Kafka from environment variable STRIMZI_KAFKA_IMAGES
+	at io.strimzi.operator.cluster.ClusterOperatorConfig.parseKafkaVersions(ClusterOperatorConfig.java:364)
+	at io.strimzi.operator.cluster.ClusterOperatorConfig.buildFromMap(ClusterOperatorConfig.java:286)
+	at io.strimzi.operator.cluster.Main.main(Main.java:66)
+Caused by: io.strimzi.operator.cluster.model.NoImageException: No image for version 4.1.0 in {}
+	at io.strimzi.operator.cluster.model.KafkaVersion$Lookup.image(KafkaVersion.java:220)
+	at io.strimzi.operator.cluster.model.KafkaVersion$Lookup.validateImages(KafkaVersion.java:256)
+	at io.strimzi.operator.cluster.model.KafkaVersion$Lookup.validateKafkaImages(KafkaVersion.java:273)
+	at io.strimzi.operator.cluster.ClusterOperatorConfig.parseKafkaVersions(ClusterOperatorConfig.java:354)
+	... 2 more
 ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ 
-)apiVersion: v1
+ and i have (apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: strimzi-cluster-operator
@@ -128,250 +352,25 @@ spec:
       serviceAccountName: strimzi-cluster-operator
       containers:
       - name: strimzi-cluster-operator
-        image: quay.io/strimzi/operator:0.41.0
+        image: quay.io/strimzi/operator:0.51.0
         command:
           - /opt/strimzi/bin/cluster_operator_run.sh
         env:
         - name: STRIMZI_NAMESPACE
-          value: "*"
+          value: kafka-operator
         - name: STRIMZI_FULL_RECONCILIATION_INTERVAL_MS
           value: "120000"
         - name: STRIMZI_LOG_LEVEL
           value: INFO
         - name: STRIMZI_FEATURE_GATES
           value: +UseKRaft
-        # Kafka version mappings - include 3.6.0 for compatibility
-        - name: STRIMZI_KAFKA_IMAGES
-          value: |
-            3.6.0=quay.io/strimzi/kafka:0.41.0-kafka-3.6.0
-            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
-            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
-        - name: STRIMZI_KAFKA_CONNECT_IMAGES
-          value: |
-            3.6.0=quay.io/strimzi/kafka:0.41.0-kafka-3.6.0
-            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
-            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
-        - name: STRIMZI_KAFKA_MIRROR_MAKER_2_IMAGES
-          value: |
-            3.6.0=quay.io/strimzi/kafka:0.41.0-kafka-3.6.0
-            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
-            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
-        - name: STRIMZI_DEFAULT_TOPIC_OPERATOR_IMAGE
-          value: quay.io/strimzi/operator:0.41.0
-        - name: STRIMZI_DEFAULT_USER_OPERATOR_IMAGE
-          value: quay.io/strimzi/operator:0.41.0
-        - name: STRIMZI_DEFAULT_KAFKA_INIT_IMAGE
-          value: quay.io/strimzi/operator:0.41.0
-        - name: STRIMZI_DEFAULT_KAFKA_BRIDGE_IMAGE
-          value: quay.io/strimzi/kafka-bridge:0.29.0
-        - name: STRIMZI_DEFAULT_CRUISE_CONTROL_IMAGE
-          value: quay.io/strimzi/cruise-control:0.41.0
+        # REMOVED: All manual image mappings - let Strimzi use its internal defaults
+        # REMOVED: STRIMZI_KAFKA_IMAGES, STRIMZI_KAFKA_CONNECT_IMAGES, STRIMZI_KAFKA_MIRROR_MAKER_2_IMAGES
+        # REMOVED: STRIMZI_DEFAULT_TOPIC_OPERATOR_IMAGE, STRIMZI_DEFAULT_USER_OPERATOR_IMAGE, STRIMZI_DEFAULT_KAFKA_INIT_IMAGE
         resources:
           requests:
             memory: "256Mi"
             cpu: "200m"
           limits:
             memory: "512Mi"
-            cpu: "400m" and apiVersion: kafka.strimzi.io/v1
-kind: KafkaNodePool
-metadata:
-  name: controller
-  namespace: kafka-operator
-  labels:
-    strimzi.io/cluster: kafka-cluster
-spec:
-  replicas: 1
-  roles:
-    - controller
-  storage:
-    type: persistent-claim
-    size: 5Gi
-    deleteClaim: false
----
-apiVersion: kafka.strimzi.io/v1
-kind: KafkaNodePool
-metadata:
-  name: broker
-  namespace: kafka-operator
-  labels:
-    strimzi.io/cluster: kafka-cluster
-spec:
-  replicas: 1
-  roles:
-    - broker
-  storage:
-    type: persistent-claim
-    size: 5Gi
-    deleteClaim: false
----
-apiVersion: kafka.strimzi.io/v1
-kind: Kafka
-metadata:
-  name: kafka-cluster
-  namespace: kafka-operator
-  labels:
-    managed-by: gitops
-  annotations:
-    strimzi.io/kraft: enabled
-spec:
-  kafka:
-    version: 4.1.1
-    metadataVersion: 4.1-IV1
-    listeners:
-      - name: plain
-        port: 9092
-        type: internal
-        tls: false
-        configuration:
-          useServiceDnsDomain: true
-      - name: tls
-        port: 9093
-        type: internal
-        tls: true
-        configuration:
-          useServiceDnsDomain: true
-    config:
-      offsets.topic.replication.factor: 1
-      transaction.state.log.replication.factor: 1
-      transaction.state.log.min.isr: 1
-      default.replication.factor: 1
-      min.insync.replicas: 1
-      inter.broker.protocol.version: "4.1"
-    # REMOVED storage block - now handled by KafkaNodePool
-  entityOperator:
-    topicOperator:
-      reconciliationIntervalSeconds: 90
-    userOperator:
-      reconciliationIntervalSeconds: 90)(You’re **very close now**. The operator is finally running, which is the hardest part. 👍
-The remaining issue is simply a **schema mismatch in the Kafka CR**.
-
-Let’s break down the exact error.
-
----
-
-# 🚨 The error
-
-Kubernetes rejected your Kafka resource:
-
-```
-unknown field "spec.entityOperator.topicOperator.reconciliationIntervalSeconds"
-unknown field "spec.entityOperator.userOperator.reconciliationIntervalSeconds"
-```
-
-This means **Strimzi 0.41 no longer supports those fields** in the `entityOperator`.
-
-Those options existed in older versions but were removed.
-
----
-
-# ✅ Fix
-
-Edit **`kafka-cluster.yaml`**.
-
-Replace this block:
-
-```yaml
-entityOperator:
-  topicOperator:
-    reconciliationIntervalSeconds: 90
-  userOperator:
-    reconciliationIntervalSeconds: 90
-```
-
-with simply:
-
-```yaml
-entityOperator:
-  topicOperator: {}
-  userOperator: {}
-```
-
-So the final part becomes:
-
-```yaml
-entityOperator:
-  topicOperator: {}
-  userOperator: {}
-```
-
----
-
-# 🚀 Then reapply
-
-Run:
-
-```bash
-kubectl apply -f infrastructure/base/kafka/kafka-cluster.yaml
-```
-
-Then check:
-
-```bash
-kubectl get pods -n kafka-operator
-```
-
-You should soon see something like:
-
-```
-kafka-cluster-controller-0
-kafka-cluster-broker-0
-kafka-cluster-entity-operator-xxxxx
-```
-
----
-
-# 🧹 Optional cleanup (recommended)
-
-Those pods:
-
-```
-kafka-cluster-broker-pool-0
-kafka-cluster-controller-pool-1
-```
-
-are **leftovers from the previous deployment**.
-
-Once the new cluster is created, you can remove them:
-
-```bash
-kubectl delete pod kafka-cluster-broker-pool-0 -n kafka-operator
-kubectl delete pod kafka-cluster-controller-pool-1 -n kafka-operator
-```
-
-The operator will recreate the correct ones.
-
----
-
-# 🧠 Small insight (important)
-
-In **Strimzi 0.41 + KRaft mode**:
-
-* `KafkaNodePool` → defines storage + roles
-* `Kafka` → defines cluster configuration
-* `entityOperator` → just enables operators (no tuning fields)
-
-So the **minimal valid structure** is:
-
-```
-KafkaNodePool
-KafkaNodePool
-Kafka
-```
-
-which you already have.
-
----
-
-# If you want, I can also show you one **very powerful improvement**
-
-Right now your Kafka is **internal-only**.
-I can show you how to expose it safely so:
-
-* your **Django microservices**
-* **Kafka UI**
-* **external producers**
-
-can connect cleanly.
-
-It's a **2-minute change** but makes debugging Kafka **100× easier**.
-)
+            cpu: "400m"))
