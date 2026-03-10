@@ -88,32 +88,7 @@ spec:
           value: INFO
         - name: STRIMZI_FEATURE_GATES
           value: +UseKRaft
-        # Kafka version mappings - include 3.6.0 for compatibility
-        - name: STRIMZI_KAFKA_IMAGES
-          value: |
-            3.6.0=quay.io/strimzi/kafka:0.41.0-kafka-3.6.0
-            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
-            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
-        - name: STRIMZI_KAFKA_CONNECT_IMAGES
-          value: |
-            3.6.0=quay.io/strimzi/kafka:0.41.0-kafka-3.6.0
-            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
-            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
-        - name: STRIMZI_KAFKA_MIRROR_MAKER_2_IMAGES
-          value: |
-            3.6.0=quay.io/strimzi/kafka:0.41.0-kafka-3.6.0
-            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
-            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
-        - name: STRIMZI_DEFAULT_TOPIC_OPERATOR_IMAGE
-          value: quay.io/strimzi/operator:0.41.0
-        - name: STRIMZI_DEFAULT_USER_OPERATOR_IMAGE
-          value: quay.io/strimzi/operator:0.41.0
-        - name: STRIMZI_DEFAULT_KAFKA_INIT_IMAGE
-          value: quay.io/strimzi/operator:0.41.0
-        - name: STRIMZI_DEFAULT_KAFKA_BRIDGE_IMAGE
-          value: quay.io/strimzi/kafka-bridge:0.29.0
-        - name: STRIMZI_DEFAULT_CRUISE_CONTROL_IMAGE
-          value: quay.io/strimzi/cruise-control:0.41.0
+        # REMOVED: STRIMZI_KAFKA_IMAGES and other image mappings - Strimzi knows them
         resources:
           requests:
             memory: "256Mi"

@@ -1,0 +1,377 @@
+((BackOff
+Back-off restarting failed container strimzi-cluster-operator in pod strimzi-cluster-operator-6c7bf8f595-gjm5q_kafka-operator(b911702d-cfb5-4da3-84f4-db8d6a4f006d)
+7
+1m ago
+Today at 5:33 PM
+15s ago
+Today at 5:35 PM ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl apply -f infrastructure/base/kafka/operator.yaml
+
+# 2. Restart the operator to pick up changes
+kubectl rollout restart deployment strimzi-cluster-operator -n kafka-operator
+
+# 3. Wait for operator to be ready
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=strimzi-cluster-operator -n kafka-operator --timeout=120s
+
+# 4. Delete the old Kafka cluster (to recreate with correct config)
+kubectl delete kafka kafka-cluster -n kafka-operator
+
+# 5. Apply the fixed Kafka cluster (with storage removed)
+kubectl apply -f infrastructure/base/kafka/kafka-cluster.yaml
+
+# 6. Watch all pods come up
+kubectl get pods -n kafka-operator
+serviceaccount/strimzi-cluster-operator unchanged
+Warning: resource clusterroles/strimzi-cluster-operator-namespaced is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
+clusterrole.rbac.authorization.k8s.io/strimzi-cluster-operator-namespaced configured
+clusterrolebinding.rbac.authorization.k8s.io/strimzi-cluster-operator unchanged
+Warning: resource deployments/strimzi-cluster-operator is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
+deployment.apps/strimzi-cluster-operator configured
+deployment.apps/strimzi-cluster-operator restarted
+pod/strimzi-cluster-operator-5849c545-22xb8 condition met
+pod/strimzi-cluster-operator-6446fccdf-64lwj condition met
+Error from server (NotFound): pods "strimzi-cluster-operator-859c8cd475-dp2wk" not found
+kafka.kafka.strimzi.io "kafka-cluster" deleted from kafka-operator namespace
+kafkanodepool.kafka.strimzi.io/controller unchanged
+kafkanodepool.kafka.strimzi.io/broker unchanged
+Error from server (BadRequest): error when creating "infrastructure/base/kafka/kafka-cluster.yaml": Kafka in version "v1" cannot be handled as a Kafka: strict decoding error: unknown field "spec.entityOperator.topicOperator.reconciliationIntervalSeconds", unknown field "spec.entityOperator.userOperator.reconciliationIntervalSeconds"
+NAME                                       READY   STATUS        RESTARTS        AGE
+kafka-cluster-broker-pool-0                1/1     Running       11 (6h9m ago)   3d7h
+kafka-cluster-controller-pool-1            1/1     Running       11 (6h9m ago)   3d7h
+strimzi-cluster-operator-5849c545-22xb8    1/1     Running       0               4s
+strimzi-cluster-operator-6446fccdf-64lwj   0/1     Terminating   0               5s
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n kafka-operator
+NAME                                        READY   STATUS    RESTARTS        AGE
+kafka-cluster-broker-pool-0                 1/1     Running   11 (6h9m ago)   3d7h
+kafka-cluster-controller-pool-1             1/1     Running   11 (6h9m ago)   3d7h
+strimzi-cluster-operator-6c7bf8f595-gjm5q   1/1     Running   0               6s
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n kafka-operator
+NAME                                        READY   STATUS    RESTARTS        AGE
+kafka-cluster-broker-pool-0                 1/1     Running   11 (6h9m ago)   3d7h
+kafka-cluster-controller-pool-1             1/1     Running   11 (6h9m ago)   3d7h
+strimzi-cluster-operator-6c7bf8f595-gjm5q   1/1     Running   1               11s
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ 
+)apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: strimzi-cluster-operator
+  namespace: kafka-operator
+  labels:
+    app: strimzi
+    app.kubernetes.io/name: strimzi-cluster-operator
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/part-of: kafka
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: strimzi-cluster-operator-namespaced
+  labels:
+    app: strimzi
+    app.kubernetes.io/name: strimzi-cluster-operator
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/part-of: kafka
+rules:
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["rolebindings"]
+  verbs: ["create", "get", "list", "watch", "update", "delete", "patch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets", "statefulsets"]
+  verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets", "persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
+- apiGroups: ["kafka.strimzi.io"]
+  resources: ["kafkas", "kafkanodepools", "kafkatopics", "kafkausers", "kafkaconnects", "kafkaconnectors", "kafkamirrormakers", "kafkamirrormaker2s", "kafkabridges"]
+  verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: strimzi-cluster-operator
+  labels:
+    app: strimzi
+    app.kubernetes.io/name: strimzi-cluster-operator
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/part-of: kafka
+subjects:
+- kind: ServiceAccount
+  name: strimzi-cluster-operator
+  namespace: kafka-operator
+roleRef:
+  kind: ClusterRole
+  name: strimzi-cluster-operator-namespaced
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strimzi-cluster-operator
+  namespace: kafka-operator
+  labels:
+    app: strimzi
+    app.kubernetes.io/name: strimzi-cluster-operator
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/part-of: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: strimzi-cluster-operator
+      app.kubernetes.io/component: operator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: strimzi-cluster-operator
+        app.kubernetes.io/component: operator
+        app.kubernetes.io/part-of: kafka
+    spec:
+      serviceAccountName: strimzi-cluster-operator
+      containers:
+      - name: strimzi-cluster-operator
+        image: quay.io/strimzi/operator:0.41.0
+        command:
+          - /opt/strimzi/bin/cluster_operator_run.sh
+        env:
+        - name: STRIMZI_NAMESPACE
+          value: "*"
+        - name: STRIMZI_FULL_RECONCILIATION_INTERVAL_MS
+          value: "120000"
+        - name: STRIMZI_LOG_LEVEL
+          value: INFO
+        - name: STRIMZI_FEATURE_GATES
+          value: +UseKRaft
+        # Kafka version mappings - include 3.6.0 for compatibility
+        - name: STRIMZI_KAFKA_IMAGES
+          value: |
+            3.6.0=quay.io/strimzi/kafka:0.41.0-kafka-3.6.0
+            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
+            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
+        - name: STRIMZI_KAFKA_CONNECT_IMAGES
+          value: |
+            3.6.0=quay.io/strimzi/kafka:0.41.0-kafka-3.6.0
+            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
+            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
+        - name: STRIMZI_KAFKA_MIRROR_MAKER_2_IMAGES
+          value: |
+            3.6.0=quay.io/strimzi/kafka:0.41.0-kafka-3.6.0
+            4.1.0=quay.io/strimzi/kafka:0.41.0-kafka-4.1.0
+            4.1.1=quay.io/strimzi/kafka:0.41.0-kafka-4.1.1
+        - name: STRIMZI_DEFAULT_TOPIC_OPERATOR_IMAGE
+          value: quay.io/strimzi/operator:0.41.0
+        - name: STRIMZI_DEFAULT_USER_OPERATOR_IMAGE
+          value: quay.io/strimzi/operator:0.41.0
+        - name: STRIMZI_DEFAULT_KAFKA_INIT_IMAGE
+          value: quay.io/strimzi/operator:0.41.0
+        - name: STRIMZI_DEFAULT_KAFKA_BRIDGE_IMAGE
+          value: quay.io/strimzi/kafka-bridge:0.29.0
+        - name: STRIMZI_DEFAULT_CRUISE_CONTROL_IMAGE
+          value: quay.io/strimzi/cruise-control:0.41.0
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "400m" and apiVersion: kafka.strimzi.io/v1
+kind: KafkaNodePool
+metadata:
+  name: controller
+  namespace: kafka-operator
+  labels:
+    strimzi.io/cluster: kafka-cluster
+spec:
+  replicas: 1
+  roles:
+    - controller
+  storage:
+    type: persistent-claim
+    size: 5Gi
+    deleteClaim: false
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaNodePool
+metadata:
+  name: broker
+  namespace: kafka-operator
+  labels:
+    strimzi.io/cluster: kafka-cluster
+spec:
+  replicas: 1
+  roles:
+    - broker
+  storage:
+    type: persistent-claim
+    size: 5Gi
+    deleteClaim: false
+---
+apiVersion: kafka.strimzi.io/v1
+kind: Kafka
+metadata:
+  name: kafka-cluster
+  namespace: kafka-operator
+  labels:
+    managed-by: gitops
+  annotations:
+    strimzi.io/kraft: enabled
+spec:
+  kafka:
+    version: 4.1.1
+    metadataVersion: 4.1-IV1
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+        configuration:
+          useServiceDnsDomain: true
+      - name: tls
+        port: 9093
+        type: internal
+        tls: true
+        configuration:
+          useServiceDnsDomain: true
+    config:
+      offsets.topic.replication.factor: 1
+      transaction.state.log.replication.factor: 1
+      transaction.state.log.min.isr: 1
+      default.replication.factor: 1
+      min.insync.replicas: 1
+      inter.broker.protocol.version: "4.1"
+    # REMOVED storage block - now handled by KafkaNodePool
+  entityOperator:
+    topicOperator:
+      reconciliationIntervalSeconds: 90
+    userOperator:
+      reconciliationIntervalSeconds: 90)(You’re **very close now**. The operator is finally running, which is the hardest part. 👍
+The remaining issue is simply a **schema mismatch in the Kafka CR**.
+
+Let’s break down the exact error.
+
+---
+
+# 🚨 The error
+
+Kubernetes rejected your Kafka resource:
+
+```
+unknown field "spec.entityOperator.topicOperator.reconciliationIntervalSeconds"
+unknown field "spec.entityOperator.userOperator.reconciliationIntervalSeconds"
+```
+
+This means **Strimzi 0.41 no longer supports those fields** in the `entityOperator`.
+
+Those options existed in older versions but were removed.
+
+---
+
+# ✅ Fix
+
+Edit **`kafka-cluster.yaml`**.
+
+Replace this block:
+
+```yaml
+entityOperator:
+  topicOperator:
+    reconciliationIntervalSeconds: 90
+  userOperator:
+    reconciliationIntervalSeconds: 90
+```
+
+with simply:
+
+```yaml
+entityOperator:
+  topicOperator: {}
+  userOperator: {}
+```
+
+So the final part becomes:
+
+```yaml
+entityOperator:
+  topicOperator: {}
+  userOperator: {}
+```
+
+---
+
+# 🚀 Then reapply
+
+Run:
+
+```bash
+kubectl apply -f infrastructure/base/kafka/kafka-cluster.yaml
+```
+
+Then check:
+
+```bash
+kubectl get pods -n kafka-operator
+```
+
+You should soon see something like:
+
+```
+kafka-cluster-controller-0
+kafka-cluster-broker-0
+kafka-cluster-entity-operator-xxxxx
+```
+
+---
+
+# 🧹 Optional cleanup (recommended)
+
+Those pods:
+
+```
+kafka-cluster-broker-pool-0
+kafka-cluster-controller-pool-1
+```
+
+are **leftovers from the previous deployment**.
+
+Once the new cluster is created, you can remove them:
+
+```bash
+kubectl delete pod kafka-cluster-broker-pool-0 -n kafka-operator
+kubectl delete pod kafka-cluster-controller-pool-1 -n kafka-operator
+```
+
+The operator will recreate the correct ones.
+
+---
+
+# 🧠 Small insight (important)
+
+In **Strimzi 0.41 + KRaft mode**:
+
+* `KafkaNodePool` → defines storage + roles
+* `Kafka` → defines cluster configuration
+* `entityOperator` → just enables operators (no tuning fields)
+
+So the **minimal valid structure** is:
+
+```
+KafkaNodePool
+KafkaNodePool
+Kafka
+```
+
+which you already have.
+
+---
+
+# If you want, I can also show you one **very powerful improvement**
+
+Right now your Kafka is **internal-only**.
+I can show you how to expose it safely so:
+
+* your **Django microservices**
+* **Kafka UI**
+* **external producers**
+
+can connect cleanly.
+
+It's a **2-minute change** but makes debugging Kafka **100× easier**.
+)
