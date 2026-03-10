@@ -76,18 +76,34 @@ spec:
       serviceAccountName: strimzi-cluster-operator
       containers:
       - name: strimzi-cluster-operator
-        image: quay.io/strimzi/operator:0.51.0  # Updated to match running version
+        image: quay.io/strimzi/operator:0.51.0
         command:
           - /opt/strimzi/bin/cluster_operator_run.sh
         env:
         - name: STRIMZI_NAMESPACE
-          value: kafka-operator  # Changed from "*" to be more secure
+          value: kafka-operator
         - name: STRIMZI_FULL_RECONCILIATION_INTERVAL_MS
           value: "120000"
         - name: STRIMZI_LOG_LEVEL
           value: INFO
         - name: STRIMZI_FEATURE_GATES
           value: +UseKRaft
+        # ADD THESE IMAGE MAPPINGS - CRITICAL for operator to know which images to use
+        - name: STRIMZI_KAFKA_IMAGES
+          value: |
+            4.1.0=quay.io/strimzi/kafka:0.51.0-kafka-4.1.0
+        - name: STRIMZI_KAFKA_CONNECT_IMAGES
+          value: |
+            4.1.0=quay.io/strimzi/kafka:0.51.0-kafka-4.1.0
+        - name: STRIMZI_KAFKA_MIRROR_MAKER_2_IMAGES
+          value: |
+            4.1.0=quay.io/strimzi/kafka:0.51.0-kafka-4.1.0
+        - name: STRIMZI_DEFAULT_TOPIC_OPERATOR_IMAGE
+          value: quay.io/strimzi/operator:0.51.0
+        - name: STRIMZI_DEFAULT_USER_OPERATOR_IMAGE
+          value: quay.io/strimzi/operator:0.51.0
+        - name: STRIMZI_DEFAULT_KAFKA_INIT_IMAGE
+          value: quay.io/strimzi/operator:0.51.0
         resources:
           requests:
             memory: "256Mi"
