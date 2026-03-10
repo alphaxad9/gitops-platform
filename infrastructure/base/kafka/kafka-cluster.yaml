@@ -1,4 +1,4 @@
-apiVersion: kafka.strimzi.io/v1
+apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaNodePool
 metadata:
   name: controller
@@ -14,7 +14,7 @@ spec:
     size: 5Gi
     deleteClaim: false
 ---
-apiVersion: kafka.strimzi.io/v1
+apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaNodePool
 metadata:
   name: broker
@@ -30,7 +30,7 @@ spec:
     size: 5Gi
     deleteClaim: false
 ---
-apiVersion: kafka.strimzi.io/v1
+apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
   name: kafka-cluster
@@ -63,9 +63,6 @@ spec:
       default.replication.factor: 1
       min.insync.replicas: 1
       inter.broker.protocol.version: "4.1"
-    # REMOVED storage block - now handled by KafkaNodePool
   entityOperator:
-    topicOperator:
-      reconciliationIntervalSeconds: 90
-    userOperator:
-      reconciliationIntervalSeconds: 90
+    topicOperator: {}
+    userOperator: {}

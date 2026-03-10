@@ -76,19 +76,18 @@ spec:
       serviceAccountName: strimzi-cluster-operator
       containers:
       - name: strimzi-cluster-operator
-        image: quay.io/strimzi/operator:0.41.0
+        image: quay.io/strimzi/operator:0.51.0  # Updated to match running version
         command:
           - /opt/strimzi/bin/cluster_operator_run.sh
         env:
         - name: STRIMZI_NAMESPACE
-          value: "*"
+          value: kafka-operator  # Changed from "*" to be more secure
         - name: STRIMZI_FULL_RECONCILIATION_INTERVAL_MS
           value: "120000"
         - name: STRIMZI_LOG_LEVEL
           value: INFO
         - name: STRIMZI_FEATURE_GATES
           value: +UseKRaft
-        # REMOVED: STRIMZI_KAFKA_IMAGES and other image mappings - Strimzi knows them
         resources:
           requests:
             memory: "256Mi"
