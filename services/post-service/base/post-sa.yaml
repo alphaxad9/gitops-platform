@@ -1,0 +1,10 @@
+# gitops-platform/services/post-service/base/post-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: post-service-sa
+  namespace: post-service
+  labels:
+    app: post-service
+    managed-by: gitops
+    component: post-service

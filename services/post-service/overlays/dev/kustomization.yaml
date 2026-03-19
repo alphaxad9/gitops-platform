@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: post-service
+
+resources:
+  - ../../base
+
+labels:
+  - pairs:
+      environment: dev
+      managed-by: gitops
+    includeSelectors: false
+
+configMapGenerator:
+  - name: post-config
+    behavior: merge
+    literals:
+      - LOG_LEVEL=DEBUG
+      - GIN_MODE=debug
+      - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
+      - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
+      - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
+      - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment

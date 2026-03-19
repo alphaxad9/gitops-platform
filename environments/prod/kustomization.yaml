@@ -6,6 +6,7 @@ resources:
   - infrastructure-application.yaml
   - auth-application.yaml
   - payment-application.yaml
+  - post-application.yaml
 
 labels:
   - pairs:
@@ -83,6 +84,14 @@ patches:
   - target:
       kind: Application
       name: payment-service
+    patch: |-
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1sync-wave
+        value: "5"
+        
+  - target:
+      kind: Application
+      name: post-service
     patch: |-
       - op: add
         path: /metadata/annotations/argocd.argoproj.io~1sync-wave

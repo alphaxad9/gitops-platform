@@ -1,0 +1,195 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: post-service
+
+# 👇 Disable hash suffix so ConfigMap name stays "post-config"
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  - ../../base/service-template
+  - post-secrets.yaml
+  - post-sa.yaml
+  - postgres-credentials.yaml
+  - kafka-credentials.yaml
+  - rabbitmq-credentials.yaml 
+  - redis-credentials.yaml   
+
+configMapGenerator:
+  - name: post-config
+    literals:
+      - SERVICE_NAME=post
+      - DB_NAME=postgresgo1
+      - GIN_MODE=release
+      - PORT=8080
+      - FRONTEND_URL=http://localhost:3000
+      - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgresgo1
+      - POSTGRES_USER=ishimwe
+      - DB_HOST=postgres.infrastructure.svc.cluster.local
+      - DB_PORT=5432
+      - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
+      - KAFKA_TOPIC=microservice_one.events
+      - KAFKA_GROUP_ID=post_service_outbox_publisher
+      - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
+      - KAFKA_ENABLE_AUTO_COMMIT=false
+      - KAFKA_AUTO_OFFSET_RESET=earliest
+      - KAFKA_RETRIES=5
+      - KAFKA_POLL_TIMEOUT=1.0
+      - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
+      - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
+      - AUTH_PUBLIC_KEY_TTL=300
+      - LOG_LEVEL=INFO
+
+images:
+  - name: placeholder
+    newName: alphaxad9/post_service
+    newTag: "0.0.4"
+
+patches:
+  # ✅ Patch postgres-credentials with POSTGRES_* keys
+  - target:
+      kind: Secret
+      name: postgres-credentials
+    patch: |-
+      - op: replace
+        path: /stringData/POSTGRES_DB
+        value: postgresgo1
+      - op: replace
+        path: /stringData/POSTGRES_USER
+        value: ishimwe
+      - op: replace
+        path: /stringData/POSTGRES_PASSWORD
+        value: "2025New+"
+      - op: replace
+        path: /stringData/DB_NAME
+        value: postgresgo1
+      - op: replace
+        path: /stringData/DB_USER
+        value: ishimwe
+      - op: replace
+        path: /stringData/DB_PASSWORD
+        value: "2025New+"
+
+  # ✅ Patch kafka-credentials
+  - target:
+      kind: Secret
+      name: kafka-credentials
+    patch: |-
+      - op: replace
+        path: /stringData/POST_KAFKA_CLIENT_ID
+        value: post-service
+
+  # ✅ Patch post-secrets
+  - target:
+      kind: Secret
+      name: post-secrets
+    patch: |-
+      - op: replace
+        path: /stringData/JWT_SECRET
+        value: "my_jwt_secret_123!"
+      - op: replace
+        path: /stringData/INTERNAL_API_KEY
+        value: "super-secret-internal-key-change-in-prod"
+
+  # Patch deployment name and all references
+  - target:
+      kind: Deployment
+      name: service-placeholder
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: post-service
+      - op: replace
+        path: /metadata/labels/app
+        value: post-service
+      - op: replace
+        path: /metadata/labels/service
+        value: post-service
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: post-service
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: post-service
+      - op: replace
+        path: /spec/template/metadata/labels/service
+        value: post-service
+      - op: replace
+        path: /spec/template/spec/serviceAccountName
+        value: post-service-sa
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: post-service
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
+        value: post-config
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
+        value: post-secrets
+
+  # ADD securityContext to fix volume permissions
+  - target:
+      kind: Deployment
+      name: post-service
+    patch: |-
+      - op: add
+        path: /spec/template/spec/securityContext
+        value:
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+
+  # ADD Host header to all probes
+  - target:
+      kind: Deployment
+      name: post-service
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: post-service
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: post-service
+      - op: add
+        path: /spec/template/spec/containers/0/startupProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: post-service
+
+  # Patch service name and labels
+  - target:
+      kind: Service
+      name: service-placeholder-service
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: post-service
+      - op: replace
+        path: /metadata/labels/app
+        value: post-service
+      - op: replace
+        path: /spec/selector/app
+        value: post-service
+
+  # Patch PVC names (if your service needs persistent volumes)
+  - target:
+      kind: PersistentVolumeClaim
+      name: service-placeholder-static-pvc
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: post-service-static-pvc
+  - target:
+      kind: PersistentVolumeClaim
+      name: service-placeholder-media-pvc
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: post-service-media-pvc
