@@ -8,6 +8,8 @@ resources:
   - payment-application.yaml
   - post-application.yaml
   - booking-application.yaml
+  - wallet-application.yaml
+  - room-application.yaml
 
 labels:
 - pairs:

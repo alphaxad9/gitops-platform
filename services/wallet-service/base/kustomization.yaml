@@ -1,34 +1,33 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: booking-service
+namespace: wallet-service
 
-# 👇 Disable hash suffix so ConfigMap name stays "booking-config"
+# 👇 Disable hash suffix so ConfigMap name stays "wallet-config"
 generatorOptions:
   disableNameSuffixHash: true
 
 resources:
   - ../../base/service-template
-  - booking-secrets.yaml
-  - booking-sa.yaml
+  - wallet-secrets.yaml
+  - wallet-sa.yaml
   - postgres-credentials.yaml
   - rabbitmq-credentials.yaml   
   - kafka-credentials.yaml      
   - redis-credentials.yaml   
 
 configMapGenerator:
-  - name: booking-config
+  - name: wallet-config
     literals:
-      - SERVICE_NAME=booking
-      - DB_NAME=bookingdb
-      - DJANGO_SETTINGS_MODULE=booking_service.settings
-      - DJANGO_ALLOWED_HOSTS=booking-service,booking-service.booking-service.svc.cluster.local,localhost,127.0.0.1
-      - KAFKA_GROUP_ID=booking_service_id
+      - SERVICE_NAME=wallet
+      - DB_NAME=walletdb
+      - DJANGO_SETTINGS_MODULE=wallet_service.settings
+      - DJANGO_ALLOWED_HOSTS=wallet-service,wallet-service.wallet-service.svc.cluster.local,localhost,127.0.0.1
+      - KAFKA_GROUP_ID=wallet_service_id
       - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
       - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
-      - WALLET_SERVICE=http://wallet-service.wallet-service.svc.cluster.local:8001/wallet_service/wallets/by-user/
       - LOG_LEVEL=INFO
-      - RABBITMQ_QUEUE=booking_service.commands
+      - RABBITMQ_QUEUE=wallet_service.commands
       - RABBITMQ_VHOST=microservice_one
       - KAFKA_TOPIC=microservice_one.events
       - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
@@ -46,10 +45,11 @@ configMapGenerator:
       - CORS_ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
       - CSRF_TRUSTED_ORIGINS=http://localhost:3000,https://yourdomain.com
       - CORS_ALLOW_CREDENTIALS=True
+      - JWT_SECRET=my_jwt_secret_123!
 
 images:
   - name: placeholder
-    newName: alphaxad9/booking_service
+    newName: alphaxad9/wallet_service
     newTag: "0.0.3"
 
 patches:
@@ -60,7 +60,7 @@ patches:
     patch: |-
       - op: replace
         path: /stringData/POSTGRES_DB
-        value: bookingdb
+        value: walletdb
       - op: replace
         path: /stringData/POSTGRES_USER
         value: ishimwe
@@ -69,7 +69,7 @@ patches:
         value: "2025New+"
       - op: replace
         path: /stringData/DB_NAME
-        value: bookingdb
+        value: walletdb
       - op: replace
         path: /stringData/DB_USER
         value: ishimwe
@@ -84,39 +84,39 @@ patches:
     patch: |-
       - op: replace
         path: /metadata/name
-        value: booking-service
+        value: wallet-service
       - op: replace
         path: /metadata/labels/app
-        value: booking-service
+        value: wallet-service
       - op: replace
         path: /metadata/labels/service
-        value: booking-service
+        value: wallet-service
       - op: replace
         path: /spec/selector/matchLabels/app
-        value: booking-service
+        value: wallet-service
       - op: replace
         path: /spec/template/metadata/labels/app
-        value: booking-service
+        value: wallet-service
       - op: replace
         path: /spec/template/metadata/labels/service
-        value: booking-service
+        value: wallet-service
       - op: replace
         path: /spec/template/spec/serviceAccountName
-        value: booking-service-sa
+        value: wallet-service-sa
       - op: replace
         path: /spec/template/spec/containers/0/name
-        value: booking-service
+        value: wallet-service
       - op: replace
         path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
-        value: booking-config
+        value: wallet-config
       - op: replace
         path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
-        value: booking-secrets
+        value: wallet-secrets
 
   # ADD securityContext to fix volume permissions
   - target:
       kind: Deployment
-      name: booking-service
+      name: wallet-service
     patch: |-
       - op: add
         path: /spec/template/spec/securityContext
@@ -128,23 +128,23 @@ patches:
   # ADD Host header to all probes (PRODUCTION FIX)
   - target:
       kind: Deployment
-      name: booking-service
+      name: wallet-service
     patch: |-
       - op: add
         path: /spec/template/spec/containers/0/livenessProbe/httpGet/httpHeaders
         value:
           - name: Host
-            value: booking-service
+            value: wallet-service
       - op: add
         path: /spec/template/spec/containers/0/readinessProbe/httpGet/httpHeaders
         value:
           - name: Host
-            value: booking-service
+            value: wallet-service
       - op: add
         path: /spec/template/spec/containers/0/startupProbe/httpGet/httpHeaders
         value:
           - name: Host
-            value: booking-service
+            value: wallet-service
 
   # Patch service name and labels
   - target:
@@ -153,13 +153,13 @@ patches:
     patch: |-
       - op: replace
         path: /metadata/name
-        value: booking-service
+        value: wallet-service
       - op: replace
         path: /metadata/labels/app
-        value: booking-service
+        value: wallet-service
       - op: replace
         path: /spec/selector/app
-        value: booking-service
+        value: wallet-service
 
   # Patch PVC names
   - target:
@@ -168,11 +168,11 @@ patches:
     patch: |-
       - op: replace
         path: /metadata/name
-        value: booking-service-static-pvc
+        value: wallet-service-static-pvc
   - target:
       kind: PersistentVolumeClaim
       name: service-placeholder-media-pvc
     patch: |-
       - op: replace
         path: /metadata/name
-        value: booking-service-media-pvc
+        value: wallet-service-media-pvc
