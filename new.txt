@@ -1,1 +1,247 @@
- 
+(ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl exec -it -n auth-service deploy/auth-service -- printenv | grep CHANNEL_LAYER_HOSTS
+CHANNEL_LAYER_HOSTS=redis-master.infrastructure.svc.cluster.local:6379
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl logs -n auth-service -f deployment/auth-service
+⏳ Waiting for database...
+🔄 Applying migrations...
+[DEBUG] Subscribed <bound method UserCreatedHandler.handle of <src.messaging.user.event_handlers.UserCreatedHandler object at 0x7733debdc310>> to event UserCreated
+[DEBUG] Subscribed <bound method UserActivatedHandler.handle of <src.messaging.user.event_handlers.UserActivatedHandler object at 0x7733debdc370>> to event UserActivated
+[DEBUG] Subscribed <bound method UserDeactivatedHandler.handle of <src.messaging.user.event_handlers.UserDeactivatedHandler object at 0x7733debdc3d0>> to event UserDeactivated
+[DEBUG] Subscribed <bound method UserLoggedInHandler.handle of <src.messaging.user.event_handlers.UserLoggedInHandler object at 0x7733debdc640>> to event UserLoggedIn
+[DEBUG] Subscribed <bound method UserLoggedOutHandler.handle of <src.messaging.user.event_handlers.UserLoggedOutHandler object at 0x7733debde620>> to event UserLoggedOut
+[DEBUG] Subscribed <bound method UserUpdatedHandler.handle of <src.messaging.user.event_handlers.UserUpdatedHandler object at 0x7733debddb40>> to event UserUpdated
+[DEBUG] Subscribed <bound method UserSoftDeletedHandler.handle of <src.messaging.user.event_handlers.UserSoftDeletedHandler object at 0x7733debdf4f0>> to event UserSoftDeleted
+[DEBUG] Subscribed <bound method ProfileCreatedHandler.handle of <src.messaging.profile.event_handlers.ProfileCreatedHandler object at 0x7733debdd990>> to event ProfileCreated
+[DEBUG] Subscribed <bound method ProfileUpdatedHandler.handle of <src.messaging.profile.event_handlers.ProfileUpdatedHandler object at 0x7733deb9d8a0>> to event ProfileUpdated
+[DEBUG] Subscribed <bound method FollowersIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersIncrementedHandler object at 0x7733deba28f0>> to event FollowersIncremented
+[DEBUG] Subscribed <bound method FollowersDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersDecrementedHandler object at 0x7733deba2e90>> to event FollowersDecremented
+[DEBUG] Subscribed <bound method FollowingIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingIncrementedHandler object at 0x7733deba0070>> to event FollowingIncremented
+[DEBUG] Subscribed <bound method FollowingDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingDecrementedHandler object at 0x7733deba0670>> to event FollowingDecremented
+[DEBUG] Subscribed <bound method NotificationsIncrementedHandler.handle of <src.messaging.profile.event_handlers.NotificationsIncrementedHandler object at 0x7733deba0040>> to event NotificationsIncremented
+[DEBUG] Subscribed <bound method UserMarkedOnlineHandler.handle of <src.messaging.profile.event_handlers.UserMarkedOnlineHandler object at 0x7733deba1db0>> to event UserMarkedOnline
+[DEBUG] Subscribed <bound method NotificationsClearedHandler.handle of <src.messaging.profile.event_handlers.NotificationsClearedHandler object at 0x7733deba29e0>> to event NotificationsCleared
+[DEBUG] Subscribed <bound method ProfileSoftDeletedToggledHandler.handle of <src.messaging.profile.event_handlers.ProfileSoftDeletedToggledHandler object at 0x7733deba01f0>> to event ProfileSoftDeletedToggled
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, outbox, profiles, sessions, token_blacklist, users
+Running migrations:
+  No migrations to apply.
+📦 Collecting static files...
+[DEBUG] Subscribed <bound method UserCreatedHandler.handle of <src.messaging.user.event_handlers.UserCreatedHandler object at 0x76312114c310>> to event UserCreated
+[DEBUG] Subscribed <bound method UserActivatedHandler.handle of <src.messaging.user.event_handlers.UserActivatedHandler object at 0x76312114c370>> to event UserActivated
+[DEBUG] Subscribed <bound method UserDeactivatedHandler.handle of <src.messaging.user.event_handlers.UserDeactivatedHandler object at 0x76312114c3d0>> to event UserDeactivated
+[DEBUG] Subscribed <bound method UserLoggedInHandler.handle of <src.messaging.user.event_handlers.UserLoggedInHandler object at 0x76312114c640>> to event UserLoggedIn
+[DEBUG] Subscribed <bound method UserLoggedOutHandler.handle of <src.messaging.user.event_handlers.UserLoggedOutHandler object at 0x76312114e620>> to event UserLoggedOut
+[DEBUG] Subscribed <bound method UserUpdatedHandler.handle of <src.messaging.user.event_handlers.UserUpdatedHandler object at 0x76312114db40>> to event UserUpdated
+[DEBUG] Subscribed <bound method UserSoftDeletedHandler.handle of <src.messaging.user.event_handlers.UserSoftDeletedHandler object at 0x76312114f4f0>> to event UserSoftDeleted
+[DEBUG] Subscribed <bound method ProfileCreatedHandler.handle of <src.messaging.profile.event_handlers.ProfileCreatedHandler object at 0x76312114d990>> to event ProfileCreated
+[DEBUG] Subscribed <bound method ProfileUpdatedHandler.handle of <src.messaging.profile.event_handlers.ProfileUpdatedHandler object at 0x76312110d8a0>> to event ProfileUpdated
+[DEBUG] Subscribed <bound method FollowersIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersIncrementedHandler object at 0x763121131720>> to event FollowersIncremented
+[DEBUG] Subscribed <bound method FollowersDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersDecrementedHandler object at 0x763121131180>> to event FollowersDecremented
+[DEBUG] Subscribed <bound method FollowingIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingIncrementedHandler object at 0x763121133fa0>> to event FollowingIncremented
+[DEBUG] Subscribed <bound method FollowingDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingDecrementedHandler object at 0x7631211339a0>> to event FollowingDecremented
+[DEBUG] Subscribed <bound method NotificationsIncrementedHandler.handle of <src.messaging.profile.event_handlers.NotificationsIncrementedHandler object at 0x763121133fd0>> to event NotificationsIncremented
+[DEBUG] Subscribed <bound method UserMarkedOnlineHandler.handle of <src.messaging.profile.event_handlers.UserMarkedOnlineHandler object at 0x763121132260>> to event UserMarkedOnline
+[DEBUG] Subscribed <bound method NotificationsClearedHandler.handle of <src.messaging.profile.event_handlers.NotificationsClearedHandler object at 0x763121131630>> to event NotificationsCleared
+[DEBUG] Subscribed <bound method ProfileSoftDeletedToggledHandler.handle of <src.messaging.profile.event_handlers.ProfileSoftDeletedToggledHandler object at 0x763121133e20>> to event ProfileSoftDeletedToggled
+
+0 static files copied to '/app/static', 163 unmodified.
+🚀 Starting server...
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started parent process [1]
+INFO:     Waiting for child process [17]
+INFO:     Child process [17] died
+[DEBUG] Subscribed <bound method UserCreatedHandler.handle of <src.messaging.user.event_handlers.UserCreatedHandler object at 0x7c53e5585b70>> to event UserCreated
+[DEBUG] Subscribed <bound method UserActivatedHandler.handle of <src.messaging.user.event_handlers.UserActivatedHandler object at 0x7c53e55878e0>> to event UserActivated
+[DEBUG] Subscribed <bound method UserDeactivatedHandler.handle of <src.messaging.user.event_handlers.UserDeactivatedHandler object at 0x7c53e5587790>> to event UserDeactivated
+[DEBUG] Subscribed <bound method UserLoggedInHandler.handle of <src.messaging.user.event_handlers.UserLoggedInHandler object at 0x7c53e5587730>> to event UserLoggedIn
+[DEBUG] Subscribed <bound method UserLoggedOutHandler.handle of <src.messaging.user.event_handlers.UserLoggedOutHandler object at 0x7c53e55876d0>> to event UserLoggedOut
+[DEBUG] Subscribed <bound method UserUpdatedHandler.handle of <src.messaging.user.event_handlers.UserUpdatedHandler object at 0x7c53e5587670>> to event UserUpdated
+[DEBUG] Subscribed <bound method UserSoftDeletedHandler.handle of <src.messaging.user.event_handlers.UserSoftDeletedHandler object at 0x7c53e5587610>> to event UserSoftDeleted
+[DEBUG] Subscribed <bound method ProfileCreatedHandler.handle of <src.messaging.profile.event_handlers.ProfileCreatedHandler object at 0x7c53e55852a0>> to event ProfileCreated
+[DEBUG] Subscribed <bound method ProfileUpdatedHandler.handle of <src.messaging.profile.event_handlers.ProfileUpdatedHandler object at 0x7c53e55873d0>> to event ProfileUpdated
+[DEBUG] Subscribed <bound method FollowersIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersIncrementedHandler object at 0x7c53e5586a40>> to event FollowersIncremented
+[DEBUG] Subscribed <bound method FollowersDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersDecrementedHandler object at 0x7c53e55845e0>> to event FollowersDecremented
+[DEBUG] Subscribed <bound method FollowingIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingIncrementedHandler object at 0x7c53e5585ab0>> to event FollowingIncremented
+[DEBUG] Subscribed <bound method FollowingDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingDecrementedHandler object at 0x7c53e5585660>> to event FollowingDecremented
+[DEBUG] Subscribed <bound method NotificationsIncrementedHandler.handle of <src.messaging.profile.event_handlers.NotificationsIncrementedHandler object at 0x7c53e5585a80>> to event NotificationsIncremented
+[DEBUG] Subscribed <bound method UserMarkedOnlineHandler.handle of <src.messaging.profile.event_handlers.UserMarkedOnlineHandler object at 0x7c53e5586110>> to event UserMarkedOnline
+[DEBUG] Subscribed <bound method NotificationsClearedHandler.handle of <src.messaging.profile.event_handlers.NotificationsClearedHandler object at 0x7c53e5586b30>> to event NotificationsCleared
+[DEBUG] Subscribed <bound method ProfileSoftDeletedToggledHandler.handle of <src.messaging.profile.event_handlers.ProfileSoftDeletedToggledHandler object at 0x7c53e5586fb0>> to event ProfileSoftDeletedToggled
+INFO:     Started server process [18]
+INFO:     Waiting for application startup.
+INFO:     ASGI 'lifespan' protocol appears unsupported.
+INFO:     Application startup complete.
+[DEBUG] Subscribed <bound method UserCreatedHandler.handle of <src.messaging.user.event_handlers.UserCreatedHandler object at 0x78eb0c079c60>> to event UserCreated
+[DEBUG] Subscribed <bound method UserActivatedHandler.handle of <src.messaging.user.event_handlers.UserActivatedHandler object at 0x78eb0c07b910>> to event UserActivated
+[DEBUG] Subscribed <bound method UserDeactivatedHandler.handle of <src.messaging.user.event_handlers.UserDeactivatedHandler object at 0x78eb0c07b7c0>> to event UserDeactivated
+[DEBUG] Subscribed <bound method UserLoggedInHandler.handle of <src.messaging.user.event_handlers.UserLoggedInHandler object at 0x78eb0c07b760>> to event UserLoggedIn
+[DEBUG] Subscribed <bound method UserLoggedOutHandler.handle of <src.messaging.user.event_handlers.UserLoggedOutHandler object at 0x78eb0c07b700>> to event UserLoggedOut
+[DEBUG] Subscribed <bound method UserUpdatedHandler.handle of <src.messaging.user.event_handlers.UserUpdatedHandler object at 0x78eb0c07b6a0>> to event UserUpdated
+[DEBUG] Subscribed <bound method UserSoftDeletedHandler.handle of <src.messaging.user.event_handlers.UserSoftDeletedHandler object at 0x78eb0c07b640>> to event UserSoftDeleted
+[DEBUG] Subscribed <bound method ProfileCreatedHandler.handle of <src.messaging.profile.event_handlers.ProfileCreatedHandler object at 0x78eb0c0792d0>> to event ProfileCreated
+[DEBUG] Subscribed <bound method ProfileUpdatedHandler.handle of <src.messaging.profile.event_handlers.ProfileUpdatedHandler object at 0x78eb0c07a0e0>> to event ProfileUpdated
+[DEBUG] Subscribed <bound method FollowersIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersIncrementedHandler object at 0x78eb0c07aa10>> to event FollowersIncremented
+[DEBUG] Subscribed <bound method FollowersDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersDecrementedHandler object at 0x78eb0c0785e0>> to event FollowersDecremented
+[DEBUG] Subscribed <bound method FollowingIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingIncrementedHandler object at 0x78eb0c079ab0>> to event FollowingIncremented
+[DEBUG] Subscribed <bound method FollowingDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingDecrementedHandler object at 0x78eb0c079630>> to event FollowingDecremented
+[DEBUG] Subscribed <bound method NotificationsIncrementedHandler.handle of <src.messaging.profile.event_handlers.NotificationsIncrementedHandler object at 0x78eb0c079a80>> to event NotificationsIncremented
+[DEBUG] Subscribed <bound method UserMarkedOnlineHandler.handle of <src.messaging.profile.event_handlers.UserMarkedOnlineHandler object at 0x78eb0c07a1a0>> to event UserMarkedOnline
+[DEBUG] Subscribed <bound method NotificationsClearedHandler.handle of <src.messaging.profile.event_handlers.NotificationsClearedHandler object at 0x78eb0c07ab00>> to event NotificationsCleared
+[DEBUG] Subscribed <bound method ProfileSoftDeletedToggledHandler.handle of <src.messaging.profile.event_handlers.ProfileSoftDeletedToggledHandler object at 0x78eb0c07afe0>> to event ProfileSoftDeletedToggled
+INFO:     Started server process [19]
+INFO:     Waiting for application startup.
+INFO:     ASGI 'lifespan' protocol appears unsupported.
+INFO:     Application startup complete.
+[DEBUG] Subscribed <bound method UserCreatedHandler.handle of <src.messaging.user.event_handlers.UserCreatedHandler object at 0x7672dcb79c60>> to event UserCreated
+[DEBUG] Subscribed <bound method UserActivatedHandler.handle of <src.messaging.user.event_handlers.UserActivatedHandler object at 0x7672dcb7b910>> to event UserActivated
+[DEBUG] Subscribed <bound method UserDeactivatedHandler.handle of <src.messaging.user.event_handlers.UserDeactivatedHandler object at 0x7672dcb7b7c0>> to event UserDeactivated
+[DEBUG] Subscribed <bound method UserLoggedInHandler.handle of <src.messaging.user.event_handlers.UserLoggedInHandler object at 0x7672dcb7b760>> to event UserLoggedIn
+[DEBUG] Subscribed <bound method UserLoggedOutHandler.handle of <src.messaging.user.event_handlers.UserLoggedOutHandler object at 0x7672dcb7b700>> to event UserLoggedOut
+[DEBUG] Subscribed <bound method UserUpdatedHandler.handle of <src.messaging.user.event_handlers.UserUpdatedHandler object at 0x7672dcb7b6a0>> to event UserUpdated
+[DEBUG] Subscribed <bound method UserSoftDeletedHandler.handle of <src.messaging.user.event_handlers.UserSoftDeletedHandler object at 0x7672dcb7b640>> to event UserSoftDeleted
+[DEBUG] Subscribed <bound method ProfileCreatedHandler.handle of <src.messaging.profile.event_handlers.ProfileCreatedHandler object at 0x7672dcb792d0>> to event ProfileCreated
+[DEBUG] Subscribed <bound method ProfileUpdatedHandler.handle of <src.messaging.profile.event_handlers.ProfileUpdatedHandler object at 0x7672dcb7a0e0>> to event ProfileUpdated
+[DEBUG] Subscribed <bound method FollowersIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersIncrementedHandler object at 0x7672dcb7aa10>> to event FollowersIncremented
+[DEBUG] Subscribed <bound method FollowersDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersDecrementedHandler object at 0x7672dcb785e0>> to event FollowersDecremented
+[DEBUG] Subscribed <bound method FollowingIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingIncrementedHandler object at 0x7672dcb79ab0>> to event FollowingIncremented
+[DEBUG] Subscribed <bound method FollowingDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingDecrementedHandler object at 0x7672dcb79630>> to event FollowingDecremented
+[DEBUG] Subscribed <bound method NotificationsIncrementedHandler.handle of <src.messaging.profile.event_handlers.NotificationsIncrementedHandler object at 0x7672dcb79a80>> to event NotificationsIncremented
+[DEBUG] Subscribed <bound method UserMarkedOnlineHandler.handle of <src.messaging.profile.event_handlers.UserMarkedOnlineHandler object at 0x7672dcb7a1a0>> to event UserMarkedOnline
+[DEBUG] Subscribed <bound method NotificationsClearedHandler.handle of <src.messaging.profile.event_handlers.NotificationsClearedHandler object at 0x7672dcb7ab00>> to event NotificationsCleared
+[DEBUG] Subscribed <bound method ProfileSoftDeletedToggledHandler.handle of <src.messaging.profile.event_handlers.ProfileSoftDeletedToggledHandler object at 0x7672dcb7afe0>> to event ProfileSoftDeletedToggled
+INFO:     Started server process [20]
+INFO:     Waiting for application startup.
+INFO:     ASGI 'lifespan' protocol appears unsupported.
+INFO:     Application startup complete.
+INFO:     10.244.0.1:36766 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:36770 - "GET /health/ HTTP/1.1" 200 OK
+[DEBUG] Subscribed <bound method UserCreatedHandler.handle of <src.messaging.user.event_handlers.UserCreatedHandler object at 0x717de4771c60>> to event UserCreated
+[DEBUG] Subscribed <bound method UserActivatedHandler.handle of <src.messaging.user.event_handlers.UserActivatedHandler object at 0x717de4773910>> to event UserActivated
+[DEBUG] Subscribed <bound method UserDeactivatedHandler.handle of <src.messaging.user.event_handlers.UserDeactivatedHandler object at 0x717de47737c0>> to event UserDeactivated
+[DEBUG] Subscribed <bound method UserLoggedInHandler.handle of <src.messaging.user.event_handlers.UserLoggedInHandler object at 0x717de4773760>> to event UserLoggedIn
+[DEBUG] Subscribed <bound method UserLoggedOutHandler.handle of <src.messaging.user.event_handlers.UserLoggedOutHandler object at 0x717de4773700>> to event UserLoggedOut
+[DEBUG] Subscribed <bound method UserUpdatedHandler.handle of <src.messaging.user.event_handlers.UserUpdatedHandler object at 0x717de47736a0>> to event UserUpdated
+[DEBUG] Subscribed <bound method UserSoftDeletedHandler.handle of <src.messaging.user.event_handlers.UserSoftDeletedHandler object at 0x717de4773640>> to event UserSoftDeleted
+[DEBUG] Subscribed <bound method ProfileCreatedHandler.handle of <src.messaging.profile.event_handlers.ProfileCreatedHandler object at 0x717de47712d0>> to event ProfileCreated
+[DEBUG] Subscribed <bound method ProfileUpdatedHandler.handle of <src.messaging.profile.event_handlers.ProfileUpdatedHandler object at 0x717de47720e0>> to event ProfileUpdated
+[DEBUG] Subscribed <bound method FollowersIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersIncrementedHandler object at 0x717de4772a10>> to event FollowersIncremented
+[DEBUG] Subscribed <bound method FollowersDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowersDecrementedHandler object at 0x717de47705e0>> to event FollowersDecremented
+[DEBUG] Subscribed <bound method FollowingIncrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingIncrementedHandler object at 0x717de4771ab0>> to event FollowingIncremented
+[DEBUG] Subscribed <bound method FollowingDecrementedHandler.handle of <src.messaging.profile.event_handlers.FollowingDecrementedHandler object at 0x717de4771630>> to event FollowingDecremented
+[DEBUG] Subscribed <bound method NotificationsIncrementedHandler.handle of <src.messaging.profile.event_handlers.NotificationsIncrementedHandler object at 0x717de4771a80>> to event NotificationsIncremented
+[DEBUG] Subscribed <bound method UserMarkedOnlineHandler.handle of <src.messaging.profile.event_handlers.UserMarkedOnlineHandler object at 0x717de47721a0>> to event UserMarkedOnline
+[DEBUG] Subscribed <bound method NotificationsClearedHandler.handle of <src.messaging.profile.event_handlers.NotificationsClearedHandler object at 0x717de4772b00>> to event NotificationsCleared
+[DEBUG] Subscribed <bound method ProfileSoftDeletedToggledHandler.handle of <src.messaging.profile.event_handlers.ProfileSoftDeletedToggledHandler object at 0x717de4772fe0>> to event ProfileSoftDeletedToggled
+INFO:     Started server process [21]
+INFO:     Waiting for application startup.
+INFO:     ASGI 'lifespan' protocol appears unsupported.
+INFO:     Application startup complete.
+INFO:     10.244.0.1:57526 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:57532 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:57530 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:42764 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:42788 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:42776 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:34864 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:34874 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:34866 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:55438 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:55454 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:55444 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:36258 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:36274 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:36286 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:54844 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:54858 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:54860 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:56098 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:56116 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:56114 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:49748 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:49766 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:49760 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:58692 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:58708 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:58720 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:58180 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:58196 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:58198 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:49416 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:49430 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:49426 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:33164 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:33178 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:33176 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:53212 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:53228 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:53226 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:60924 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:60942 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:60940 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:32948 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:32952 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:32950 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:42796 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:42802 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:42804 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:46132 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:46136 - "GET /health/ HTTP/1.1" 200 OK
+INFO:     10.244.0.1:46148 - "GET /health/ HTTP/1.1" 200 OK
+) but i can still see (ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/my_backend$ kubectl get configmap -n auth-service
+NAME               DATA   AGE
+auth-config        20     19d
+kube-root-ca.crt   1      22d
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/my_backend$ kubectl get configmap auth-config -n auth-service -o yaml | grep -A 2 CHANNEL_LAYER_HOSTS
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/myishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/myishimwe@alpha:~/projs/django/microservices/service_one/zedvye_sixishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/my_backend$ 
+curl -X POST http://127.0.0.1:8000/zedvye_one/users/token/ \
+  -H "Content-Type: application/json" \
+  -H "X-CSRFToken: EW8jqY3yDI8veaqY8kUXPT31p5NxLGKrCx4CX7zeXLxa2oETl7pBT57dlvZkLSpa" \
+  -c cookies.txt -b cookies.txt \
+  -d '{
+    "identifier": "test@example.com",
+    "password": "Test123!"
+  }' | jq
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:100    70    0     0  100    70      0     58  0:00:01  0:00:01 --:100    70    0     0  100    70      0     31  0:00:02  0:00:02 --:100  1457  100  1387  100    70    621     31  0:00:02  0:00:02 --:--:--   653
+{
+  "message": "testuser logged in successfully",
+  "user": {
+    "id": "9e6c4138-3129-4875-8e72-25e4cb05905d",
+    "username": "testuser",
+    "email": "test@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "profile_picture": null
+  },
+  "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzczOTQ2Mzc0LCJpYXQiOjE3NzM5NDYwNzQsImp0aSI6ImE1NzE5M2Q1ZTMwYzRhZGJiYmU1MTA2OTYwZTYyYmEzIiwidXNlcl9pZCI6IjllNmM0MTM4LTMxMjktNDg3NS04ZTcyLTI1ZTRjYjA1OTA1ZCJ9.Fsfv8xqOI82gCaYYaSjJJZLiSzZJxU4-20j9bZ7U0AU_tvnmPhuPRvunalIJxwWrj7BxYXm6rTA1qBQR5ioq72LkgxVaZHjMz8zspqPo3FQjG-dGHIociCqsscaRNj2iStN8BvyGf71KI3xcLc294MS69BOkIuwV4Ue0OPN-oJEZAikNtyxchrEDIaMNMsd2FDy6dFh5X7cSFnUPnuRn_3DqYpx6JSYT-1p98OTkCoqy_wEvmSi1tZeNkbkfefGqJDl5xNTGLaxC3zDVPVI0tRshbhzZVhCUykbVdnToNalioQCZNiGsZxTjvkw_7ZBi66eEmGV1naSLXyUg4EZ0lg",
+  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3NDAzMjQ3NCwiaWF0IjoxNzczOTQ2MDc0LCJqdGkiOiIxNDU1NTZmNzFiZTc0ZDM4ODJlMmJhMGE3MWU0NGYzYiIsInVzZXJfaWQiOiI5ZTZjNDEzOC0zMTI5LTQ4NzUtOGU3Mi0yNWU0Y2IwNTkwNWQifQ.mo2pGSIsiIwiLCoboQaCC0hava32_rOEpTdDzjMkC02k7SeLFX29W5xrBXLoriL-XAtZJLhC_Pnma8CnNGBKaCt7jqi5--J5nz0QVKNykFoMLOijOZVz9egnTRqksy_pSHGMG6os7AKGl20dZLXTyWKOOh44PL0lOAaPT7hkc5SFf60fpERkSRzUvgXGtGGec7Iaw2j0kKlZ0oH78Jztcj4Q8HXrL7r69OSgtkVqjS2xTgWDXaN1ztkbiV3abq-O5HLFgDvzcugRNZe3pCGq2DK02tnhsWF8SYBL8mJR_-YE1j_hQo0L6yvOkQhOC-_6lgVhXqY6F7XHq4YmU4_ZRw"
+}
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/my_backend$ curl -X POST http://127.0.0.1:8080/api/v1/posts \
+  -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzczOTQ2Mzc0LCJpYXQiOjE3NzM5NDYwNzQsImp0aSI6ImE1NzE5M2Q1ZTMwYzRhZGJiYmU1MTA2OTYwZTYyYmEzIiwidXNlcl9pZCI6IjllNmM0MTM4LTMxMjktNDg3NS04ZTcyLTI1ZTRjYjA1OTA1ZCJ9.Fsfv8xqOI82gCaYYaSjJJZLiSzZJxU4-20j9bZ7U0AU_tvnmPhuPRvunalIJxwWrj7BxYXm6rTA1qBQR5ioq72LkgxVaZHjMz8zspqPo3FQjG-dGHIociCqsscaRNj2iStN8BvyGf71KI3xcLc294MS69BOkIuwV4Ue0OPN-oJEZAikNtyxchrEDIaMNMsd2FDy6dFh5X7cSFnUPnuRn_3DqYpx6JSYT-1p98OTkCoqy_wEvmSi1tZeNkbkfefGqJDl5xNTGLaxC3zDVPVI0tRshbhzZVhCUykbVdnToNalioQCZNiGsZxTjvkw_7ZBi66eEmGV1naSLXyUg4EZ0lg" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "My kafkaa go consumer4",
+    "content": "This is the content of my first post in the new service1!",
+    "community_id": "123e4567-e89b-12d3-a456-426614174000",
+    "is_public": true
+  }' | jq
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to 127.0.0.1 port 8080 after 0 ms: Connection refused
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/my_backend$ curl -X POST http://127.0.0.1:8080/api/v1/posts \
+  -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzczOTQ2Mzc0LCJpYXQiOjE3NzM5NDYwNzQsImp0aSI6ImE1NzE5M2Q1ZTMwYzRhZGJiYmU1MTA2OTYwZTYyYmEzIiwidXNlcl9pZCI6IjllNmM0MTM4LTMxMjktNDg3NS04ZTcyLTI1ZTRjYjA1OTA1ZCJ9.Fsfv8xqOI82gCaYYaSjJJZLiSzZJxU4-20j9bZ7U0AU_tvnmPhuPRvunalIJxwWrj7BxYXm6rTA1qBQR5ioq72LkgxVaZHjMz8zspqPo3FQjG-dGHIociCqsscaRNj2iStN8BvyGf71KI3xcLc294MS69BOkIuwV4Ue0OPN-oJEZAikNtyxchrEDIaMNMsd2FDy6dFh5X7cSFnUPnuRn_3DqYpx6JSYT-1p98OTkCoqy_wEvmSi1tZeNkbkfefGqJDl5xNTGLaxC3zDVPVI0tRshbhzZVhCUykbVdnToNalioQCZNiGsZxTjvkw_7ZBi66eEmGV1naSLXyUg4EZ0lg" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "My kafkaa go consumer4",
+    "content": "This is the content of my first post in the new service1!",
+    "community_id": "123e4567-e89b-12d3-a456-426614174000",
+    "is_public": true
+  }' | jq
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:100   343  100   141  100   202   8810  12621 --:--:-- --:--:-- --:--:-- 22866
+{
+  "error": "Get \"http://auth-service:8000/zedvye_one/users/public_key/\": dial tcp: lookup auth-service on 10.96.0.10:53: server misbehaving"
+}
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/my_backend$)

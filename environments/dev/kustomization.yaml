@@ -7,6 +7,7 @@ resources:
   - auth-application.yaml
   - payment-application.yaml
   - post-application.yaml
+  - booking-application.yaml
 
 labels:
 - pairs:

@@ -1,0 +1,178 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: booking-service
+
+# 👇 Disable hash suffix so ConfigMap name stays "booking-config"
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  - ../../base/service-template
+  - booking-secrets.yaml
+  - booking-sa.yaml
+  - postgres-credentials.yaml
+  - rabbitmq-credentials.yaml   
+  - kafka-credentials.yaml      
+  - redis-credentials.yaml   
+
+configMapGenerator:
+  - name: booking-config
+    literals:
+      - SERVICE_NAME=booking
+      - DB_NAME=bookingdb
+      - DJANGO_SETTINGS_MODULE=booking_service.settings
+      - DJANGO_ALLOWED_HOSTS=booking-service,booking-service.booking-service.svc.cluster.local,localhost,127.0.0.1
+      - KAFKA_GROUP_ID=booking_service_id
+      - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
+      - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
+      - WALLET_SERVICE=http://wallet-service.wallet-service.svc.cluster.local:8001/wallet_service/wallets/by-user/
+      - LOG_LEVEL=INFO
+      - RABBITMQ_QUEUE=booking_service.commands
+      - RABBITMQ_VHOST=microservice_one
+      - KAFKA_TOPIC=microservice_one.events
+      - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
+      - POSTGRES_PORT=5432
+      - DB_HOST=postgres.infrastructure.svc.cluster.local
+      - DB_PORT=5432
+      - RABBITMQ_HOST=rabbitmq.infrastructure.svc.cluster.local
+      - REDIS_HOST=redis.infrastructure.svc.cluster.local
+      - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
+      - LIKES_CACHE_TTL=300
+      - AUTHOR_TIMELINE_CACHE_TTL=120
+      - CHANNEL_LAYER_HOSTS=redis.infrastructure.svc.cluster.local:6379
+      - CHANNEL_LAYER_CAPACITY=1000
+      - CHANNEL_LAYER_EXPIRY=10
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
+      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,https://yourdomain.com
+      - CORS_ALLOW_CREDENTIALS=True
+
+images:
+  - name: placeholder
+    newName: alphaxad9/booking_service
+    newTag: "0.0.2"
+
+patches:
+  # ✅ Patch postgres-credentials with POSTGRES_* keys
+  - target:
+      kind: Secret
+      name: postgres-credentials
+    patch: |-
+      - op: replace
+        path: /stringData/POSTGRES_DB
+        value: bookingdb
+      - op: replace
+        path: /stringData/POSTGRES_USER
+        value: ishimwe
+      - op: replace
+        path: /stringData/POSTGRES_PASSWORD
+        value: "2025New+"
+      - op: replace
+        path: /stringData/DB_NAME
+        value: bookingdb
+      - op: replace
+        path: /stringData/DB_USER
+        value: ishimwe
+      - op: replace
+        path: /stringData/DB_PASSWORD
+        value: "2025New+"
+
+  # Patch deployment name and all references
+  - target:
+      kind: Deployment
+      name: service-placeholder
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: booking-service
+      - op: replace
+        path: /metadata/labels/app
+        value: booking-service
+      - op: replace
+        path: /metadata/labels/service
+        value: booking-service
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: booking-service
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: booking-service
+      - op: replace
+        path: /spec/template/metadata/labels/service
+        value: booking-service
+      - op: replace
+        path: /spec/template/spec/serviceAccountName
+        value: booking-service-sa
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: booking-service
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
+        value: booking-config
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
+        value: booking-secrets
+
+  # ADD securityContext to fix volume permissions
+  - target:
+      kind: Deployment
+      name: booking-service
+    patch: |-
+      - op: add
+        path: /spec/template/spec/securityContext
+        value:
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+
+  # ADD Host header to all probes (PRODUCTION FIX)
+  - target:
+      kind: Deployment
+      name: booking-service
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: booking-service
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: booking-service
+      - op: add
+        path: /spec/template/spec/containers/0/startupProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: booking-service
+
+  # Patch service name and labels
+  - target:
+      kind: Service
+      name: service-placeholder-service
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: booking-service
+      - op: replace
+        path: /metadata/labels/app
+        value: booking-service
+      - op: replace
+        path: /spec/selector/app
+        value: booking-service
+
+  # Patch PVC names
+  - target:
+      kind: PersistentVolumeClaim
+      name: service-placeholder-static-pvc
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: booking-service-static-pvc
+  - target:
+      kind: PersistentVolumeClaim
+      name: service-placeholder-media-pvc
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: booking-service-media-pvc

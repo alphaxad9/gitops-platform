@@ -1,0 +1,10 @@
+# gitops-platform/services/booking-service/base/booking-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: booking-service-sa
+  namespace: booking-service
+  labels:
+    app: booking-service
+    managed-by: gitops
+    component: booking-service
