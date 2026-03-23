@@ -8,8 +8,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: placeholder-repo  # Will be replaced by kustomize patch
-    targetRevision: placeholder-rev  # Will be replaced by kustomize patch
+    repoURL: placeholder-repo
+    targetRevision: placeholder-rev
     path: services/wallet-service/overlays/dev
   destination:
     server: https://kubernetes.default.svc
