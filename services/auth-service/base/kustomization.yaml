@@ -40,7 +40,7 @@ configMapGenerator:
 images:
   - name: placeholder
     newName: alphaxad9/auth-service
-    newTag: "0.0.7"
+    newTag: "0.0.8"
 
 patches:
   # ✅ Patch postgres-credentials with POSTGRES_* keys
