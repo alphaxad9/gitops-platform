@@ -1,15 +1,15 @@
+# services/frontend/base/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 namespace: frontend
 
-# Disable hash suffix for simpler names
 generatorOptions:
   disableNameSuffixHash: true
 
 resources:
-  - ../../base/service-template  # Use the same service template as backend
-  - frontend-sa.yaml              # Service account (optional, but keep pattern consistent)
+  - service-template
+  - frontend-sa.yaml
 
 images:
   - name: placeholder
@@ -17,7 +17,7 @@ images:
     newTag: "0.0.1"
 
 patches:
-  # Patch deployment name and all references
+  # Patch deployment name and references
   - target:
       kind: Deployment
       name: service-placeholder
@@ -46,59 +46,8 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/name
         value: frontend
-      - op: replace
-        path: /spec/template/spec/containers/0/ports/0/containerPort
-        value: 80
-      - op: replace
-        path: /spec/template/spec/containers/0/image
-        value: alphaxad9/booking_microservice_frontend:0.0.1
 
-  # Add frontend-specific resources
-  - target:
-      kind: Deployment
-      name: frontend
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/resources
-        value:
-          requests:
-            memory: "128Mi"
-            cpu: "50m"
-          limits:
-            memory: "256Mi"
-            cpu: "100m"
-
-  # Add liveness/readiness probes for frontend
-  - target:
-      kind: Deployment
-      name: frontend
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/livenessProbe
-        value:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 10
-          periodSeconds: 10
-      - op: add
-        path: /spec/template/spec/containers/0/readinessProbe
-        value:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 5
-      - op: add
-        path: /spec/template/spec/containers/0/startupProbe
-        value:
-          httpGet:
-            path: /
-            port: 80
-          failureThreshold: 30
-          periodSeconds: 10
-
-  # Patch service name and labels
+  # Patch service name
   - target:
       kind: Service
       name: service-placeholder-service
@@ -112,9 +61,3 @@ patches:
       - op: replace
         path: /spec/selector/app
         value: frontend
-      - op: replace
-        path: /spec/ports/0/port
-        value: 80
-      - op: replace
-        path: /spec/ports/0/targetPort
-        value: 80

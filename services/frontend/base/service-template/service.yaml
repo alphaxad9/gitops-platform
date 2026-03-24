@@ -1,0 +1,19 @@
+# services/frontend/base/service-template/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-placeholder-service
+  labels:
+    app: service-placeholder
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "80"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: service-placeholder
