@@ -23,7 +23,7 @@ spec:
       - name: auth-producer
         image: alphaxad9/auth-service:0.0.9
         imagePullPolicy: IfNotPresent
-        command: ["python", "manage.py", "run_publisher"]
+        command: ["python", "manage.py", "run_kafka_publisher"]  # ← CHANGED HERE
         envFrom:
         - configMapRef:
             name: auth-config
