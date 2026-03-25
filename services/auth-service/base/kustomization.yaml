@@ -38,7 +38,7 @@ configMapGenerator:
       - LOG_LEVEL=INFO
       - RABBITMQ_QUEUE=auth.events
       - RABBITMQ_VHOST=auth_service
-      - KAFKA_TOPIC=auth.events
+      - KAFKA_TOPIC=microservice_one.events  # ← CHANGE THIS
       - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
       - POSTGRES_PORT=5432
       - DB_HOST=postgres.infrastructure.svc.cluster.local
