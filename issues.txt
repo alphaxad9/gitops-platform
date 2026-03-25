@@ -1,43 +1,76 @@
-kubectl describe pod auth-service-dd4ff6fc7-nfcm6 -n auth-service
-kubectl logs auth-service-58b7d7d47-ccmwp auth-service
-
-kubectl describe pod auth-service-dd4ff6fc7-nfcm6 -n auth-service
-kubectl logs auth-service-7f7f7cb9ff-lhw4f -n auth-service
-
-
-kubectl describe pod strimzi-cluster-operator-77b84778c5-m9nhs -n kafka-operator
-kubectl logs strimzi-cluster-operator-77b84778c5-m9nhs -n kafka-operator
-
-
-kubectl logs pods -n auth-service
-
-# Try loading images with your cluster name
-kind load docker-image postgres:15 --name payment-service
-kind load docker-image rabbitmq:3-management --name payment-service
-kind load docker-image redis:7 --name payment-service
-kind load docker-image traefik:v2.11 --name payment-service
-kind load docker-image apache/kafka:4.1.1 --name payment-service
-
-
-
-
-
-
-
-
-(# Build the new image with version 0.0.4
-docker build -t alphaxad9/auth-service:0.0.4 .
-
-# Also tag as latest
-docker tag alphaxad9/auth-service:0.0.4 alphaxad9/auth-service:latest
-
-# Push to Docker Hub
-docker push alphaxad9/auth-service:0.0.4
-docker push alphaxad9/auth-service:latest
-
-kind load docker-image alphaxad9/auth-service:0.0.4 --name payment-service
-
-# Verify it's loaded
-docker exec -it payment-service-control-plane crictl images | grep auth-service
-
-)
+in my frontend config i also have (# services/frontend/base/service-template/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-placeholder-service
+  labels:
+    app: service-placeholder
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "80"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: service-placeholder)(# services/frontend/base/service-template/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-placeholder
+  labels:
+    app: service-placeholder
+    service: service-placeholder
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: service-placeholder
+  template:
+    metadata:
+      labels:
+        app: service-placeholder
+        service: service-placeholder
+    spec:
+      containers:
+        - name: service-placeholder
+          image: placeholder:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "100m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10) should i change these ports? are they the ones leading to (Environment: production
+client.ts:12 API Base URL: http://localhost:8000/zedvye_one) i think no and my server is running at 3000

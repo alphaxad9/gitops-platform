@@ -3,18 +3,28 @@ kind: Kustomization
 
 namespace: auth-service
 
-# 👇 Disable hash suffix so ConfigMap name stays "auth-config"
 generatorOptions:
   disableNameSuffixHash: true
 
 resources:
-  - ../../base/service-template
-  - auth-secrets.yaml
+  # Deployments
+  - api-deployment.yaml
+  - consumer-deployment.yaml
+  - producer-deployment.yaml
+  
+  # Service (only for API)
+  - service.yaml
+  
+  # PVCs (only for API)
+  - pvc.yaml
+  
+  # Security & Credentials
   - auth-sa.yaml
+  - auth-secrets.yaml
   - postgres-credentials.yaml
   - rabbitmq-credentials.yaml  
   - kafka-credentials.yaml      
-  - redis-credentials.yaml   
+  - redis-credentials.yaml
 
 configMapGenerator:
   - name: auth-config
@@ -23,12 +33,12 @@ configMapGenerator:
       - DB_NAME=authdb
       - DJANGO_SETTINGS_MODULE=my_backend.settings
       - DJANGO_ALLOWED_HOSTS=auth-service,auth-service.auth-service.svc.cluster.local,localhost,127.0.0.1
-      - KAFKA_GROUP_ID=my_backend_id
+      - KAFKA_GROUP_ID=auth_consumer_group
       - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
       - LOG_LEVEL=INFO
-      - RABBITMQ_QUEUE=microservice_one.events
-      - RABBITMQ_VHOST=microservice_one
-      - KAFKA_TOPIC=microservice_one.events
+      - RABBITMQ_QUEUE=auth.events
+      - RABBITMQ_VHOST=auth_service
+      - KAFKA_TOPIC=auth.events
       - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
       - POSTGRES_PORT=5432
       - DB_HOST=postgres.infrastructure.svc.cluster.local
@@ -38,78 +48,14 @@ configMapGenerator:
       - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
 
 images:
-  - name: placeholder
-    newName: alphaxad9/auth-service
-    newTag: "0.0.8"
+  - name: alphaxad9/auth-service
+    newTag: "0.0.9"
 
 patches:
-  # ✅ Patch postgres-credentials with POSTGRES_* keys
-  - target:
-      kind: Secret
-      name: postgres-credentials
-    patch: |-
-      - op: replace
-        path: /stringData/POSTGRES_DB
-        value: authdb
-      - op: replace
-        path: /stringData/POSTGRES_USER
-        value: ishimwe
-      - op: replace
-        path: /stringData/POSTGRES_PASSWORD
-        value: "2025New+"
-
-  # Patch deployment name and all references
+  # Add Host header to API probes only
   - target:
       kind: Deployment
-      name: service-placeholder
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: auth-service
-      - op: replace
-        path: /metadata/labels/app
-        value: auth-service
-      - op: replace
-        path: /metadata/labels/service
-        value: auth-service
-      - op: replace
-        path: /spec/selector/matchLabels/app
-        value: auth-service
-      - op: replace
-        path: /spec/template/metadata/labels/app
-        value: auth-service
-      - op: replace
-        path: /spec/template/metadata/labels/service
-        value: auth-service
-      - op: replace
-        path: /spec/template/spec/serviceAccountName
-        value: auth-service-sa
-      - op: replace
-        path: /spec/template/spec/containers/0/name
-        value: auth-service
-      - op: replace
-        path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
-        value: auth-config
-      - op: replace
-        path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
-        value: auth-secrets
-
-  # ADD securityContext to fix volume permissions
-  - target:
-      kind: Deployment
-      name: auth-service
-    patch: |-
-      - op: add
-        path: /spec/template/spec/securityContext
-        value:
-          runAsUser: 1000
-          runAsGroup: 1000
-          fsGroup: 1000
-
-  # ADD Host header to all probes (PRODUCTION FIX)
-  - target:
-      kind: Deployment
-      name: auth-service
+      name: auth-api
     patch: |-
       - op: add
         path: /spec/template/spec/containers/0/livenessProbe/httpGet/httpHeaders
@@ -126,55 +72,3 @@ patches:
         value:
           - name: Host
             value: auth-service
-
-  # ADD keys volume and volumeMount
-  - target:
-      kind: Deployment
-      name: auth-service
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/volumeMounts/-
-        value:
-          name: keys
-          mountPath: /app/keys
-          readOnly: true
-      - op: add
-        path: /spec/template/spec/volumes/-
-        value:
-          name: keys
-          secret:
-            secretName: auth-secrets
-            items:
-            - key: SIGNING_KEY
-              path: private.pem
-
-  # Patch service name and labels
-  - target:
-      kind: Service
-      name: service-placeholder-service
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: auth-service
-      - op: replace
-        path: /metadata/labels/app
-        value: auth-service
-      - op: replace
-        path: /spec/selector/app
-        value: auth-service
-
-  # Patch PVC names
-  - target:
-      kind: PersistentVolumeClaim
-      name: service-placeholder-static-pvc
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: auth-service-static-pvc
-  - target:
-      kind: PersistentVolumeClaim
-      name: service-placeholder-media-pvc
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: auth-service-media-pvc

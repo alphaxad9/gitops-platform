@@ -1,3 +1,4 @@
+# infrastructure/base/kafka/kafka-cluster.yaml
 apiVersion: kafka.strimzi.io/v1
 kind: KafkaNodePool
 metadata:
@@ -41,7 +42,7 @@ metadata:
     strimzi.io/kraft: enabled
 spec:
   kafka:
-    version: 4.1.0  # Changed from 4.1.1 to match available image
+    version: 4.1.0
     metadataVersion: 4.1-IV1
     listeners:
       - name: plain

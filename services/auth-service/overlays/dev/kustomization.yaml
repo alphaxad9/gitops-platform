@@ -22,9 +22,27 @@ configMapGenerator:
       - CHANNEL_LAYER_HOSTS=redis-master.infrastructure.svc.cluster.local:6379
 
 patches:
+  # Set replicas for all deployments in dev
   - patch: |-
       - op: replace
         path: /spec/replicas
         value: 1
     target:
       kind: Deployment
+      name: auth-api
+  
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: auth-consumer
+  
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: auth-producer
