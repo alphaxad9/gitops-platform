@@ -21,7 +21,7 @@ spec:
       serviceAccountName: auth-service-sa
       containers:
       - name: auth-producer
-        image: alphaxad9/auth-service:0.1.1
+        image: alphaxad9/auth-service:0.1.2
         imagePullPolicy: IfNotPresent
         command: ["python", "manage.py", "run_kafka_publisher"]  # ← CHANGED HERE
         envFrom:
