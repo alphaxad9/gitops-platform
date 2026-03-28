@@ -1,3 +1,4 @@
+# services/room-service/overlays/prod/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -22,13 +23,32 @@ configMapGenerator:
       - CSRF_TRUSTED_ORIGINS=https://yourdomain.com
 
 patches:
+  # Set replicas for all deployments in production
   - patch: |-
       - op: replace
         path: /spec/replicas
         value: 3
     target:
       kind: Deployment
+      name: room-api
   
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+    target:
+      kind: Deployment
+      name: room-rabbitmq-consumer
+  
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+    target:
+      kind: Deployment
+      name: room-producer
+  
+  # Update resource requests/limits for API in production (higher specs)
   - patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/memory
@@ -44,27 +64,39 @@ patches:
         value: 1000m
     target:
       kind: Deployment
+      name: room-api
   
-  # Production-specific: Add PodDisruptionBudget
+  # Update resource requests/limits for consumers in production
   - patch: |-
-      apiVersion: policy/v1
-      kind: PodDisruptionBudget
-      metadata:
-        name: room-service-pdb
-      spec:
-        minAvailable: 2
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 256Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 250m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 512Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 500m
     target:
-      kind: PodDisruptionBudget
+      kind: Deployment
+      name: room-rabbitmq-consumer
   
-  # Production-specific: Add horizontal pod autoscaling
   - patch: |-
-      apiVersion: autoscaling/v2
-      kind: HorizontalPodAutoscaler
-      metadata:
-        name: room-service-hpa
-      spec:
-        minReplicas: 3
-        maxReplicas: 10
-        targetCPUUtilizationPercentage: 70
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 256Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 250m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 512Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 500m
     target:
-      kind: HorizontalPodAutoscaler
+      kind: Deployment
+      name: room-producer

@@ -1,0 +1,63 @@
+# services/room-service/base/rabbitmq-consumer-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: room-rabbitmq-consumer
+  labels:
+    app: room-service
+    component: rabbitmq-consumer
+    managed-by: gitops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: room-service
+      component: rabbitmq-consumer
+  template:
+    metadata:
+      labels:
+        app: room-service
+        component: rabbitmq-consumer
+    spec:
+      serviceAccountName: room-service-sa
+      containers:
+      - name: room-rabbitmq-consumer
+        image: alphaxad9/room_service:0.0.4
+        imagePullPolicy: IfNotPresent
+        command: ["python", "manage.py", "run_consumer"]
+        envFrom:
+        - configMapRef:
+            name: room-config
+        - secretRef:
+            name: room-secrets
+        - secretRef:
+            name: postgres-credentials
+        - secretRef:
+            name: rabbitmq-credentials
+        - secretRef:
+            name: kafka-credentials
+        - secretRef:
+            name: redis-credentials
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SERVICE_COMPONENT
+          value: "rabbitmq-consumer"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
