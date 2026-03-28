@@ -1,0 +1,28 @@
+# services/booking-service/base/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: booking-service-static-pvc
+  labels:
+    app: booking-service
+    managed-by: gitops
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: booking-service-media-pvc
+  labels:
+    app: booking-service
+    managed-by: gitops
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

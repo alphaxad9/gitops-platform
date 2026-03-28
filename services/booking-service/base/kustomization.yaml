@@ -50,7 +50,7 @@ configMapGenerator:
 images:
   - name: placeholder
     newName: alphaxad9/booking_service
-    newTag: "0.0.3"
+    newTag: "0.0.4"
 
 patches:
   # ✅ Patch postgres-credentials with POSTGRES_* keys

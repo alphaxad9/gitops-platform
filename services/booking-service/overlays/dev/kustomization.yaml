@@ -1,3 +1,4 @@
+# services/booking-service/overlays/dev/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -22,9 +23,35 @@ configMapGenerator:
       - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://localhost:8000,http://localhost:8003
 
 patches:
+  # Set replicas for all deployments in dev
   - patch: |-
       - op: replace
         path: /spec/replicas
         value: 1
     target:
       kind: Deployment
+      name: booking-api
+  
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: booking-consumer
+  
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: booking-producer
+  
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: booking-rabbitmq-consumer
