@@ -101,9 +101,8 @@ spec:
           mountPath: /app/static
         - name: media-files
           mountPath: /app/media
-        - name: keys
-          mountPath: /app/keys
-          readOnly: true
+        - name: tmp
+          mountPath: /tmp
       volumes:
       - name: static-files
         persistentVolumeClaim:
@@ -113,12 +112,6 @@ spec:
           claimName: booking-service-media-pvc
       - name: tmp
         emptyDir: {}
-      - name: keys
-        secret:
-          secretName: booking-secrets
-          items:
-          - key: SIGNING_KEY
-            path: private.pem
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
