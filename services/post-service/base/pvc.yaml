@@ -1,0 +1,28 @@
+# services/post-service/base/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: post-service-static-pvc
+  labels:
+    app: post-service
+    managed-by: gitops
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: post-service-media-pvc
+  labels:
+    app: post-service
+    managed-by: gitops
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

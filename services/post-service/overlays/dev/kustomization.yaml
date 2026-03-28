@@ -1,3 +1,4 @@
+# services/post-service/overlays/dev/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -18,22 +19,32 @@ configMapGenerator:
     literals:
       - LOG_LEVEL=DEBUG
       - GIN_MODE=debug
-      - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
-      - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
-      - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
-      - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080
+      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080
+      - CORS_ALLOW_CREDENTIALS=True
 
 patches:
+  # Set replicas for all deployments in dev
   - patch: |-
       - op: replace
         path: /spec/replicas
         value: 1
     target:
       kind: Deployment
+      name: post-api
+  
   - patch: |-
       - op: replace
-        path: /spec/template/spec/containers/0/ports/0/containerPort
-        value: 8080
+        path: /spec/replicas
+        value: 1
     target:
       kind: Deployment
-      name: post-service
+      name: post-consumer
+  
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: post-producer

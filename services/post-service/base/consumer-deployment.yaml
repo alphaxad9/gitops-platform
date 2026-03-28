@@ -1,0 +1,59 @@
+# services/post-service/base/consumer-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: post-consumer
+  labels:
+    app: post-service
+    component: consumer
+    managed-by: gitops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: post-service
+      component: consumer
+  template:
+    metadata:
+      labels:
+        app: post-service
+        component: consumer
+    spec:
+      serviceAccountName: post-service-sa
+      containers:
+      - name: post-consumer
+        image: alphaxad9/post_service:0.0.5
+        imagePullPolicy: IfNotPresent
+        command: ["./bin/kafka-consumer"]
+        envFrom:
+        - configMapRef:
+            name: post-config
+        - secretRef:
+            name: post-secrets
+        - secretRef:
+            name: postgres-credentials
+        - secretRef:
+            name: kafka-credentials
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SERVICE_COMPONENT
+          value: "kafka-consumer"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
