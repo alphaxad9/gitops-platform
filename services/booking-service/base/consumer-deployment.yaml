@@ -56,17 +56,6 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "250m"
-        volumeMounts:
-        - name: keys
-          mountPath: /app/keys
-          readOnly: true
-      volumes:
-      - name: keys
-        secret:
-          secretName: booking-secrets
-          items:
-          - key: SIGNING_KEY
-            path: private.pem
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
