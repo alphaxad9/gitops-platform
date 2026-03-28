@@ -1,101 +1,202 @@
-(ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl exec -n infrastructure -it rabbitmq-0 -- bash
-rabbitmq-0:/# rabbitmqctl add_user ishimwe GA4xdr2K1hbUdJgB1DOJXsUOq0WK6koXZy3M9ATy7Ec=
-Adding user "ishimwe" ...
-Done. Don't forget to grant the user permissions to some virtual hosts! See 'rabbitmqctl help set_permissions' to learn more.
-rabbitmq-0:/# rabbitmqctl set_permissions -p microservice_one ishimwe ".*" ".*" ".*"
-Setting permissions for user "ishimwe" in vhost "microservice_one" ...
-rabbitmq-0:/# rabbitmqctl list_users
-Listing users ...
-user	tags
-guest	[administrator]
-ishimwe	[]
-rabbitmq-0:/# rabbitmqctl list_vhosts
-Listing vhosts ...
-name
-microservice_one
-rabbitmq-0:/# exit
-exit
-ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ 
-
-)(ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ # 1. Port forward to RabbitMQ management UI
-kubectl port-forward -n infrastructure rabbitmq-0 15672:15672
-
-# In another terminal, check if the user 'ishimwe' exists
-# Or check via API
-curl -u guest:guest http://localhost:15672/api/users
-
-# 2. Check the RabbitMQ logs to see why authentication is failing
-kubectl logs -n infrastructure rabbitmq-0 --tail=100 | grep -i "auth\|ishimwe"
-
-# 3. Check if the vhost 'microservice_one' exists
-kubectl exec -n infrastructure rabbitmq-0 -- rabbitmqctl list_vhosts
-Unable to listen on port 15672: Listeners failed to create with the following errors: [unable to create listener: Error listen tcp4 127.0.0.1:15672: bind: address already in use unable to create listener: Error listen tcp6 [::1]:15672: bind: address already in use]
-error: unable to listen on any of the requested ports: [{15672 15672}]
-[{"hashing_algorithm":"rabbit_password_hashing_sha256","limits":{},"name":"guest","password_hash":"fYI55iiBRjWXDklX+ppHYEkmxIBnz5FVEnHzI7uUY8tWjrdY","tags":["administrator"]},{"hashing_algorithm":"rabbit_password_hashing_sha256","limits":{},"name":"ishimwe","password_hash":"Yju48mJS5GVj0liRSFNc9i2SYS16iUCNtj7eHIgl3DLd1CGG","tags":["administrator"]}]2026-03-28 11:10:58.216277+00:00 [error] <0.4124.0> PLAIN login refused: user 'ishimwe' - invalid credentials
-2026-03-28 11:11:03.240275+00:00 [debug] <0.4131.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:03.240408+00:00 [debug] <0.4131.0> User 'ishimwe' failed authentication by backend rabbit_auth_backend_internal
-2026-03-28 11:11:03.240733+00:00 [error] <0.4131.0> PLAIN login refused: user 'ishimwe' - invalid credentials
-2026-03-28 11:11:08.269236+00:00 [debug] <0.4136.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:08.269432+00:00 [debug] <0.4136.0> User 'ishimwe' failed authentication by backend rabbit_auth_backend_internal
-2026-03-28 11:11:08.269766+00:00 [error] <0.4136.0> PLAIN login refused: user 'ishimwe' - invalid credentials
-2026-03-28 11:11:13.363611+00:00 [debug] <0.4141.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:13.363814+00:00 [debug] <0.4141.0> User 'ishimwe' failed authentication by backend rabbit_auth_backend_internal
-2026-03-28 11:11:13.364200+00:00 [error] <0.4141.0> PLAIN login refused: user 'ishimwe' - invalid credentials
-2026-03-28 11:11:18.384138+00:00 [debug] <0.4146.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:18.384260+00:00 [debug] <0.4146.0> User 'ishimwe' failed authentication by backend rabbit_auth_backend_internal
-2026-03-28 11:11:18.384525+00:00 [error] <0.4146.0> PLAIN login refused: user 'ishimwe' - invalid credentials
-2026-03-28 11:11:23.406062+00:00 [debug] <0.4151.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:23.406198+00:00 [debug] <0.4151.0> User 'ishimwe' failed authentication by backend rabbit_auth_backend_internal
-2026-03-28 11:11:23.406479+00:00 [error] <0.4151.0> PLAIN login refused: user 'ishimwe' - invalid credentials
-2026-03-28 11:11:28.425563+00:00 [debug] <0.4156.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:28.425737+00:00 [debug] <0.4156.0> User 'ishimwe' failed authentication by backend rabbit_auth_backend_internal
-2026-03-28 11:11:28.426340+00:00 [error] <0.4156.0> PLAIN login refused: user 'ishimwe' - invalid credentials
-2026-03-28 11:11:33.443509+00:00 [debug] <0.4161.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:33.443624+00:00 [debug] <0.4161.0> User 'ishimwe' failed authentication by backend rabbit_auth_backend_internal
-2026-03-28 11:11:33.443879+00:00 [error] <0.4161.0> PLAIN login refused: user 'ishimwe' - invalid credentials
-2026-03-28 11:11:38.461104+00:00 [debug] <0.4166.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:38.461231+00:00 [debug] <0.4166.0> User 'ishimwe' failed authentication by backend rabbit_auth_backend_internal
-2026-03-28 11:11:38.461504+00:00 [error] <0.4166.0> PLAIN login refused: user 'ishimwe' - invalid credentials
-2026-03-28 11:11:43.493689+00:00 [debug] <0.4171.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:43.493857+00:00 [debug] <0.4171.0> User 'ishimwe' failed authentication by backend rabbit_auth_backend_internal
-2026-03-28 11:11:43.494199+00:00 [error] <0.4171.0> PLAIN login refused: user 'ishimwe' - invalid credentials
-2026-03-28 11:11:48.594191+00:00 [debug] <0.4176.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:48.594853+00:00 [debug] <0.4176.0> User 'ishimwe' failed authentication by backend rabbit_auth_backend_internal
-2026-03-28 11:11:48.595205+00:00 [error] <0.4176.0> PLAIN login refused: user 'ishimwe' - invalid credentials
-2026-03-28 11:11:52.296021+00:00 [debug] <0.4184.0> Asked to create a new user 'ishimwe', password length in bytes: 352
-2026-03-28 11:11:52.319092+00:00 [info] <0.4184.0> Created user 'ishimwe'
-2026-03-28 11:11:53.617992+00:00 [debug] <0.4191.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:53.618167+00:00 [debug] <0.4191.0> User 'ishimwe' authenticated successfully by backend rabbit_auth_backend_internal
-2026-03-28 11:11:53.620526+00:00 [error] <0.4191.0> Error on AMQP connection <0.4191.0> (10.244.0.43:48284 -> 10.244.0.25:5672, user: 'ishimwe', state: opening):
-2026-03-28 11:11:53.620526+00:00 [error] <0.4191.0> access to vhost 'microservice_one' refused for user 'ishimwe'
-2026-03-28 11:11:53.624853+00:00 [info] <0.4191.0> closing AMQP connection <0.4191.0> (10.244.0.43:48284 -> 10.244.0.25:5672, vhost: 'none', user: 'ishimwe')
-2026-03-28 11:11:58.639509+00:00 [debug] <0.4200.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:11:58.639649+00:00 [debug] <0.4200.0> User 'ishimwe' authenticated successfully by backend rabbit_auth_backend_internal
-2026-03-28 11:11:58.641227+00:00 [error] <0.4200.0> Error on AMQP connection <0.4200.0> (10.244.0.43:54072 -> 10.244.0.25:5672, user: 'ishimwe', state: opening):
-2026-03-28 11:11:58.641227+00:00 [error] <0.4200.0> access to vhost 'microservice_one' refused for user 'ishimwe'
-2026-03-28 11:11:58.644377+00:00 [info] <0.4200.0> closing AMQP connection <0.4200.0> (10.244.0.43:54072 -> 10.244.0.25:5672, vhost: 'none', user: 'ishimwe')
-2026-03-28 11:12:03.660495+00:00 [debug] <0.4208.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:12:03.660629+00:00 [debug] <0.4208.0> User 'ishimwe' authenticated successfully by backend rabbit_auth_backend_internal
-2026-03-28 11:12:03.662590+00:00 [error] <0.4208.0> Error on AMQP connection <0.4208.0> (10.244.0.43:54076 -> 10.244.0.25:5672, user: 'ishimwe', state: opening):
-2026-03-28 11:12:03.662590+00:00 [error] <0.4208.0> access to vhost 'microservice_one' refused for user 'ishimwe'
-2026-03-28 11:12:03.667592+00:00 [info] <0.4208.0> closing AMQP connection <0.4208.0> (10.244.0.43:54076 -> 10.244.0.25:5672, vhost: 'none', user: 'ishimwe')
-2026-03-28 11:12:08.695060+00:00 [debug] <0.4216.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:12:08.695229+00:00 [debug] <0.4216.0> User 'ishimwe' authenticated successfully by backend rabbit_auth_backend_internal
-2026-03-28 11:12:08.758345+00:00 [error] <0.4216.0> Error on AMQP connection <0.4216.0> (10.244.0.43:33156 -> 10.244.0.25:5672, user: 'ishimwe', state: opening):
-2026-03-28 11:12:08.758345+00:00 [error] <0.4216.0> access to vhost 'microservice_one' refused for user 'ishimwe'
-2026-03-28 11:12:08.790767+00:00 [info] <0.4216.0> closing AMQP connection <0.4216.0> (10.244.0.43:33156 -> 10.244.0.25:5672, vhost: 'none', user: 'ishimwe')
-2026-03-28 11:12:13.794191+00:00 [debug] <0.4224.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:12:13.794345+00:00 [debug] <0.4224.0> User 'ishimwe' authenticated successfully by backend rabbit_auth_backend_internal
-2026-03-28 11:12:13.796844+00:00 [error] <0.4224.0> Error on AMQP connection <0.4224.0> (10.244.0.43:33160 -> 10.244.0.25:5672, user: 'ishimwe', state: opening):
-2026-03-28 11:12:13.796844+00:00 [error] <0.4224.0> access to vhost 'microservice_one' refused for user 'ishimwe'
-2026-03-28 11:12:13.800325+00:00 [info] <0.4224.0> closing AMQP connection <0.4224.0> (10.244.0.43:33160 -> 10.244.0.25:5672, vhost: 'none', user: 'ishimwe')
-2026-03-28 11:12:18.595876+00:00 [debug] <0.4235.0> Asked to set permissions for user 'ishimwe' in virtual host 'microservice_one' to '.*', '.*', '.*'
-2026-03-28 11:12:18.602568+00:00 [info] <0.4235.0> Successfully set permissions for user 'ishimwe' in virtual host 'microservice_one' to '.*', '.*', '.*'
-2026-03-28 11:12:18.894539+00:00 [debug] <0.4239.0> Client address during authN phase: {0,0,0,0,0,65535,2804,25}
-2026-03-28 11:12:18.894770+00:00 [debug] <0.4239.0> User 'ishimwe' authenticated successfully by backend rabbit_auth_backend_internal
-2026-03-28 11:12:18.897284+00:00 [info] <0.4239.0> connection <0.4239.0> (10.244.0.43:38316 -> 10.244.0.25:5672): user 'ishimwe' authenticated and granted access to vhost 'microservice_one'
-Listing vhosts ...
-name
-microservice_one
-ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ 
-)
+so these are the exact files (# services/post-service/base/api-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: post-api
+  labels:
+    app: post-service
+    component: api
+    managed-by: gitops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: post-service
+      component: api
+  template:
+    metadata:
+      labels:
+        app: post-service
+        component: api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: post-service-sa
+      containers:
+      - name: post-api
+        image: alphaxad9/post_service:0.0.5
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+        envFrom:
+        - configMapRef:
+            name: post-config
+        - secretRef:
+            name: post-secrets
+        - secretRef:
+            name: postgres-credentials
+        - secretRef:
+            name: kafka-credentials
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health/  
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/   (was /ready)
+            port: http
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        startupProbe:
+          httpGet:
+            path: /health/  
+            port: http
+          failureThreshold: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001)(# services/post-service/base/producer-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: post-producer
+  labels:
+    app: post-service
+    component: producer
+    managed-by: gitops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: post-service
+      component: producer
+  template:
+    metadata:
+      labels:
+        app: post-service
+        component: producer
+    spec:
+      serviceAccountName: post-service-sa
+      containers:
+      - name: post-producer
+        image: alphaxad9/post_service:0.0.5
+        imagePullPolicy: IfNotPresent
+        command: ["/app/outbox-publisher"]  
+        envFrom:
+        - configMapRef:
+            name: post-config
+        - secretRef:
+            name: post-secrets
+        - secretRef:
+            name: postgres-credentials
+        - secretRef:
+            name: kafka-credentials
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SERVICE_COMPONENT
+          value: "kafka-producer"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001)(# services/post-service/base/consumer-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: post-consumer
+  labels:
+    app: post-service
+    component: consumer
+    managed-by: gitops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: post-service
+      component: consumer
+  template:
+    metadata:
+      labels:
+        app: post-service
+        component: consumer
+    spec:
+      serviceAccountName: post-service-sa
+      containers:
+      - name: post-consumer
+        image: alphaxad9/post_service:0.0.5
+        imagePullPolicy: IfNotPresent
+        command: ["/app/kafka-consumer"]
+        envFrom:
+        - configMapRef:
+            name: post-config
+        - secretRef:
+            name: post-secrets
+        - secretRef:
+            name: postgres-credentials
+        - secretRef:
+            name: kafka-credentials
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SERVICE_COMPONENT
+          value: "kafka-consumer"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001)

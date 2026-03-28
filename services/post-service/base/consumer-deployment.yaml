@@ -24,7 +24,7 @@ spec:
       - name: post-consumer
         image: alphaxad9/post_service:0.0.5
         imagePullPolicy: IfNotPresent
-        command: ["./bin/kafka-consumer"]
+        command: ["/app/kafka-consumer"]
         envFrom:
         - configMapRef:
             name: post-config
@@ -54,6 +54,6 @@ spec:
             cpu: "250m"
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
