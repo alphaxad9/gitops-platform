@@ -1,20 +1,31 @@
+# services/wallet-service/base/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 namespace: wallet-service
 
-# 👇 Disable hash suffix so ConfigMap name stays "wallet-config"
 generatorOptions:
   disableNameSuffixHash: true
 
 resources:
-  - ../../base/service-template
-  - wallet-secrets.yaml
+  # Deployments
+  - api-deployment.yaml
+  - rabbitmq-consumer-deployment.yaml
+  - producer-deployment.yaml
+  
+  # Service (only for API)
+  - service.yaml
+  
+  # PVCs (only for API)
+  - pvc.yaml
+  
+  # Security & Credentials
   - wallet-sa.yaml
+  - wallet-secrets.yaml
   - postgres-credentials.yaml
-  - rabbitmq-credentials.yaml   
+  - rabbitmq-credentials.yaml  
   - kafka-credentials.yaml      
-  - redis-credentials.yaml   
+  - redis-credentials.yaml
 
 configMapGenerator:
   - name: wallet-config
@@ -42,93 +53,30 @@ configMapGenerator:
       - CHANNEL_LAYER_HOSTS=redis.infrastructure.svc.cluster.local:6379
       - CHANNEL_LAYER_CAPACITY=1000
       - CHANNEL_LAYER_EXPIRY=10
-      - CORS_ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
-      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,https://yourdomain.com
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
       - CORS_ALLOW_CREDENTIALS=True
+      - DJANGO_SECRET_KEY=your-secret-key-here-change-in-production
+      - DJANGO_DEBUG=False
+      - DJANGO_LANGUAGE_CODE=en-us
+      - DJANGO_TIME_ZONE=UTC
+      - REDIS_DB=0
+      - REDIS_SOCKET_TIMEOUT=2
+      - REDIS_CONNECT_TIMEOUT=2
+      - REDIS_RETRY_ON_TIMEOUT=true
+      - REDIS_PASSWORD=
+      - REDIS_PORT=6379
       - JWT_SECRET=my_jwt_secret_123!
 
 images:
-  - name: placeholder
-    newName: alphaxad9/wallet_service
+  - name: alphaxad9/wallet_service
     newTag: "0.0.6"
 
 patches:
-  # ✅ Patch postgres-credentials with POSTGRES_* keys
-  - target:
-      kind: Secret
-      name: postgres-credentials
-    patch: |-
-      - op: replace
-        path: /stringData/POSTGRES_DB
-        value: walletdb
-      - op: replace
-        path: /stringData/POSTGRES_USER
-        value: ishimwe
-      - op: replace
-        path: /stringData/POSTGRES_PASSWORD
-        value: "2025New+"
-      - op: replace
-        path: /stringData/DB_NAME
-        value: walletdb
-      - op: replace
-        path: /stringData/DB_USER
-        value: ishimwe
-      - op: replace
-        path: /stringData/DB_PASSWORD
-        value: "2025New+"
-
-  # Patch deployment name and all references
+  # Add Host header to API probes only
   - target:
       kind: Deployment
-      name: service-placeholder
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: wallet-service
-      - op: replace
-        path: /metadata/labels/app
-        value: wallet-service
-      - op: replace
-        path: /metadata/labels/service
-        value: wallet-service
-      - op: replace
-        path: /spec/selector/matchLabels/app
-        value: wallet-service
-      - op: replace
-        path: /spec/template/metadata/labels/app
-        value: wallet-service
-      - op: replace
-        path: /spec/template/metadata/labels/service
-        value: wallet-service
-      - op: replace
-        path: /spec/template/spec/serviceAccountName
-        value: wallet-service-sa
-      - op: replace
-        path: /spec/template/spec/containers/0/name
-        value: wallet-service
-      - op: replace
-        path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
-        value: wallet-config
-      - op: replace
-        path: /spec/template/spec/containers/0/envFrom/1/secretRef/name
-        value: wallet-secrets
-
-  # ADD securityContext to fix volume permissions
-  - target:
-      kind: Deployment
-      name: wallet-service
-    patch: |-
-      - op: add
-        path: /spec/template/spec/securityContext
-        value:
-          runAsUser: 1000
-          runAsGroup: 1000
-          fsGroup: 1000
-
-  # ADD Host header to all probes (PRODUCTION FIX)
-  - target:
-      kind: Deployment
-      name: wallet-service
+      name: wallet-api
     patch: |-
       - op: add
         path: /spec/template/spec/containers/0/livenessProbe/httpGet/httpHeaders
@@ -145,34 +93,3 @@ patches:
         value:
           - name: Host
             value: wallet-service
-
-  # Patch service name and labels
-  - target:
-      kind: Service
-      name: service-placeholder-service
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: wallet-service
-      - op: replace
-        path: /metadata/labels/app
-        value: wallet-service
-      - op: replace
-        path: /spec/selector/app
-        value: wallet-service
-
-  # Patch PVC names
-  - target:
-      kind: PersistentVolumeClaim
-      name: service-placeholder-static-pvc
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: wallet-service-static-pvc
-  - target:
-      kind: PersistentVolumeClaim
-      name: service-placeholder-media-pvc
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: wallet-service-media-pvc
