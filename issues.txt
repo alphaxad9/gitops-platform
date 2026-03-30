@@ -71,4 +71,678 @@ HOME=/home/appuser
 ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ 
 ) you can see that i have //localhost:3000,http://127.0.0.1:3000,http://localhost:8080
 , my i still see (Access to XMLHttpRequest at 'http://localhost:8080/api/v1/users/cd935898-386b-44c8-9391-0db94f629814/posts?limit=10&offset=0' from origin 'http://127.0.0.1:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
-) and i have 
+) and i have (package config
+
+import (
+	"log"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+
+	"github.com/joho/godotenv"
+)
+
+type Config struct {
+	// Database
+	PostgresHost     string
+	PostgresPort     int
+	PostgresDB       string
+	PostgresUser     string
+	PostgresPassword string
+
+	// Kafka
+	KafkaBrokers          []string
+	KafkaTopic            string
+	KafkaGroupID          string
+	KafkaSecurityProtocol string
+	KafkaEnableAutoCommit bool
+	KafkaAutoOffsetReset  string
+	KafkaRetries          int
+	KafkaPollTimeout      float64
+
+	// Auth & Security
+	JWTSecret        string
+	AuthPublicKeyURL string
+	AuthPublicKeyTTL int
+	AuthServiceURL   string
+	InternalAPIKey   string
+
+	// Server
+	FrontendURLs []string
+	Port         string
+	GinMode      string
+}
+
+func Load() *Config {
+	loadEnvFile()
+
+	return &Config{
+		// Database
+		PostgresHost:     getEnv("POSTGRES_HOST", "localhost"),
+		PostgresPort:     getEnvAsInt("POSTGRES_PORT", 5432),
+		PostgresDB:       getEnv("POSTGRES_DB", ""),
+		PostgresUser:     getEnv("POSTGRES_USER", ""),
+		PostgresPassword: getEnv("POSTGRES_PASSWORD", ""),
+
+		// Kafka
+		KafkaBrokers:          getEnvAsSlice("KAFKA_BROKERS", []string{"localhost:9092"}),
+		KafkaTopic:            getEnv("KAFKA_TOPIC", ""),
+		KafkaGroupID:          getEnv("KAFKA_GROUP_ID", ""),
+		KafkaSecurityProtocol: getEnv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT"),
+		KafkaEnableAutoCommit: getEnvAsBool("KAFKA_ENABLE_AUTO_COMMIT", false),
+		KafkaAutoOffsetReset:  getEnv("KAFKA_AUTO_OFFSET_RESET", "earliest"),
+		KafkaRetries:          getEnvAsInt("KAFKA_RETRIES", 5),
+		KafkaPollTimeout:      getEnvAsFloat("KAFKA_POLL_TIMEOUT", 1.0),
+
+		// Auth & Security
+		JWTSecret:        getEnv("JWT_SECRET", ""),
+		AuthPublicKeyURL: getEnv("AUTH_PUBLIC_KEY_URL", ""),
+		AuthPublicKeyTTL: getEnvAsInt("AUTH_PUBLIC_KEY_TTL", 300),
+		AuthServiceURL:   getEnv("AUTH_SERVICE_URL", ""),
+		InternalAPIKey:   getEnv("INTERNAL_API_KEY", ""),
+
+		// Server
+		FrontendURLs: getEnvAsSlice("FRONTEND_URL", []string{"http://localhost:3000"}),
+		Port:         getEnv("PORT", "8080"),
+		GinMode:      getEnv("GIN_MODE", "debug"),
+	}
+}
+
+func loadEnvFile() {
+	// Check if running in Kubernetes
+	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
+		log.Println("ℹ️ Running inside Kubernetes, skipping .env loading")
+		return
+	}
+
+	// Try current working directory
+	if err := godotenv.Load(); err == nil {
+		log.Println("✅ .env loaded from working directory")
+		return
+	}
+
+	// Try project root (walk up directories)
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Println("⚠️  Could not determine working directory")
+		return
+	}
+
+	for i := 0; i < 5; i++ {
+		envPath := filepath.Join(dir, ".env")
+		if _, err := os.Stat(envPath); err == nil {
+			if err := godotenv.Load(envPath); err == nil {
+				log.Printf("✅ .env loaded from: %s", envPath)
+				return
+			}
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+
+	log.Println("ℹ️ No .env file found, using system environment variables")
+}
+
+// Helper: Get string env var with default
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	if defaultValue != "" {
+		log.Printf("⚠️  Environment variable %s not set, using default", key)
+		return defaultValue
+	}
+	log.Printf("❌ Environment variable %s is required but not set", key)
+	return ""
+}
+
+// Helper: Get int env var with default
+func getEnvAsInt(key string, defaultValue int) int {
+	valueStr := os.Getenv(key)
+	if valueStr == "" {
+		return defaultValue
+	}
+
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		log.Printf("⚠️  Invalid integer for %s: %s, using default: %d", key, valueStr, defaultValue)
+		return defaultValue
+	}
+	return value
+}
+
+// Helper: Get float env var with default
+func getEnvAsFloat(key string, defaultValue float64) float64 {
+	valueStr := os.Getenv(key)
+	if valueStr == "" {
+		return defaultValue
+	}
+
+	value, err := strconv.ParseFloat(valueStr, 64)
+	if err != nil {
+		log.Printf("⚠️  Invalid float for %s: %s, using default: %f", key, valueStr, defaultValue)
+		return defaultValue
+	}
+	return value
+}
+
+// Helper: Get bool env var with default
+func getEnvAsBool(key string, defaultValue bool) bool {
+	valueStr := os.Getenv(key)
+	if valueStr == "" {
+		return defaultValue
+	}
+
+	value, err := strconv.ParseBool(valueStr)
+	if err != nil {
+		log.Printf("⚠️  Invalid boolean for %s: %s, using default: %t", key, valueStr, defaultValue)
+		return defaultValue
+	}
+	return value
+}
+
+// Helper: Get slice env var (comma-separated)
+func getEnvAsSlice(key string, defaultValue []string) []string {
+	valueStr := os.Getenv(key)
+	if valueStr == "" {
+		return defaultValue
+	}
+
+	// Split by comma and trim spaces
+	parts := strings.Split(valueStr, ",")
+	for i, part := range parts {
+		parts[i] = strings.TrimSpace(part)
+	}
+	return parts
+}
+
+// Validate required config (call after Load())
+func (c *Config) Validate() error {
+	required := map[string]string{
+		"POSTGRES_DB":         c.PostgresDB,
+		"POSTGRES_USER":       c.PostgresUser,
+		"POSTGRES_PASSWORD":   c.PostgresPassword,
+		"JWT_SECRET":          c.JWTSecret,
+		"KAFKA_TOPIC":         c.KafkaTopic,
+		"KAFKA_GROUP_ID":      c.KafkaGroupID,
+		"AUTH_PUBLIC_KEY_URL": c.AuthPublicKeyURL,
+		"AUTH_SERVICE_URL":    c.AuthServiceURL,
+		"INTERNAL_API_KEY":    c.InternalAPIKey,
+	}
+
+	missing := []string{}
+	for key, value := range required {
+		if value == "" {
+			missing = append(missing, key)
+		}
+	}
+
+	if len(missing) > 0 {
+		return &MissingConfigError{Missing: missing}
+	}
+
+	return nil
+}
+
+type MissingConfigError struct {
+	Missing []string
+}
+
+func (e *MissingConfigError) Error() string {
+	return "missing required environment variables: " + strings.Join(e.Missing, ", ")
+}
+) good news is that the problem of env is solved see (ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl logs post-api-594dcbdcd4-ss2h8 -n post-service
+2026/03/30 11:46:09 ℹ️ Running inside Kubernetes, skipping .env loading
+2026/03/30 11:46:09 Connected to PostgreSQL successfully
+2026/03/30 11:46:09 Posts table and indexes created successfully
+2026/03/30 11:46:09 Event outbox table and indexes created successfully
+2026/03/30 11:46:09 All database tables created successfully
+2026/03/30 11:46:09 Post event handlers registered successfully
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+) , now how can i solve the problem of cors-, and locally it works, this is what happens (ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/my-go-backend$ go run post_service/cmd/internal/main.go 
+2026/03/30 14:14:48 ✅ .env loaded from working directory
+2026/03/30 14:14:48 Connected to PostgreSQL successfully
+2026/03/30 14:14:48 Posts table and indexes created successfully
+2026/03/30 14:14:48 Event outbox table and indexes created successfully
+2026/03/30 14:14:48 All database tables created successfully
+2026/03/30 14:14:48 Post event handlers registered successfully
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:   export GIN_MODE=release
+ - using code:  gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/                  --> github.com/alphaxad9/my-go-backend/post_service/internal/http.SetupRouter.func1 (4 handlers)
+[GIN-debug] GET    /api/v1/auth/ping         --> github.com/alphaxad9/my-go-backend/post_service/internal/http.SetupRouter.func2 (4 handlers)
+[GIN-debug] GET    /api/v1/auth/test         --> github.com/alphaxad9/my-go-backend/post_service/internal/http.SetupRouter.func3 (5 handlers)
+[GIN-debug] GET    /api/v1/posts/:id         --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).GetPost-fm (4 handlers)
+[GIN-debug] GET    /api/v1/posts/search      --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).SearchPosts-fm (4 handlers)
+[GIN-debug] GET    /api/v1/users/:userId/posts --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).GetPostsByAuthor-fm (4 handlers)
+[GIN-debug] GET    /api/v1/communities/:communityId/posts --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).GetPostsByCommunity-fm (4 handlers)
+[GIN-debug] POST   /api/v1/posts             --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).CreatePost-fm (5 handlers)
+[GIN-debug] PUT    /api/v1/posts/:id         --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).UpdatePost-fm (5 handlers)
+[GIN-debug] PATCH  /api/v1/posts/:id/visibility --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).TogglePostVisibility-fm (5 handlers)
+[GIN-debug] POST   /api/v1/posts/:id/like    --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).LikePost-fm (5 handlers)
+[GIN-debug] POST   /api/v1/posts/:id/unlike  --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).UnlikePost-fm (5 handlers)
+[GIN-debug] POST   /api/v1/posts/:id/comment --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).AddCommentToPost-fm (5 handlers)
+[GIN-debug] DELETE /api/v1/posts/:id/comment --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).RemoveCommentFromPost-fm (5 handlers)
+[GIN-debug] DELETE /api/v1/posts/:id         --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).DeletePost-fm (5 handlers)
+2026/03/30 14:14:48 Post service starting on port 8080 in debug mode...
+[GIN] 2026/03/30 - 14:14:54 | 200 |   43.429791ms |             ::1 | GET      "/api/v1/users/cd935898-386b-44c8-9391-0db94f629814/posts?limit=10&offset=0"
+^C2026/03/30 14:15:07 Shutting down server...) you see it can send data the frontend, and it had # Kafka
+KAFKA_BROKERS=localhost:9092,localhost:9093
+KAFKA_TOPIC=microservice_one.events
+KAFKA_GROUP_ID=post_service_outbox_publisher
+KAFKA_SECURITY_PROTOCOL=PLAINTEXT
+KAFKA_ENABLE_AUTO_COMMIT=false
+KAFKA_AUTO_OFFSET_RESET=earliest
+KAFKA_RETRIES=5
+KAFKA_POLL_TIMEOUT=1.0
+
+
+
+# # Then:
+# go mod tidy
+# go build -o outbox-publisher ./cmd/outbox-publisher
+# ./outbox-publisher
+
+
+GIN_MODE=debug #release
+
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=postgresgo1
+POSTGRES_USER=ishimwe
+POSTGRES_PASSWORD=2025New+
+JWT_SECRET=my_jwt_secret_123!
+FRONTEND_URL=http://localhost:3000,https://yourdomain.com,http://127.0.0.1:3000
+PORT=8080
+
+AUTH_PUBLIC_KEY_URL=http://127.0.0.1:8000/zedvye_one/users/public_key/
+AUTH_SERVICE_URL=http://127.0.0.1:8000/zedvye_one
+AUTH_PUBLIC_KEY_TTL=300
+INTERNAL_API_KEY=super-secret-internal-key-change-in-prod
+so what is the solution, solution (Alright — this is a **classic Kubernetes + CORS trap**, and your setup is actually exposing the exact root cause very clearly.
+
+Let’s go straight to it.
+
+---
+
+# 🚨 The REAL problem (not what you think)
+
+Your browser says:
+
+```
+No 'Access-Control-Allow-Origin' header is present
+```
+
+👉 That does **NOT always mean CORS is misconfigured**
+
+It often means:
+
+> ❌ Your request never reached your handler
+> ❌ OR it crashed / got rejected before CORS middleware ran
+
+---
+
+# 🧠 Key difference: Local vs Kubernetes
+
+### ✅ Local
+
+* Backend runs directly
+* Requests go straight to Gin
+* CORS middleware runs → headers added → works
+
+### ❌ Kubernetes
+
+You are doing:
+
+```
+Frontend (127.0.0.1:3000)
+→ localhost:8080 (port-forward)
+→ Pod
+```
+
+BUT…
+
+👉 Something inside the request chain is breaking **before CORS attaches headers**
+
+---
+
+# 🔍 The smoking gun in YOUR setup
+
+This part:
+
+```env
+FRONTEND_URL=http://localhost:3000
+```
+
+But your browser request is from:
+
+```
+http://127.0.0.1:3000
+```
+
+---
+
+# ⚠️ Why this breaks CORS
+
+CORS is **string EXACT match**, not “close enough”.
+
+So:
+
+| Origin                                         | Allowed?           |
+| ---------------------------------------------- | ------------------ |
+| [http://localhost:3000](http://localhost:3000) | ✅                  |
+| [http://127.0.0.1:3000](http://127.0.0.1:3000) | ❌ DIFFERENT ORIGIN |
+
+Even though they look similar — they are NOT the same.
+
+---
+
+# 🔥 BUT WAIT — you said you included both?
+
+You have:
+
+```env
+FRONTEND_URL=http://localhost:3000
+```
+
+👉 In Kubernetes (from your env dump):
+
+```
+FRONTEND_URL=http://localhost:3000
+```
+
+🚨 You are **missing**:
+
+```
+http://127.0.0.1:3000
+```
+
+---
+
+# ✅ SOLUTION 1 (immediate fix)
+
+Update your ConfigMap / Helm values:
+
+```env
+FRONTEND_URL=http://localhost:3000,http://127.0.0.1:3000
+```
+
+Then:
+
+```bash
+kubectl rollout restart deployment post-api -n post-service
+```
+
+---
+
+# 🧠 But there's a SECOND hidden issue (important)
+
+Your error:
+
+```
+No 'Access-Control-Allow-Origin' header
+```
+
+👉 also happens if:
+
+* request fails (500, 401, 404)
+* middleware doesn't execute
+
+---
+
+# 🔥 VERY LIKELY issue in your case
+
+This endpoint:
+
+```
+/api/v1/users/:userId/posts
+```
+
+👉 might be failing internally in Kubernetes
+
+Why?
+
+### This line:
+
+```env
+AUTH_SERVICE_URL=http://auth-service:8000/zedvye_one
+```
+
+If:
+
+* auth-service is unreachable
+* JWT verification fails
+* middleware rejects request
+
+👉 response is returned **without CORS headers**
+
+---
+
+# ✅ SOLUTION 2 (debug like a pro)
+
+Run this:
+
+```bash
+kubectl logs -f post-api-594dcbdcd4-ss2h8 -n post-service
+```
+
+Then hit the endpoint again.
+
+👉 Look for:
+
+* 401
+* 500
+* timeout errors
+* auth failures
+
+---
+
+# 🧪 SOLUTION 3 (force CORS to always apply)
+
+Your middleware is correct, BUT let’s harden it:
+
+### Update CORS config:
+
+```go
+return cors.New(cors.Config{
+    AllowOrigins:     frontendURLs,
+    AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+    AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+    ExposeHeaders:    []string{"Content-Length"},
+    AllowCredentials: true,
+    MaxAge:           12 * time.Hour,
+
+    // 🔥 ADD THIS
+    AllowWildcard: true,
+})
+```
+
+---
+
+# 🧪 BONUS: Quick sanity test
+
+Run this from your machine:
+
+```bash
+curl -i http://localhost:8080/api/v1/users/ID/posts
+```
+
+Check if headers include:
+
+```
+Access-Control-Allow-Origin
+```
+
+---
+
+# 🧠 Final Diagnosis (clean summary)
+
+You have **2 overlapping issues**:
+
+### 1️⃣ WRONG origin
+
+* Missing `127.0.0.1:3000` in Kubernetes env
+
+### 2️⃣ POSSIBLE backend rejection
+
+* Auth / internal failure prevents CORS headers
+
+---
+
+# 🧩 What I’d do (exact steps)
+
+1. Fix env:
+
+```env
+FRONTEND_URL=http://localhost:3000,http://127.0.0.1:3000
+```
+
+2. Restart deployment
+
+3. Watch logs while making request
+
+4. If still failing → debug endpoint (likely auth issue)
+
+---
+
+# 💬 Real talk
+
+You didn’t mess up — this is one of those:
+
+> “works locally, breaks in K8s, makes you question life” bugs 😄
+
+You actually structured things really well — this is just environment nuance.
+
+---
+
+If you want, next step we can:
+👉 trace the exact request lifecycle inside your pod
+👉 or test your auth middleware in isolation (very likely next bottleneck)
+
+Just tell me 👍
+) and i have # services/post-service/base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: post-service
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  # Deployments
+  - api-deployment.yaml
+  - consumer-deployment.yaml
+  - producer-deployment.yaml
+  
+  # Service (only for API)
+  - service.yaml
+  
+  # PVCs (if needed - Go services might not need static/media files)
+  # - pvc.yaml
+  
+  # Security & Credentials
+  - post-sa.yaml
+  - post-secrets.yaml
+  - postgres-credentials.yaml
+  - kafka-credentials.yaml
+
+configMapGenerator:
+  - name: post-config
+    literals:
+      - SERVICE_NAME=post
+      - DB_NAME=postgresgo1
+      - GIN_MODE=release
+      - PORT=8080
+      - FRONTEND_URL=http://localhost:3000
+      - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgresgo1
+      - POSTGRES_USER=ishimwe
+      - DB_HOST=postgres.infrastructure.svc.cluster.local
+      - DB_PORT=5432
+      - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
+      - KAFKA_TOPIC=microservice_one.events
+      - KAFKA_GROUP_ID=post_service_outbox_publisher
+      - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
+      - KAFKA_ENABLE_AUTO_COMMIT=false
+      - KAFKA_AUTO_OFFSET_RESET=earliest
+      - KAFKA_RETRIES=5
+      - KAFKA_POLL_TIMEOUT=1.0
+      - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
+      - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
+      - AUTH_PUBLIC_KEY_TTL=300
+      - LOG_LEVEL=INFO
+      - REDIS_HOST=redis.infrastructure.svc.cluster.local
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_SOCKET_TIMEOUT=2
+      - REDIS_CONNECT_TIMEOUT=2
+      - REDIS_RETRY_ON_TIMEOUT=true
+      - REDIS_PASSWORD=
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - CORS_ALLOW_CREDENTIALS=True
+
+images:
+  - name: alphaxad9/post_service
+    newTag: "0.0.6"
+
+patches:
+  # Add Host header to API probes only
+  - target:
+      kind: Deployment
+      name: post-api
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: post-service
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: post-service
+      - op: add
+        path: /spec/template/spec/containers/0/startupProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: post-service ,, apiVersion: v1
+kind: Secret
+metadata:
+  name: post-secrets
+  labels:
+    app: post
+    app.kubernetes.io/component: post-service
+type: Opaque
+stringData:
+  # JWT Secret for token verification
+  JWT_SECRET: "my_jwt_secret_123!"
+  
+  # Internal API Key for service-to-service communication
+  INTERNAL_API_KEY: "super-secret-internal-key-change-in-prod"
+  
+  # Auth Service Configuration
+  AUTH_PUBLIC_KEY_URL: "http://auth-service:8000/zedvye_one/users/public_key/"
+  AUTH_SERVICE_URL: "http://auth-service:8000/zedvye_one"
+  AUTH_PUBLIC_KEY_TTL: "300"
+  
+  # Server Configuration
+  GIN_MODE: "debug"
+  FRONTEND_URL: "http://localhost:3000"
+  PORT: "8080"
+  
+ what can i do
