@@ -64,7 +64,7 @@ configMapGenerator:
 
 images:
   - name: alphaxad9/post_service
-    newTag: "0.0.5"
+    newTag: "0.0.6"
 
 patches:
   # Add Host header to API probes only

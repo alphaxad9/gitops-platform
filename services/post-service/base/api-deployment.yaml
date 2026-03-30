@@ -26,7 +26,7 @@ spec:
       serviceAccountName: post-service-sa
       containers:
       - name: post-api
-        image: alphaxad9/post_service:0.0.5
+        image: alphaxad9/post_service:0.0.7
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

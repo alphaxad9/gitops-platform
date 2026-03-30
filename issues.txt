@@ -1,202 +1,630 @@
-so these are the exact files (# services/post-service/base/api-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
+problem ((ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six$ kubectl logs post-api-7dd577dbb9-xwlc5 -n post-service
+2026/03/28 14:26:50 ⚠️  No .env file found, using system environment variables
+2026/03/28 14:26:50 Connected to PostgreSQL successfully
+2026/03/28 14:26:50 Posts table and indexes created successfully
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/                  --> github.com/alphaxad9/my-go-backend/post_service/internal/http.SetupRouter.func1 (4 handlers)
+[GIN-debug] GET    /api/v1/auth/ping         --> github.com/alphaxad9/my-go-backend/post_service/internal/http.SetupRouter.func2 (4 handlers)
+[GIN-debug] GET    /api/v1/auth/test         --> github.com/alphaxad9/my-go-backend/post_service/internal/http.SetupRouter.func3 (5 handlers)
+[GIN-debug] GET    /api/v1/posts/:id         --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).GetPost-fm (4 handlers)
+[GIN-debug] GET    /api/v1/posts/search      --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).SearchPosts-fm (4 handlers)
+[GIN-debug] GET    /api/v1/users/:userId/posts --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).GetPostsByAuthor-fm (4 handlers)
+[GIN-debug] GET    /api/v1/communities/:communityId/posts --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).GetPostsByCommunity-fm (4 handlers)
+[GIN-debug] POST   /api/v1/posts             --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).CreatePost-fm (5 handlers)
+[GIN-debug] PUT    /api/v1/posts/:id         --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).UpdatePost-fm (5 handlers)
+[GIN-debug] PATCH  /api/v1/posts/:id/visibility --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).TogglePostVisibility-fm (5 handlers)
+[GIN-debug] POST   /api/v1/posts/:id/like    --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).LikePost-fm (5 handlers)
+[GIN-debug] POST   /api/v1/posts/:id/unlike  --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).UnlikePost-fm (5 handlers)
+[GIN-debug] POST   /api/v1/posts/:id/comment --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).AddCommentToPost-fm (5 handlers)
+[GIN-debug] DELETE /api/v1/posts/:id/comment --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).RemoveCommentFromPost-fm (5 handlers)
+[GIN-debug] DELETE /api/v1/posts/:id         --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).DeletePost-fm (5 handlers)
+2026/03/28 14:26:50 Event outbox table and indexes created successfully
+2026/03/28 14:26:50 All database tables created successfully
+2026/03/28 14:26:50 Post event handlers registered successfully
+2026/03/28 14:26:50 Post service starting on port 8080 in debug mode...
+[GIN] 2026/03/28 - 14:26:54 | 200 |     197.659µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:14 | 200 |     101.361µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:19 | 200 |     105.134µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:24 | 200 |     123.143µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:24 | 200 |      55.607µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:29 | 200 |      68.514µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:34 | 200 |      77.452µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:34 | 200 |      96.562µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:39 | 200 |      59.792µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:44 | 200 |     212.268µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:44 | 200 |      99.825µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:49 | 200 |      56.888µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:54 | 200 |     176.897µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:54 | 200 |      87.086µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:27:59 | 200 |      55.699µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:28:04 | 200 |      55.022µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:28:04 | 200 |      33.228µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:28:04 | 403 |     151.895µs |       127.0.0.1 | GET      "/api/v1/users/cd935898-386b-44c8-9391-0db94f629814/posts?limit=10&offset=0"
+[GIN] 2026/03/28 - 14:28:05 | 403 |      42.859µs |       127.0.0.1 | GET      "/api/v1/users/cd935898-386b-44c8-9391-0db94f629814/posts?limit=10&offset=0"
+[GIN] 2026/03/28 - 14:28:07 | 403 |      49.366µs |       127.0.0.1 | GET      "/api/v1/users/cd935898-386b-44c8-9391-0db94f629814/posts?limit=10&offset=0"
+[GIN] 2026/03/28 - 14:28:09 | 200 |      89.609µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:28:11 | 403 |       7.585µs |       127.0.0.1 | GET      "/api/v1/users/cd935898-386b-44c8-9391-0db94f629814/posts?limit=10&offset=0"
+[GIN] 2026/03/28 - 14:28:14 | 200 |      48.882µs |      10.244.0.1 | GET      "/health/"
+[GIN] 2026/03/28 - 14:28:14 | 200 |      48.833µs |      10.244.0.1 | GET      "/health/"
+)((index):1 Access to XMLHttpRequest at 'http://localhost:8080/api/v1/users/cd935898-386b-44c8-9391-0db94f629814/posts?limit=10&offset=0' from origin 'http://127.0.0.1:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+api.tsx:95 Fetch user posts failed: Network Error)(ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six$ kubectl get pods -n post-service
+NAME                             READY   STATUS    RESTARTS       AGE
+post-api-7dd577dbb9-xwlc5        1/1     Running   1 (105s ago)   4m1s
+post-consumer-5599fd85fc-hsg7w   1/1     Running   0              4m
+post-producer-555b7cbbd-8rh2j    1/1     Running   1 (105s ago)   4m
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six$ 
+) see this problem (2026/03/28 14:26:50 ⚠️  No .env file found, using system environment variables
+)(ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six$ # Check what environment variables are set in the ConfigMap
+kubectl get configmap post-config -n post-service -o yaml
+apiVersion: v1
+data:
+  AUTH_PUBLIC_KEY_TTL: "300"
+  AUTH_PUBLIC_KEY_URL: http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
+  AUTH_SERVICE_URL: http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
+  CORS_ALLOW_CREDENTIALS: "True"
+  CORS_ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080
+  CSRF_TRUSTED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080
+  DB_HOST: postgres.infrastructure.svc.cluster.local
+  DB_NAME: postgresgo1
+  DB_PORT: "5432"
+  FRONTEND_URL: http://localhost:3000
+  GIN_MODE: debug
+  KAFKA_AUTO_OFFSET_RESET: earliest
+  KAFKA_BROKERS: kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
+  KAFKA_ENABLE_AUTO_COMMIT: "false"
+  KAFKA_GROUP_ID: post_service_outbox_publisher
+  KAFKA_POLL_TIMEOUT: "1.0"
+  KAFKA_RETRIES: "5"
+  KAFKA_SECURITY_PROTOCOL: PLAINTEXT
+  KAFKA_TOPIC: microservice_one.events
+  LOG_LEVEL: DEBUG
+  PORT: "8080"
+  POSTGRES_DB: postgresgo1
+  POSTGRES_HOST: postgres.infrastructure.svc.cluster.local
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: ishimwe
+  REDIS_CONNECT_TIMEOUT: "2"
+  REDIS_DB: "0"
+  REDIS_HOST: redis.infrastructure.svc.cluster.local
+  REDIS_PASSWORD: ""
+  REDIS_PORT: "6379"
+  REDIS_RETRY_ON_TIMEOUT: "true"
+  REDIS_SOCKET_TIMEOUT: "2"
+  SERVICE_NAME: post
+kind: ConfigMap
 metadata:
-  name: post-api
+  annotations:
+    argocd.argoproj.io/tracking-id: post-service:/ConfigMap:post-service/post-config
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"AUTH_PUBLIC_KEY_TTL":"300","AUTH_PUBLIC_KEY_URL":"http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/","AUTH_SERVICE_URL":"http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/","CORS_ALLOWED_ORIGINS":"http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080","CORS_ALLOW_CREDENTIALS":"True","CSRF_TRUSTED_ORIGINS":"http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080","DB_HOST":"postgres.infrastructure.svc.cluster.local","DB_NAME":"postgresgo1","DB_PORT":"5432","FRONTEND_URL":"http://localhost:3000","GIN_MODE":"debug","KAFKA_AUTO_OFFSET_RESET":"earliest","KAFKA_BROKERS":"kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092","KAFKA_ENABLE_AUTO_COMMIT":"false","KAFKA_GROUP_ID":"post_service_outbox_publisher","KAFKA_POLL_TIMEOUT":"1.0","KAFKA_RETRIES":"5","KAFKA_SECURITY_PROTOCOL":"PLAINTEXT","KAFKA_TOPIC":"microservice_one.events","LOG_LEVEL":"DEBUG","PORT":"8080","POSTGRES_DB":"postgresgo1","POSTGRES_HOST":"postgres.infrastructure.svc.cluster.local","POSTGRES_PORT":"5432","POSTGRES_USER":"ishimwe","REDIS_CONNECT_TIMEOUT":"2","REDIS_DB":"0","REDIS_HOST":"redis.infrastructure.svc.cluster.local","REDIS_PASSWORD":"","REDIS_PORT":"6379","REDIS_RETRY_ON_TIMEOUT":"true","REDIS_SOCKET_TIMEOUT":"2","SERVICE_NAME":"post"},"kind":"ConfigMap","metadata":{"annotations":{},"labels":{"environment":"dev","managed-by":"gitops"},"name":"post-config","namespace":"post-service"}}
+  creationTimestamp: "2026-03-19T14:13:48Z"
   labels:
-    app: post-service
-    component: api
+    environment: dev
     managed-by: gitops
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: post-service
-      component: api
-  template:
-    metadata:
-      labels:
-        app: post-service
-        component: api
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
-        prometheus.io/path: "/metrics"
-    spec:
-      serviceAccountName: post-service-sa
-      containers:
-      - name: post-api
-        image: alphaxad9/post_service:0.0.5
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8080
-          name: http
-        envFrom:
-        - configMapRef:
-            name: post-config
-        - secretRef:
-            name: post-secrets
-        - secretRef:
-            name: postgres-credentials
-        - secretRef:
-            name: kafka-credentials
-        env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health/  
-            port: http
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        readinessProbe:
-          httpGet:
-            path: /health/   (was /ready)
-            port: http
-          initialDelaySeconds: 20
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 2
-        startupProbe:
-          httpGet:
-            path: /health/  
-            port: http
-          failureThreshold: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1001
-        runAsGroup: 1001
-        fsGroup: 1001)(# services/post-service/base/producer-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: post-producer
-  labels:
-    app: post-service
-    component: producer
-    managed-by: gitops
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: post-service
-      component: producer
-  template:
-    metadata:
-      labels:
-        app: post-service
-        component: producer
-    spec:
-      serviceAccountName: post-service-sa
-      containers:
-      - name: post-producer
-        image: alphaxad9/post_service:0.0.5
-        imagePullPolicy: IfNotPresent
-        command: ["/app/outbox-publisher"]  
-        envFrom:
-        - configMapRef:
-            name: post-config
-        - secretRef:
-            name: post-secrets
-        - secretRef:
-            name: postgres-credentials
-        - secretRef:
-            name: kafka-credentials
-        env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: SERVICE_COMPONENT
-          value: "kafka-producer"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "250m"
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1001
-        runAsGroup: 1001
-        fsGroup: 1001)(# services/post-service/base/consumer-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: post-consumer
-  labels:
-    app: post-service
-    component: consumer
-    managed-by: gitops
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: post-service
-      component: consumer
-  template:
-    metadata:
-      labels:
-        app: post-service
-        component: consumer
-    spec:
-      serviceAccountName: post-service-sa
-      containers:
-      - name: post-consumer
-        image: alphaxad9/post_service:0.0.5
-        imagePullPolicy: IfNotPresent
-        command: ["/app/kafka-consumer"]
-        envFrom:
-        - configMapRef:
-            name: post-config
-        - secretRef:
-            name: post-secrets
-        - secretRef:
-            name: postgres-credentials
-        - secretRef:
-            name: kafka-credentials
-        env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: SERVICE_COMPONENT
-          value: "kafka-consumer"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "250m"
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1001
-        runAsGroup: 1001
-        fsGroup: 1001)
+  name: post-config
+  namespace: post-service
+  resourceVersion: "1445126"
+  uid: cf27e08f-8585-4017-87db-ee35fa392e86
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six$ 
+) and my env data should be  like this # Kafka
+KAFKA_BROKERS=localhost:9092,localhost:9093
+KAFKA_TOPIC=microservice_one.events
+KAFKA_GROUP_ID=post_service_outbox_publisher
+KAFKA_SECURITY_PROTOCOL=PLAINTEXT
+KAFKA_ENABLE_AUTO_COMMIT=false
+KAFKA_AUTO_OFFSET_RESET=earliest
+KAFKA_RETRIES=5
+KAFKA_POLL_TIMEOUT=1.0
+
+
+
+# # Then:
+# go mod tidy
+# go build -o outbox-publisher ./cmd/outbox-publisher
+# ./outbox-publisher
+
+
+GIN_MODE=debug #release
+
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=postgresgo1
+POSTGRES_USER=ishimwe
+POSTGRES_PASSWORD=2025New+
+JWT_SECRET=my_jwt_secret_123!
+FRONTEND_URL=http://localhost:3000,https://yourdomain.com,http://127.0.0.1:3000
+PORT=8080
+
+AUTH_PUBLIC_KEY_URL=http://127.0.0.1:8000/zedvye_one/users/public_key/
+AUTH_SERVICE_URL=http://127.0.0.1:8000/zedvye_one
+AUTH_PUBLIC_KEY_TTL=300
+INTERNAL_API_KEY=super-secret-internal-key-change-in-prod
+
+
+
+
+(# services/room-service/base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: room-service
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  # Deployments
+  - api-deployment.yaml
+  - rabbitmq-consumer-deployment.yaml
+  - producer-deployment.yaml
+  
+  # Service (only for API)
+  - service.yaml
+  
+  # PVCs (only for API)
+  - pvc.yaml
+  
+  # Security & Credentials
+  - room-sa.yaml
+  - room-secrets.yaml
+  - postgres-credentials.yaml
+  - rabbitmq-credentials.yaml  
+  - kafka-credentials.yaml      
+  - redis-credentials.yaml
+
+configMapGenerator:
+  - name: room-config
+    literals:
+      - SERVICE_NAME=room
+      - DB_NAME=roomdb
+      - DJANGO_SETTINGS_MODULE=room_service.settings
+      - DJANGO_ALLOWED_HOSTS=room-service,room-service.room-service.svc.cluster.local,localhost,127.0.0.1
+      - KAFKA_GROUP_ID=room_service_id
+      - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
+      - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
+      - WALLET_SERVICE=http://wallet-service.wallet-service.svc.cluster.local:8001/wallet_service/wallets/by-user/
+      - LOG_LEVEL=INFO
+      - RABBITMQ_QUEUE=room_service.commands
+      - RABBITMQ_VHOST=microservice_one
+      - KAFKA_TOPIC=microservice_one.events
+      - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
+      - POSTGRES_PORT=5432
+      - DB_HOST=postgres.infrastructure.svc.cluster.local
+      - DB_PORT=5432
+      - RABBITMQ_HOST=rabbitmq.infrastructure.svc.cluster.local
+      - REDIS_HOST=redis.infrastructure.svc.cluster.local
+      - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
+      - ROOM_CACHE_TTL=300
+      - CHANNEL_LAYER_HOSTS=redis.infrastructure.svc.cluster.local:6379
+      - CHANNEL_LAYER_CAPACITY=1000
+      - CHANNEL_LAYER_EXPIRY=10
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - CORS_ALLOW_CREDENTIALS=True
+      - DJANGO_SECRET_KEY=your-secret-key-here-change-in-production
+      - DJANGO_DEBUG=False
+      - DJANGO_LANGUAGE_CODE=en-us
+      - DJANGO_TIME_ZONE=UTC
+      - REDIS_DB=0
+      - REDIS_SOCKET_TIMEOUT=2
+      - REDIS_CONNECT_TIMEOUT=2
+      - REDIS_RETRY_ON_TIMEOUT=true
+      - REDIS_PASSWORD=
+      - REDIS_PORT=6379
+
+images:
+  - name: alphaxad9/room_service
+    newTag: "0.0.4"
+
+patches:
+  # Add Host header to API probes only
+  - target:
+      kind: Deployment
+      name: room-api
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: room-service
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: room-service
+      - op: add
+        path: /spec/template/spec/containers/0/startupProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: room-service)(# services/room-service/overlays/dev/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: room-service
+
+resources:
+  - ../../base
+
+labels:
+  - pairs:
+      environment: dev
+      managed-by: gitops
+    includeSelectors: false
+    
+configMapGenerator:
+  - name: room-config
+    behavior: merge
+    literals:
+      - LOG_LEVEL=DEBUG
+      - DJANGO_DEBUG=True
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://localhost:8002
+      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://localhost:8002
+      - CORS_ALLOW_CREDENTIALS=True
+
+patches:
+  # Set replicas for all deployments in dev
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: room-api
+  
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: room-rabbitmq-consumer
+  
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: room-producer) what is the solution) solution (Alright — this is a **different class of problem now**. Your pods are healthy ✅, but you’ve hit **config + networking realities of Kubernetes**.
+
+Let’s break it cleanly.
+
+---
+
+# 🧠 1. “No .env file found” → NOT an error
+
+```bash
+⚠️ No .env file found, using system environment variables
+```
+
+👉 This is actually **correct behavior in Kubernetes**
+
+### Why?
+
+* In local dev → you use `.env`
+* In Kubernetes → you use:
+
+  * `ConfigMap`
+  * `Secrets`
+
+And you already have:
+
+```yaml
+envFrom:
+  - configMapRef:
+      name: post-config
+```
+
+👉 So your app **is using env vars**, just not from `.env`
+
+---
+
+## ✅ Recommendation (production-grade)
+
+Instead of logging a warning, change this:
+
+```go
+log.Println("⚠️ No .env file found...")
+```
+
+👉 to:
+
+```go
+if os.Getenv("KUBERNETES_SERVICE_HOST") == "" {
+    log.Println("⚠️ No .env file found, using system environment variables")
+}
+```
+
+✔ Only warn in local dev
+✔ Silent in Kubernetes
+
+---
+
+# 🚨 2. Your REAL problem = CORS
+
+This is the actual blocker:
+
+```bash
+Access to XMLHttpRequest has been blocked by CORS policy
+No 'Access-Control-Allow-Origin' header
+```
+
+And logs show:
+
+```bash
+403
+```
+
+---
+
+## 🧠 Why this is happening
+
+Your frontend:
+
+```
+http://127.0.0.1:3000
+```
+
+Your API:
+
+```
+http://localhost:8080
+```
+
+👉 Different origins → CORS required
+
+---
+
+## ⚠️ Hidden issue in your ConfigMap
+
+You have:
+
+```yaml
+CORS_ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080
+```
+
+But in Go…
+
+👉 this is just a **string**, not parsed automatically.
+
+---
+
+# ✅ Fix: Implement proper CORS in your Go app
+
+If you're using Gin, do this:
+
+## 🔥 Add middleware
+
+```go
+import "github.com/gin-contrib/cors"
+
+router.Use(cors.New(cors.Config{
+    AllowOrigins: strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ","),
+    AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+    AllowHeaders: []string{"Origin", "Content-Type", "Authorization"},
+    ExposeHeaders: []string{"Content-Length"},
+    AllowCredentials: true,
+}))
+```
+
+---
+
+## ❗ Critical detail
+
+This line:
+
+```go
+AllowOrigins: strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ","),
+```
+
+👉 This is what you were missing
+
+---
+
+# 🚨 3. Why you're getting 403 (not just CORS)
+
+This line:
+
+```bash
+403 /api/v1/users/.../posts
+```
+
+means:
+
+👉 Your **auth middleware is rejecting the request**
+
+NOT just CORS.
+
+---
+
+## 🧠 What’s happening
+
+Browser:
+
+1. Sends request → blocked by CORS
+2. Even if allowed → backend returns **403**
+
+So you have **two issues stacked**:
+
+---
+
+## 🔴 Issue A: CORS (browser-level)
+
+Fix → middleware above
+
+---
+
+## 🔴 Issue B: Auth (backend-level)
+
+Your request:
+
+```bash
+GET /api/v1/users/.../posts
+```
+
+👉 probably requires:
+
+* JWT
+* or internal API key
+
+But your frontend isn’t sending it.
+
+---
+
+## ✅ Fix auth issue
+
+Check your frontend request:
+
+```ts
+axios.get(url, {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+})
+```
+
+---
+
+# 🔥 4. Kubernetes vs localhost (important mindset shift)
+
+Your ConfigMap:
+
+```yaml
+FRONTEND_URL: http://localhost:3000
+```
+
+👉 Inside Kubernetes, **localhost ≠ your machine**
+
+---
+
+## 🧠 Reality
+
+| Location | Meaning of localhost |
+| -------- | -------------------- |
+| Browser  | your laptop          |
+| Pod      | the pod itself       |
+
+---
+
+## ✅ Better config (future-safe)
+
+```yaml
+CORS_ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+```
+
+✔ fine for dev
+
+But in prod:
+
+```yaml
+https://yourdomain.com
+```
+
+---
+
+# 🧪 5. Quick verification steps
+
+### Test inside cluster:
+
+```bash
+kubectl exec -it <post-api-pod> -n post-service -- sh
+
+wget -qO- http://localhost:8080/health/
+```
+
+---
+
+### Test via port-forward:
+
+```bash
+kubectl port-forward svc/post-service 8080:8080 -n post-service
+```
+
+Then:
+
+```bash
+curl http://localhost:8080/health/
+```
+
+---
+
+# 🧠 Final diagnosis
+
+You had **3 separate issues**:
+
+---
+
+## ✅ FIXED
+
+✔ CrashLoopBackOff → binary paths
+✔ Readiness probe → /health
+
+---
+
+## ⚠️ CURRENT
+
+### 1. Not an issue
+
+✔ `.env` warning → ignore / improve logging
+
+---
+
+### 2. Real issue
+
+❌ CORS not implemented in backend
+
+---
+
+### 3. Real issue
+
+❌ Auth failing (403)
+
+---
+
+# 🏁 What you should do NOW
+
+### Step 1
+
+Add Gin CORS middleware ✅
+
+---
+
+### Step 2
+
+Ensure frontend sends JWT ✅
+
+---
+
+### Step 3
+
+(optional but good)
+Clean `.env` warning
+
+---
+
+# 💬 Real talk
+
+What you’re seeing right now is **the classic transition**:
+
+> “It works locally” → “Why is Kubernetes different?”
+
+And the answer is always:
+
+* No `.env` → env vars
+* No localhost → service DNS
+* No implicit trust → CORS + auth
+
+---
+
+If you want next step, I can help you:
+
+* design **secure internal service-to-service auth (API key vs JWT)**
+* or fix your frontend request layer properly
+
+Just say 👍
+) and i have 
