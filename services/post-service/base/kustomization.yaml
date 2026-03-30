@@ -32,7 +32,7 @@ configMapGenerator:
       - DB_NAME=postgresgo1
       - GIN_MODE=release
       - PORT=8080
-      - FRONTEND_URL=http://localhost:3000
+      - FRONTEND_URL=http://localhost:3000,https://yourdomain.com,http://127.0.0.1:3000
       - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
       - POSTGRES_PORT=5432
       - POSTGRES_DB=postgresgo1
