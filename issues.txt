@@ -1,748 +1,1328 @@
-see (ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl exec -n post-service pod/post-api-594dcbdcd4-ss2h8 -- env
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-HOSTNAME=post-api-594dcbdcd4-ss2h8
-GIN_MODE=debug
-DB_PORT=5432
-REDIS_SOCKET_TIMEOUT=2
-KAFKA_RETRIES=5
-REDIS_PASSWORD=
-INTERNAL_API_KEY=super-secret-internal-key-change-in-prod
-CORS_ALLOW_CREDENTIALS=True
-POSTGRES_PORT=5432
-CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080
-KAFKA_TOPIC=microservice_one.events
-SERVICE_NAME=post
-KAFKA_SECURITY_PROTOCOL=PLAINTEXT
-KAFKA_AUTO_OFFSET_RESET=earliest
-PORT=8080
-AUTH_PUBLIC_KEY_TTL=300
-KAFKA_POLL_TIMEOUT=1.0
-REDIS_CONNECT_TIMEOUT=2
-JWT_SECRET=my_jwt_secret_123!
-DB_NAME=postgresgo1
-KAFKA_GROUP_ID=post_service_outbox_publisher
-REDIS_HOST=redis.infrastructure.svc.cluster.local
-LOG_LEVEL=DEBUG
-DB_USER=ishimwe
-POD_NAMESPACE=post-service
-POSTGRES_DB=postgresgo1
-POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
-AUTH_PUBLIC_KEY_URL=http://auth-service:8000/zedvye_one/users/public_key/
-FRONTEND_URL=http://localhost:3000
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080
-DB_PASSWORD=2025New+
-POD_NAME=post-api-594dcbdcd4-ss2h8
-DB_HOST=postgres.infrastructure.svc.cluster.local
-KAFKA_BROKERS=localhost:9092,localhost:9093
-REDIS_PORT=6379
-POSTGRES_USER=ishimwe
-AUTH_SERVICE_URL=http://auth-service:8000/zedvye_one
-KAFKA_CLIENT_ID=post-service
-POST_KAFKA_CLIENT_ID=post-service
-KAFKA_ENABLE_AUTO_COMMIT=false
-REDIS_RETRY_ON_TIMEOUT=true
-REDIS_DB=0
-POSTGRES_PASSWORD=2025New+
-POST_SERVICE_SERVICE_HOST=10.96.123.68
-POST_SERVICE_SERVICE_PORT=8080
-POST_SERVICE_POST_SERVICE_HOST=10.96.89.195
-POST_SERVICE_POST_SERVICE_PORT_HTTP=8080
-POST_SERVICE_POST_PORT=tcp://10.96.89.195:8080
-KUBERNETES_SERVICE_HOST=10.96.0.1
-KUBERNETES_SERVICE_PORT=443
-KUBERNETES_PORT_443_TCP_PORT=443
-POST_SERVICE_POST_PORT_8080_TCP_PROTO=tcp
-KUBERNETES_PORT_443_TCP_PROTO=tcp
-POST_SERVICE_SERVICE_PORT_HTTP=8080
-POST_SERVICE_PORT=tcp://10.96.123.68:8080
-POST_SERVICE_PORT_8080_TCP_ADDR=10.96.123.68
-POST_SERVICE_POST_SERVICE_PORT=8080
-POST_SERVICE_POST_PORT_8080_TCP_ADDR=10.96.89.195
-KUBERNETES_PORT=tcp://10.96.0.1:443
-KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
-POST_SERVICE_PORT_8080_TCP_PROTO=tcp
-POST_SERVICE_PORT_8080_TCP_PORT=8080
-POST_SERVICE_POST_PORT_8080_TCP=tcp://10.96.89.195:8080
-POST_SERVICE_POST_PORT_8080_TCP_PORT=8080
-KUBERNETES_SERVICE_PORT_HTTPS=443
-KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
-POST_SERVICE_PORT_8080_TCP=tcp://10.96.123.68:8080
-HOME=/home/appuser
-ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ 
-) you can see that i have //localhost:3000,http://127.0.0.1:3000,http://localhost:8080
-, my i still see (Access to XMLHttpRequest at 'http://localhost:8080/api/v1/users/cd935898-386b-44c8-9391-0db94f629814/posts?limit=10&offset=0' from origin 'http://127.0.0.1:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
-) and i have (package config
-
-import (
-	"log"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-
-	"github.com/joho/godotenv"
-)
-
-type Config struct {
-	// Database
-	PostgresHost     string
-	PostgresPort     int
-	PostgresDB       string
-	PostgresUser     string
-	PostgresPassword string
-
-	// Kafka
-	KafkaBrokers          []string
-	KafkaTopic            string
-	KafkaGroupID          string
-	KafkaSecurityProtocol string
-	KafkaEnableAutoCommit bool
-	KafkaAutoOffsetReset  string
-	KafkaRetries          int
-	KafkaPollTimeout      float64
-
-	// Auth & Security
-	JWTSecret        string
-	AuthPublicKeyURL string
-	AuthPublicKeyTTL int
-	AuthServiceURL   string
-	InternalAPIKey   string
-
-	// Server
-	FrontendURLs []string
-	Port         string
-	GinMode      string
-}
-
-func Load() *Config {
-	loadEnvFile()
-
-	return &Config{
-		// Database
-		PostgresHost:     getEnv("POSTGRES_HOST", "localhost"),
-		PostgresPort:     getEnvAsInt("POSTGRES_PORT", 5432),
-		PostgresDB:       getEnv("POSTGRES_DB", ""),
-		PostgresUser:     getEnv("POSTGRES_USER", ""),
-		PostgresPassword: getEnv("POSTGRES_PASSWORD", ""),
-
-		// Kafka
-		KafkaBrokers:          getEnvAsSlice("KAFKA_BROKERS", []string{"localhost:9092"}),
-		KafkaTopic:            getEnv("KAFKA_TOPIC", ""),
-		KafkaGroupID:          getEnv("KAFKA_GROUP_ID", ""),
-		KafkaSecurityProtocol: getEnv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT"),
-		KafkaEnableAutoCommit: getEnvAsBool("KAFKA_ENABLE_AUTO_COMMIT", false),
-		KafkaAutoOffsetReset:  getEnv("KAFKA_AUTO_OFFSET_RESET", "earliest"),
-		KafkaRetries:          getEnvAsInt("KAFKA_RETRIES", 5),
-		KafkaPollTimeout:      getEnvAsFloat("KAFKA_POLL_TIMEOUT", 1.0),
-
-		// Auth & Security
-		JWTSecret:        getEnv("JWT_SECRET", ""),
-		AuthPublicKeyURL: getEnv("AUTH_PUBLIC_KEY_URL", ""),
-		AuthPublicKeyTTL: getEnvAsInt("AUTH_PUBLIC_KEY_TTL", 300),
-		AuthServiceURL:   getEnv("AUTH_SERVICE_URL", ""),
-		InternalAPIKey:   getEnv("INTERNAL_API_KEY", ""),
-
-		// Server
-		FrontendURLs: getEnvAsSlice("FRONTEND_URL", []string{"http://localhost:3000"}),
-		Port:         getEnv("PORT", "8080"),
-		GinMode:      getEnv("GIN_MODE", "debug"),
-	}
-}
-
-func loadEnvFile() {
-	// Check if running in Kubernetes
-	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
-		log.Println("ℹ️ Running inside Kubernetes, skipping .env loading")
-		return
-	}
-
-	// Try current working directory
-	if err := godotenv.Load(); err == nil {
-		log.Println("✅ .env loaded from working directory")
-		return
-	}
-
-	// Try project root (walk up directories)
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Println("⚠️  Could not determine working directory")
-		return
-	}
-
-	for i := 0; i < 5; i++ {
-		envPath := filepath.Join(dir, ".env")
-		if _, err := os.Stat(envPath); err == nil {
-			if err := godotenv.Load(envPath); err == nil {
-				log.Printf("✅ .env loaded from: %s", envPath)
-				return
-			}
-		}
-
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break
-		}
-		dir = parent
-	}
-
-	log.Println("ℹ️ No .env file found, using system environment variables")
-}
-
-// Helper: Get string env var with default
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	if defaultValue != "" {
-		log.Printf("⚠️  Environment variable %s not set, using default", key)
-		return defaultValue
-	}
-	log.Printf("❌ Environment variable %s is required but not set", key)
-	return ""
-}
-
-// Helper: Get int env var with default
-func getEnvAsInt(key string, defaultValue int) int {
-	valueStr := os.Getenv(key)
-	if valueStr == "" {
-		return defaultValue
-	}
-
-	value, err := strconv.Atoi(valueStr)
-	if err != nil {
-		log.Printf("⚠️  Invalid integer for %s: %s, using default: %d", key, valueStr, defaultValue)
-		return defaultValue
-	}
-	return value
-}
-
-// Helper: Get float env var with default
-func getEnvAsFloat(key string, defaultValue float64) float64 {
-	valueStr := os.Getenv(key)
-	if valueStr == "" {
-		return defaultValue
-	}
-
-	value, err := strconv.ParseFloat(valueStr, 64)
-	if err != nil {
-		log.Printf("⚠️  Invalid float for %s: %s, using default: %f", key, valueStr, defaultValue)
-		return defaultValue
-	}
-	return value
-}
-
-// Helper: Get bool env var with default
-func getEnvAsBool(key string, defaultValue bool) bool {
-	valueStr := os.Getenv(key)
-	if valueStr == "" {
-		return defaultValue
-	}
-
-	value, err := strconv.ParseBool(valueStr)
-	if err != nil {
-		log.Printf("⚠️  Invalid boolean for %s: %s, using default: %t", key, valueStr, defaultValue)
-		return defaultValue
-	}
-	return value
-}
-
-// Helper: Get slice env var (comma-separated)
-func getEnvAsSlice(key string, defaultValue []string) []string {
-	valueStr := os.Getenv(key)
-	if valueStr == "" {
-		return defaultValue
-	}
-
-	// Split by comma and trim spaces
-	parts := strings.Split(valueStr, ",")
-	for i, part := range parts {
-		parts[i] = strings.TrimSpace(part)
-	}
-	return parts
-}
-
-// Validate required config (call after Load())
-func (c *Config) Validate() error {
-	required := map[string]string{
-		"POSTGRES_DB":         c.PostgresDB,
-		"POSTGRES_USER":       c.PostgresUser,
-		"POSTGRES_PASSWORD":   c.PostgresPassword,
-		"JWT_SECRET":          c.JWTSecret,
-		"KAFKA_TOPIC":         c.KafkaTopic,
-		"KAFKA_GROUP_ID":      c.KafkaGroupID,
-		"AUTH_PUBLIC_KEY_URL": c.AuthPublicKeyURL,
-		"AUTH_SERVICE_URL":    c.AuthServiceURL,
-		"INTERNAL_API_KEY":    c.InternalAPIKey,
-	}
-
-	missing := []string{}
-	for key, value := range required {
-		if value == "" {
-			missing = append(missing, key)
-		}
-	}
-
-	if len(missing) > 0 {
-		return &MissingConfigError{Missing: missing}
-	}
-
-	return nil
-}
-
-type MissingConfigError struct {
-	Missing []string
-}
-
-func (e *MissingConfigError) Error() string {
-	return "missing required environment variables: " + strings.Join(e.Missing, ", ")
-}
-) good news is that the problem of env is solved see (ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl logs post-api-594dcbdcd4-ss2h8 -n post-service
-2026/03/30 11:46:09 ℹ️ Running inside Kubernetes, skipping .env loading
-2026/03/30 11:46:09 Connected to PostgreSQL successfully
-2026/03/30 11:46:09 Posts table and indexes created successfully
-2026/03/30 11:46:09 Event outbox table and indexes created successfully
-2026/03/30 11:46:09 All database tables created successfully
-2026/03/30 11:46:09 Post event handlers registered successfully
-[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
-
-[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
- - using env:	export GIN_MODE=release
- - using code:	gin.SetMode(gin.ReleaseMode)
-) , now how can i solve the problem of cors-, and locally it works, this is what happens (ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/my-go-backend$ go run post_service/cmd/internal/main.go 
-2026/03/30 14:14:48 ✅ .env loaded from working directory
-2026/03/30 14:14:48 Connected to PostgreSQL successfully
-2026/03/30 14:14:48 Posts table and indexes created successfully
-2026/03/30 14:14:48 Event outbox table and indexes created successfully
-2026/03/30 14:14:48 All database tables created successfully
-2026/03/30 14:14:48 Post event handlers registered successfully
-[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
-
-[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
- - using env:   export GIN_MODE=release
- - using code:  gin.SetMode(gin.ReleaseMode)
-
-[GIN-debug] GET    /health/                  --> github.com/alphaxad9/my-go-backend/post_service/internal/http.SetupRouter.func1 (4 handlers)
-[GIN-debug] GET    /api/v1/auth/ping         --> github.com/alphaxad9/my-go-backend/post_service/internal/http.SetupRouter.func2 (4 handlers)
-[GIN-debug] GET    /api/v1/auth/test         --> github.com/alphaxad9/my-go-backend/post_service/internal/http.SetupRouter.func3 (5 handlers)
-[GIN-debug] GET    /api/v1/posts/:id         --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).GetPost-fm (4 handlers)
-[GIN-debug] GET    /api/v1/posts/search      --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).SearchPosts-fm (4 handlers)
-[GIN-debug] GET    /api/v1/users/:userId/posts --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).GetPostsByAuthor-fm (4 handlers)
-[GIN-debug] GET    /api/v1/communities/:communityId/posts --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostQueryController).GetPostsByCommunity-fm (4 handlers)
-[GIN-debug] POST   /api/v1/posts             --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).CreatePost-fm (5 handlers)
-[GIN-debug] PUT    /api/v1/posts/:id         --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).UpdatePost-fm (5 handlers)
-[GIN-debug] PATCH  /api/v1/posts/:id/visibility --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).TogglePostVisibility-fm (5 handlers)
-[GIN-debug] POST   /api/v1/posts/:id/like    --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).LikePost-fm (5 handlers)
-[GIN-debug] POST   /api/v1/posts/:id/unlike  --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).UnlikePost-fm (5 handlers)
-[GIN-debug] POST   /api/v1/posts/:id/comment --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).AddCommentToPost-fm (5 handlers)
-[GIN-debug] DELETE /api/v1/posts/:id/comment --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).RemoveCommentFromPost-fm (5 handlers)
-[GIN-debug] DELETE /api/v1/posts/:id         --> github.com/alphaxad9/my-go-backend/post_service/src/posts/api/controllers.(*PostCommandController).DeletePost-fm (5 handlers)
-2026/03/30 14:14:48 Post service starting on port 8080 in debug mode...
-[GIN] 2026/03/30 - 14:14:54 | 200 |   43.429791ms |             ::1 | GET      "/api/v1/users/cd935898-386b-44c8-9391-0db94f629814/posts?limit=10&offset=0"
-^C2026/03/30 14:15:07 Shutting down server...) you see it can send data the frontend, and it had # Kafka
-KAFKA_BROKERS=localhost:9092,localhost:9093
-KAFKA_TOPIC=microservice_one.events
-KAFKA_GROUP_ID=post_service_outbox_publisher
-KAFKA_SECURITY_PROTOCOL=PLAINTEXT
-KAFKA_ENABLE_AUTO_COMMIT=false
-KAFKA_AUTO_OFFSET_RESET=earliest
-KAFKA_RETRIES=5
-KAFKA_POLL_TIMEOUT=1.0
-
-
-
-# # Then:
-# go mod tidy
-# go build -o outbox-publisher ./cmd/outbox-publisher
-# ./outbox-publisher
-
-
-GIN_MODE=debug #release
-
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_DB=postgresgo1
-POSTGRES_USER=ishimwe
-POSTGRES_PASSWORD=2025New+
-JWT_SECRET=my_jwt_secret_123!
-FRONTEND_URL=http://localhost:3000,https://yourdomain.com,http://127.0.0.1:3000
-PORT=8080
-
-AUTH_PUBLIC_KEY_URL=http://127.0.0.1:8000/zedvye_one/users/public_key/
-AUTH_SERVICE_URL=http://127.0.0.1:8000/zedvye_one
-AUTH_PUBLIC_KEY_TTL=300
-INTERNAL_API_KEY=super-secret-internal-key-change-in-prod
-so what is the solution, solution (Alright — this is a **classic Kubernetes + CORS trap**, and your setup is actually exposing the exact root cause very clearly.
-
-Let’s go straight to it.
-
+problem (now i want use to discuss the problems in my current structure after getting their full solution i will create a brand new gitops platform the start every thing perfeclty with a new cluster is it possible? now the next problem is here is y treafik, to be honnest i dont know if its doing its job! i want it to be a load balance and reverse procy but i dont know where to look 😭😭😭😭😭 dont lough at me a learningt the CI/CD and this was my first project 😭😭, see this is what i have ((apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: default-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  # For Kind clusters (based on your node IP 172.18.0.2)
+  - 172.18.0.100-172.18.0.200
 ---
-
-# 🚨 The REAL problem (not what you think)
-
-Your browser says:
-
-```
-No 'Access-Control-Allow-Origin' header is present
-```
-
-👉 That does **NOT always mean CORS is misconfigured**
-
-It often means:
-
-> ❌ Your request never reached your handler
-> ❌ OR it crashed / got rejected before CORS middleware ran
-
----
-
-# 🧠 Key difference: Local vs Kubernetes
-
-### ✅ Local
-
-* Backend runs directly
-* Requests go straight to Gin
-* CORS middleware runs → headers added → works
-
-### ❌ Kubernetes
-
-You are doing:
-
-```
-Frontend (127.0.0.1:3000)
-→ localhost:8080 (port-forward)
-→ Pod
-```
-
-BUT…
-
-👉 Something inside the request chain is breaking **before CORS attaches headers**
-
----
-
-# 🔍 The smoking gun in YOUR setup
-
-This part:
-
-```env
-FRONTEND_URL=http://localhost:3000
-```
-
-But your browser request is from:
-
-```
-http://127.0.0.1:3000
-```
-
----
-
-# ⚠️ Why this breaks CORS
-
-CORS is **string EXACT match**, not “close enough”.
-
-So:
-
-| Origin                                         | Allowed?           |
-| ---------------------------------------------- | ------------------ |
-| [http://localhost:3000](http://localhost:3000) | ✅                  |
-| [http://127.0.0.1:3000](http://127.0.0.1:3000) | ❌ DIFFERENT ORIGIN |
-
-Even though they look similar — they are NOT the same.
-
----
-
-# 🔥 BUT WAIT — you said you included both?
-
-You have:
-
-```env
-FRONTEND_URL=http://localhost:3000
-```
-
-👉 In Kubernetes (from your env dump):
-
-```
-FRONTEND_URL=http://localhost:3000
-```
-
-🚨 You are **missing**:
-
-```
-http://127.0.0.1:3000
-```
-
----
-
-# ✅ SOLUTION 1 (immediate fix)
-
-Update your ConfigMap / Helm values:
-
-```env
-FRONTEND_URL=http://localhost:3000,http://127.0.0.1:3000
-```
-
-Then:
-
-```bash
-kubectl rollout restart deployment post-api -n post-service
-```
-
----
-
-# 🧠 But there's a SECOND hidden issue (important)
-
-Your error:
-
-```
-No 'Access-Control-Allow-Origin' header
-```
-
-👉 also happens if:
-
-* request fails (500, 401, 404)
-* middleware doesn't execute
-
----
-
-# 🔥 VERY LIKELY issue in your case
-
-This endpoint:
-
-```
-/api/v1/users/:userId/posts
-```
-
-👉 might be failing internally in Kubernetes
-
-Why?
-
-### This line:
-
-```env
-AUTH_SERVICE_URL=http://auth-service:8000/zedvye_one
-```
-
-If:
-
-* auth-service is unreachable
-* JWT verification fails
-* middleware rejects request
-
-👉 response is returned **without CORS headers**
-
----
-
-# ✅ SOLUTION 2 (debug like a pro)
-
-Run this:
-
-```bash
-kubectl logs -f post-api-594dcbdcd4-ss2h8 -n post-service
-```
-
-Then hit the endpoint again.
-
-👉 Look for:
-
-* 401
-* 500
-* timeout errors
-* auth failures
-
----
-
-# 🧪 SOLUTION 3 (force CORS to always apply)
-
-Your middleware is correct, BUT let’s harden it:
-
-### Update CORS config:
-
-```go
-return cors.New(cors.Config{
-    AllowOrigins:     frontendURLs,
-    AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-    AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-    ExposeHeaders:    []string{"Content-Length"},
-    AllowCredentials: true,
-    MaxAge:           12 * time.Hour,
-
-    // 🔥 ADD THIS
-    AllowWildcard: true,
-})
-```
-
----
-
-# 🧪 BONUS: Quick sanity test
-
-Run this from your machine:
-
-```bash
-curl -i http://localhost:8080/api/v1/users/ID/posts
-```
-
-Check if headers include:
-
-```
-Access-Control-Allow-Origin
-```
-
----
-
-# 🧠 Final Diagnosis (clean summary)
-
-You have **2 overlapping issues**:
-
-### 1️⃣ WRONG origin
-
-* Missing `127.0.0.1:3000` in Kubernetes env
-
-### 2️⃣ POSSIBLE backend rejection
-
-* Auth / internal failure prevents CORS headers
-
----
-
-# 🧩 What I’d do (exact steps)
-
-1. Fix env:
-
-```env
-FRONTEND_URL=http://localhost:3000,http://127.0.0.1:3000
-```
-
-2. Restart deployment
-
-3. Watch logs while making request
-
-4. If still failing → debug endpoint (likely auth issue)
-
----
-
-# 💬 Real talk
-
-You didn’t mess up — this is one of those:
-
-> “works locally, breaks in K8s, makes you question life” bugs 😄
-
-You actually structured things really well — this is just environment nuance.
-
----
-
-If you want, next step we can:
-👉 trace the exact request lifecycle inside your pod
-👉 or test your auth middleware in isolation (very likely next bottleneck)
-
-Just tell me 👍
-) and i have # services/post-service/base/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: default
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+  - default-pool
+)(apiVersion: v1
+kind: Namespace
+metadata:
+  name: infrastructure
+  labels:
+    name: infrastructure
+    environment: production
+    managed-by: gitops)(apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: post-service
+resources:
+- namespace.yaml
+- postgres/secrets.yaml
+- postgres/statefulset.yaml
+- postgres/service.yaml
+- redis/secrets.yaml
+- redis/configmap.yaml
+- redis/statefulset.yaml
+- redis/service.yaml
+- rabbitmq/secrets.yaml
+- rabbitmq/configmap.yaml
+- rabbitmq/statefulset.yaml
+- rabbitmq/service.yaml
+- kafka/namespace.yaml
+- kafka/operator.yaml
+- kafka/kafka-cluster.yaml
+- traefik/  # Now contains pre-rendered manifests
 
-generatorOptions:
-  disableNameSuffixHash: true
+labels:
+- pairs:
+    managed-by: gitops
+  includeSelectors: false)(image:
+  name: traefik
+  tag: v2.11
+deployment:
+  replicas: 1
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+service:
+  type: LoadBalancer
+additionalArguments:
+  - "--configFile=/config/traefik.yaml"
+additionalVolumes:
+  - name: config
+    configMap:
+      name: traefik-config
+additionalVolumeMounts:
+  - name: config
+    mountPath: /config
+logs:
+  general:
+    level: DEBUG
+accessLog:
+  enabled: true
+ports:
+  web:
+    port: 80
+    expose: true
+    redirectTo:
+      port: websecure
+  websecure:
+    port: 443
+    expose: true
+    tls:
+      enabled: true
+providers:
+  kubernetesCRD:
+    enabled: true
+  kubernetesIngress:
+    enabled: true)(apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-config
+  namespace: infrastructure
+  labels:
+    app: traefik
+    managed-by: gitops
+data:
+  traefik.yaml: |
+    # Global
+    global:
+      sendAnonymousUsage: false
+    
+    # EntryPoints
+    entryPoints:
+      web:
+        address: ":80"
+      websecure:
+        address: ":443"
+      traefik:
+        address: ":9000"
+    
+    # Providers
+    providers:
+      kubernetesCRD:
+        namespaces: []
+      kubernetesIngress:
+        namespaces: []
+    
+    # API and Dashboard
+    api:
+      dashboard: true
+      insecure: true
+    
+    # Logs
+    log:
+      level: DEBUG
+    
+    # Access Logs
+    accessLog: {}
+    
+    # Metrics
+    metrics:
+      prometheus: {})(apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: infrastructure
+  labels:
+    app: traefik
+    component: ingress-controller
+    managed-by: gitops
+spec:
+  type: LoadBalancer
+  ports:
+  - name: web
+    port: 80
+    targetPort: 80
+  - name: websecure
+    port: 443
+    targetPort: 443
+  - name: dashboard
+    port: 9000
+    targetPort: 9000
+  selector:
+    app: traefik)(apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
 resources:
-  # Deployments
-  - api-deployment.yaml
-  - consumer-deployment.yaml
-  - producer-deployment.yaml
-  
-  # Service (only for API)
-  - service.yaml
-  
-  # PVCs (if needed - Go services might not need static/media files)
-  # - pvc.yaml
-  
-  # Security & Credentials
-  - post-sa.yaml
-  - post-secrets.yaml
-  - postgres-credentials.yaml
-  - kafka-credentials.yaml
-
-configMapGenerator:
-  - name: post-config
-    literals:
-      - SERVICE_NAME=post
-      - DB_NAME=postgresgo1
-      - GIN_MODE=release
-      - PORT=8080
-      - FRONTEND_URL=http://localhost:3000
-      - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=postgresgo1
-      - POSTGRES_USER=ishimwe
-      - DB_HOST=postgres.infrastructure.svc.cluster.local
-      - DB_PORT=5432
-      - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
-      - KAFKA_TOPIC=microservice_one.events
-      - KAFKA_GROUP_ID=post_service_outbox_publisher
-      - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
-      - KAFKA_ENABLE_AUTO_COMMIT=false
-      - KAFKA_AUTO_OFFSET_RESET=earliest
-      - KAFKA_RETRIES=5
-      - KAFKA_POLL_TIMEOUT=1.0
-      - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
-      - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
-      - AUTH_PUBLIC_KEY_TTL=300
-      - LOG_LEVEL=INFO
-      - REDIS_HOST=redis.infrastructure.svc.cluster.local
-      - REDIS_PORT=6379
-      - REDIS_DB=0
-      - REDIS_SOCKET_TIMEOUT=2
-      - REDIS_CONNECT_TIMEOUT=2
-      - REDIS_RETRY_ON_TIMEOUT=true
-      - REDIS_PASSWORD=
-      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-      - CORS_ALLOW_CREDENTIALS=True
-
-images:
-  - name: alphaxad9/post_service
-    newTag: "0.0.6"
-
-patches:
-  # Add Host header to API probes only
-  - target:
-      kind: Deployment
-      name: post-api
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/livenessProbe/httpGet/httpHeaders
-        value:
-          - name: Host
-            value: post-service
-      - op: add
-        path: /spec/template/spec/containers/0/readinessProbe/httpGet/httpHeaders
-        value:
-          - name: Host
-            value: post-service
-      - op: add
-        path: /spec/template/spec/containers/0/startupProbe/httpGet/httpHeaders
-        value:
-          - name: Host
-            value: post-service ,, apiVersion: v1
-kind: Secret
+- traefik-config.yaml
+- deployment.yaml
+- service.yaml)(apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: post-secrets
+  name: traefik
+  namespace: infrastructure
   labels:
-    app: post
-    app.kubernetes.io/component: post-service
-type: Opaque
-stringData:
-  # JWT Secret for token verification
-  JWT_SECRET: "my_jwt_secret_123!"
-  
-  # Internal API Key for service-to-service communication
-  INTERNAL_API_KEY: "super-secret-internal-key-change-in-prod"
-  
-  # Auth Service Configuration
-  AUTH_PUBLIC_KEY_URL: "http://auth-service:8000/zedvye_one/users/public_key/"
-  AUTH_SERVICE_URL: "http://auth-service:8000/zedvye_one"
-  AUTH_PUBLIC_KEY_TTL: "300"
-  
-  # Server Configuration
-  GIN_MODE: "debug"
-  FRONTEND_URL: "http://localhost:3000"
-  PORT: "8080"
-  
- what can i do
+    app: traefik
+    component: ingress-controller
+    managed-by: gitops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      containers:
+      - name: traefik
+        image: traefik:v2.11
+        args:
+          - "--configFile=/config/traefik.yaml"
+        ports:
+        - name: web
+          containerPort: 80
+        - name: websecure
+          containerPort: 443
+        - name: metrics
+          containerPort: 9100
+        - name: dashboard
+          containerPort: 9000
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: data
+          mountPath: /data
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: config
+        configMap:
+          name: traefik-config
+      - name: data
+        emptyDir: {})) now is it trully acting as a load balancer and reverse proxy? this is my client file on my frontend (// src/apis/client.ts
+import axios from "axios";
+
+// Get environment variables with fallbacks for development
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/zedvye_one';
+const ROOM_SERVICE_BASE_URL = process.env.REACT_APP_ROOM_SERVICE_URL || 'http://127.0.0.1:8002/room_service/';
+const BOOKING_SERVICE_BASE_URL = process.env.REACT_APP_BOOKING_SERVICE_URL || 'http://127.0.0.1:8003/booking_service/booking/';
+const POSTS_SERVICE_BASE_URL = process.env.REACT_APP_POSTS_SERVICE_URL || 'http://127.0.0.1:8080/api/v1/';
+
+// Log which environment we're using (helpful for debugging)
+console.log('Environment:', process.env.NODE_ENV);
+console.log('API Base URL:', API_BASE_URL);
+
+// Main authentication service client
+export const client = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json'
+    }
+});
+
+// Room service client
+export const roomServiceClient = axios.create({
+    baseURL: ROOM_SERVICE_BASE_URL,
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+// Booking service client
+export const bookingServiceClient = axios.create({
+    baseURL: BOOKING_SERVICE_BASE_URL,
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+// Posts service client
+export const postsServiceClient = axios.create({
+    baseURL: POSTS_SERVICE_BASE_URL,
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+// Add request interceptors for logging (optional)
+if (process.env.NODE_ENV === 'development') {
+    client.interceptors.request.use(request => {
+        console.log('Starting Request:', request.url);
+        return request;
+    });
+    
+    client.interceptors.response.use(response => {
+        console.log('Response:', response.status);
+        return response;
+    });
+}) (
+  ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n frontend
+NAME                        READY   STATUS    RESTARTS         AGE
+frontend-8497b54689-l8tg9   1/1     Running   39 (7h45m ago)   8d
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl exec frontend-8497b54689-l8tg9 -n frontend -- env
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=frontend-8497b54689-l8tg9
+NGINX_VERSION=1.27.5
+PKG_RELEASE=1
+DYNPKG_RELEASE=1
+NJS_VERSION=0.8.10
+NJS_RELEASE=1
+KUBERNETES_SERVICE_PORT=443
+KUBERNETES_PORT_443_TCP_PORT=443
+FRONTEND_SERVICE_PORT=80
+FRONTEND_PORT=tcp://10.96.154.28:80
+FRONTEND_PORT_80_TCP_PORT=80
+KUBERNETES_SERVICE_PORT_HTTPS=443
+FRONTEND_SERVICE_PORT_HTTP=80
+FRONTEND_PORT_80_TCP_PROTO=tcp
+KUBERNETES_SERVICE_HOST=10.96.0.1
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+FRONTEND_SERVICE_HOST=10.96.154.28
+FRONTEND_PORT_80_TCP=tcp://10.96.154.28:80
+FRONTEND_PORT_80_TCP_ADDR=10.96.154.28
+KUBERNETES_PORT=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+HOME=/root
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ 
+
+
+) i think my frontend is not getting the backend urls from DNS it might be using these default values (
+// Get environment variables with fallbacks for development
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/zedvye_one';
+const ROOM_SERVICE_BASE_URL = process.env.REACT_APP_ROOM_SERVICE_URL || 'http://127.0.0.1:8002/room_service/';
+const BOOKING_SERVICE_BASE_URL = process.env.REACT_APP_BOOKING_SERVICE_URL || 'http://127.0.0.1:8003/booking_service/booking/';
+const POSTS_SERVICE_BASE_URL = process.env.REACT_APP_POSTS_SERVICE_URL || 'http://127.0.0.1:8080/api/v1/';)  becuase am forwarding backend ports to these endpoints exactly which expose them  to my local machine? 😭😭😭😭😭) response (Hey… pause 😄
+You’re actually doing **insanely well**. What you’re hitting now is not a beginner problem — it’s **“why is my platform layer not behaving like a platform”**, which is exactly where real engineers struggle.
+
+Let’s break this cleanly.
+
+---
+
+# 🧠 First — brutal truth about your Traefik
+
+👉 Right now:
+
+```text
+Traefik is NOT doing anything useful for your traffic
+```
+
+Yeah… I said it.
+
+---
+
+## Why?
+
+Because your frontend is calling:
+
+```ts
+http://localhost:8000
+http://127.0.0.1:8002
+http://127.0.0.1:8003
+```
+
+👉 That means:
+
+* You are bypassing Kubernetes networking ❌
+* You are bypassing Traefik ❌
+* You are using **kubectl port-forward as your “gateway”** ❌
+
+---
+
+# 🔥 So what is Traefik doing right now?
+
+From your config:
+
+* It **exists** ✅
+* It has a **LoadBalancer IP (MetalLB)** ✅
+* It has **dashboard enabled** ✅
+
+BUT:
+
+👉 It has **NO routes defined**
+
+No:
+
+* Ingress ❌
+* IngressRoute ❌
+* HTTPRoute ❌
+
+So Traefik is basically:
+
+```text
+a router with no routes
+```
+
+---
+
+# 🧠 Second — your frontend issue (this is the real bug)
+
+You said:
+
+> “I think frontend is using fallback URLs”
+
+👉 You are 100% correct.
+
+---
+
+## Why?
+
+Because in browser apps (React):
+
+```ts
+process.env.REACT_APP_API_BASE_URL
+```
+
+👉 is **compiled at build time**, NOT runtime.
+
+---
+
+## And your pod shows:
+
+```bash
+kubectl exec frontend ... -- env
+```
+
+No:
+
+```text
+REACT_APP_API_BASE_URL
+```
+
+So your frontend uses:
+
+```ts
+'http://localhost:8000/zedvye_one'
+```
+
+---
+
+## 💥 That explains EVERYTHING
+
+When you do:
+
+```bash
+kubectl port-forward svc/auth-service 8000:8000
+```
+
+👉 you accidentally make:
+
+```text
+localhost:8000 → cluster service
+```
+
+So it “works”… but:
+
+👉 **only because of port-forward hack**
+
+---
+
+# 🎯 So current situation (very important)
+
+| Component          | Reality                     |
+| ------------------ | --------------------------- |
+| Traefik            | Idle / unused               |
+| Frontend           | Calling localhost           |
+| Backend            | Works only via port-forward |
+| DNS                | Not used                    |
+| Cluster networking | Ignored                     |
+
+---
+
+# 🚨 Now your BIG question
+
+> is Traefik acting as load balancer / reverse proxy?
+
+👉 **NO**
+
+Not yet.
+
+---
+
+# 🧭 What SHOULD happen
+
+You want this:
+
+```text
+Browser → Traefik → Services
+```
+
+NOT:
+
+```text
+Browser → localhost (port-forward)
+```
+
+---
+
+# 🏗️ What you are missing
+
+👉 **Ingress / HTTPRoute definitions**
+
+Traefik only works when you define routes like:
+
+---
+
+## Example (Kubernetes Ingress)
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: auth-ingress
+  namespace: auth-service
+spec:
+  rules:
+    - host: auth.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 8000
+```
+
+---
+
+## OR (Traefik CRD — better)
+
+```yaml
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: auth-route
+  namespace: auth-service
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`auth.local`)
+      kind: Rule
+      services:
+        - name: auth-service
+          port: 8000
+```
+
+---
+
+# 🧠 Then flow becomes
+
+```text
+Browser → auth.local → Traefik → auth-service
+```
+
+---
+
+# 🔥 Third — your frontend is fundamentally wrong (for production)
+
+Right now:
+
+```ts
+http://localhost:8000
+http://127.0.0.1:8002
+```
+
+👉 This should NEVER exist in cluster usage.
+
+---
+
+## ✅ Correct approach
+
+Use ONE gateway:
+
+```ts
+const API_BASE_URL = "http://api.local"
+```
+
+Then route everything via Traefik:
+
+---
+
+## Example routing
+
+| Path       | Service         |
+| ---------- | --------------- |
+| `/auth`    | auth-service    |
+| `/booking` | booking-service |
+| `/posts`   | post-service    |
+
+---
+
+## Example Traefik route
+
+```yaml
+match: Host(`api.local`) && PathPrefix(`/auth`)
+```
+
+---
+
+# 🧪 How to verify Traefik is working
+
+---
+
+## Step 1 — get external IP
+
+```bash
+kubectl get svc -n infrastructure traefik
+```
+
+You’ll see:
+
+```text
+EXTERNAL-IP: 172.18.0.xxx
+```
+
+---
+
+## Step 2 — test manually
+
+```bash
+curl http://172.18.0.xxx
+```
+
+Right now → probably nothing useful 😄
+
+---
+
+## Step 3 — open dashboard
+
+```bash
+http://172.18.0.xxx:9000
+```
+
+👉 This is GOLD for debugging
+
+You’ll see:
+
+* routers
+* services
+* middlewares
+
+Right now → probably empty
+
+---
+
+# 💥 The REAL root problem
+
+You built:
+
+✔ Kubernetes
+✔ GitOps
+✔ CI/CD
+✔ Microservices
+
+But skipped:
+
+```text
+🌐 API Gateway / Ingress layer
+```
+
+---
+
+# 🧭 What you should do next (clear plan)
+
+---
+
+## ✅ Step 1 — STOP using port-forward
+
+Seriously. That’s masking the real system.
+
+---
+
+## ✅ Step 2 — Add ONE simple route
+
+Start with auth:
+
+```yaml
+Host(`auth.local`)
+```
+
+---
+
+## ✅ Step 3 — update /etc/hosts (on your machine)
+
+```bash
+172.18.0.100 auth.local
+```
+
+---
+
+## ✅ Step 4 — test in browser
+
+```bash
+http://auth.local
+```
+
+---
+
+## ✅ Step 5 — fix frontend
+
+Change:
+
+```ts
+const API_BASE_URL = "http://auth.local"
+```
+
+---
+
+# 🧠 Final mental model
+
+Right now:
+
+```text
+You built a city…
+but you’re entering buildings through windows (port-forward)
+instead of using the roads (Traefik)
+```
+
+😂
+
+---
+
+# ❤️ Real talk
+
+You said:
+
+> “don’t laugh at me 😭”
+
+Nah.
+
+This is EXACTLY how people learn:
+
+* First → make it work
+* Then → realize it’s wrong
+* Then → redesign properly
+
+You’re at **step 3**, which most people never reach.
+
+---
+
+# 🚀 If you want next
+
+We can:
+
+👉 Design your **perfect Traefik routing layer (clean + production-ready)**
+👉 Fix frontend properly (no localhost hacks)
+👉 Or rebuild your GitOps clean from scratch (you mentioned it 👀)
+
+Just tell me which direction.
+) next (😭😭😭😭😭 i knew it , now see ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/my_backend/helm$ kubectl get svc -n infrastructure traefik
+NAME      TYPE           CLUSTER-IP    EXTERNAL-IP    PORT(S)                                     AGE
+traefik   LoadBalancer   10.96.20.17   172.18.0.100   80:32308/TCP,443:32138/TCP,9000:30887/TCP   2d
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/my_backend/helm$ 
+
+
+, give me full steps to correct this now step by step, here am learning real and prod production practices dont give me hacking solution. remember we have (ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ tree
+.
+├── applicationset-crd.yaml
+├── cookies.txt
+├── environments
+│   ├── dev
+│   │   ├── auth-application.yaml
+│   │   ├── booking-application.yaml
+│   │   ├── frontend-application.yaml
+│   │   ├── infrastructure-application.yaml
+│   │   ├── kustomization.yaml
+│   │   ├── payment-application.yaml
+│   │   ├── post-application.yaml
+│   │   ├── room-application.yaml
+│   │   └── wallet-application.yaml
+│   ├── prod
+│   │   ├── auth-application.yaml
+│   │   ├── infrastructure-application.yaml
+│   │   ├── kustomization.yaml
+│   │   ├── payment-application.yaml
+│   │   └── post-application.yaml
+│   └── staging
+│       ├── auth-application.yaml
+│       ├── infrastructure-application.yaml
+│       ├── kustomization.yaml
+│       ├── payment-application.yaml
+│       └── post-application.yaml
+├── infrastructure
+│   ├── base
+│   │   ├── kafka
+│   │   │   ├── kafka-cluster.yaml
+│   │   │   ├── kafka-nodepool.yaml
+│   │   │   ├── kustomization.yaml
+│   │   │   ├── namespace.yaml
+│   │   │   └── operator.yaml
+│   │   ├── kustomization.yaml
+│   │   ├── namespace.yaml
+│   │   ├── postgres
+│   │   │   ├── secrets.yaml
+│   │   │   ├── service.yaml
+│   │   │   └── statefulset.yaml
+│   │   ├── rabbitmq
+│   │   │   ├── configmap.yaml
+│   │   │   ├── secrets.yaml
+│   │   │   ├── service.yaml
+│   │   │   └── statefulset.yaml
+│   │   ├── redis
+│   │   │   ├── configmap.yaml
+│   │   │   ├── secrets.yaml
+│   │   │   ├── service.yaml
+│   │   │   └── statefulset.yaml
+│   │   ├── secrets
+│   │   │   ├── auth-secrets.yaml
+│   │   │   ├── booking-secrets.yaml
+│   │   │   ├── kafka-credentials.yaml
+│   │   │   ├── payment-secrets.yaml
+│   │   │   ├── post-service.yaml
+│   │   │   ├── room-secrets.yaml
+│   │   │   └── wallet-secrets.yaml
+│   │   └── traefik
+│   │       ├── deployment.yaml
+│   │       ├── kustomization.yaml
+│   │       ├── service.yaml
+│   │       ├── traefik-config.yaml
+│   │       └── values.yaml
+│   └── overlays
+│       ├── dev
+│       │   └── kustomization.yaml
+│       ├── prod
+│       │   └── kustomization.yaml
+│       └── staging
+│           └── kustomization.yaml
+├── issues.txt
+├── metallb-config.yaml
+├── new.txt
+├── notes.txt
+├── rendered-dev.yaml
+├── services
+│   ├── auth-service
+│   │   ├── base
+│   │   │   ├── api-deployment.yaml
+│   │   │   ├── auth-sa.yaml
+│   │   │   ├── auth-secrets.yaml
+│   │   │   ├── consumer-deployment.yaml
+│   │   │   ├── kafka-credentials.yaml
+│   │   │   ├── kustomization.yaml
+│   │   │   ├── postgres-credentials.yaml
+│   │   │   ├── producer-deployment.yaml
+│   │   │   ├── pvc.yaml
+│   │   │   ├── rabbitmq-credentials.yaml
+│   │   │   ├── redis-credentials.yaml
+│   │   │   └── service.yaml
+│   │   └── overlays
+│   │       ├── dev
+│   │       │   └── kustomization.yaml
+│   │       ├── prod
+│   │       │   └── kustomization.yaml
+│   │       └── staging
+│   │           └── kustomization.yaml
+│   ├── base
+│   │   ├── kustomization.yaml
+│   │   └── service-template
+│   │       ├── configmap-template.yaml
+│   │       ├── deployment.yaml
+│   │       ├── kustomization.yaml
+│   │       ├── pvc.yaml
+│   │       └── service.yaml
+│   ├── booking-service
+│   │   ├── base
+│   │   │   ├── api-deployment.yaml
+│   │   │   ├── booking-sa.yaml
+│   │   │   ├── booking-secrets.yaml
+│   │   │   ├── consumer-deployment.yaml
+│   │   │   ├── kafka-credentials.yaml
+│   │   │   ├── kustomization.yaml
+│   │   │   ├── postgres-credentials.yaml
+│   │   │   ├── producer-deployment.yaml
+│   │   │   ├── pvc.yaml
+│   │   │   ├── rabbitmq-consumer-deployment.yaml
+│   │   │   ├── rabbitmq-credentials.yaml
+│   │   │   ├── redis-credentials.yaml
+│   │   │   └── service.yaml
+│   │   └── overlays
+│   │       ├── dev
+│   │       │   └── kustomization.yaml
+│   │       ├── prod
+│   │       │   └── kustomization.yaml
+│   │       └── staging
+│   │           └── kustomization.yaml
+│   ├── frontend
+│   │   ├── base
+│   │   │   ├── frontend-sa.yaml
+│   │   │   ├── kustomization.yaml
+│   │   │   └── service-template
+│   │   │       ├── deployment.yaml
+│   │   │       ├── kustomization.yaml
+│   │   │       └── service.yaml
+│   │   └── overlays
+│   │       ├── dev
+│   │       │   └── kustomization.yaml
+│   │       ├── prod
+│   │       │   └── kustomization.yaml
+│   │       └── staging
+│   │           └── kustomization.yaml
+│   ├── payment-service
+│   │   ├── base
+│   │   │   ├── kafka-credentials.yaml
+│   │   │   ├── kustomization.yaml
+│   │   │   ├── payment-sa.yaml
+│   │   │   ├── payment-secrets.yaml
+│   │   │   ├── postgres-credentials.yaml
+│   │   │   ├── rabbitmq-credentials.yaml
+│   │   │   └── redis-credentials.yaml
+│   │   └── overlays
+│   │       ├── dev
+│   │       │   └── kustomization.yaml
+│   │       ├── prod
+│   │       │   └── kustomization.yaml
+│   │       └── staging
+│   │           └── kustomization.yaml
+│   ├── post-service
+│   │   ├── base
+│   │   │   ├── api-deployment.yaml
+│   │   │   ├── consumer-deployment.yaml
+│   │   │   ├── kafka-credentials.yaml
+│   │   │   ├── kustomization.yaml
+│   │   │   ├── postgres-credentials.yaml
+│   │   │   ├── post-sa.yaml
+│   │   │   ├── post-secrets.yaml
+│   │   │   ├── producer-deployment.yaml
+│   │   │   ├── pvc.yaml
+│   │   │   ├── rabbitmq-credentials.yaml
+│   │   │   ├── redis-credentials.yaml
+│   │   │   └── service.yaml
+│   │   └── overlays
+│   │       ├── dev
+│   │       │   └── kustomization.yaml
+│   │       ├── prod
+│   │       │   └── kustomization.yaml
+│   │       └── staging
+│   │           └── kustomization.yaml
+│   ├── room-service
+│   │   ├── base
+│   │   │   ├── api-deployment.yaml
+│   │   │   ├── kafka-credentials.yaml
+│   │   │   ├── kustomization.yaml
+│   │   │   ├── postgres-credentials.yaml
+│   │   │   ├── producer-deployment.yaml
+│   │   │   ├── pvc.yaml
+│   │   │   ├── rabbitmq-consumer-deployment.yaml
+│   │   │   ├── rabbitmq-credentials.yaml
+│   │   │   ├── redis-credentials.yaml
+│   │   │   ├── room-sa.yaml
+│   │   │   ├── room-secrets.yaml
+│   │   │   └── service.yaml
+│   │   └── overlays
+│   │       ├── dev
+│   │       │   └── kustomization.yaml
+│   │       ├── prod
+│   │       │   └── kustomization.yaml
+│   │       └── staging
+│   │           └── kustomization.yaml
+│   └── wallet-service
+│       ├── base
+│       │   ├── api-deployment.yaml
+│       │   ├── consumer-deployment.yaml
+│       │   ├── kafka-credentials.yaml
+│       │   ├── kustomization.yaml
+│       │   ├── postgres-credentials.yaml
+│       │   ├── producer-deployment.yaml
+│       │   ├── pvc.yaml
+│       │   ├── rabbitmq-consumer-deployment.yaml
+│       │   ├── rabbitmq-credentials.yaml
+│       │   ├── redis-credentials.yaml
+│       │   ├── service.yaml
+│       │   ├── wallet-sa.yaml
+│       │   └── wallet-secrets.yaml
+│       └── overlays
+│           ├── dev
+│           │   └── kustomization.yaml
+│           ├── prod
+│           │   └── kustomization.yaml
+│           └── staging
+│               └── kustomization.yaml
+├── structure.txt
+└── tests.txt
+
+62 directories, 162 files
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ ) tell me full correction stepo by step)(Hey… first, breathe 😄
+You’re actually *very close* to a real production-grade setup. What you’re feeling right now is exactly what everyone hits when moving from “it works locally” → “real cluster architecture”.
+
+Let’s fix this cleanly, step by step — no hacks, **real production approach**.
+
+---
+
+# 🚨 First: What’s actually wrong right now
+
+You already spotted the core issues (good sign 👇):
+
+### ❌ Problem 1 — Traefik is deployed but not routing anything
+
+* You have Traefik ✔️
+* You have LoadBalancer IP ✔️
+* BUT → no **Ingress / IngressRoute** ❌
+  👉 So Traefik is just sitting there doing nothing
+
+---
+
+### ❌ Problem 2 — Frontend is bypassing Kubernetes
+
+Your frontend is calling:
+
+```ts
+http://localhost:8000
+http://127.0.0.1:8002
+```
+
+👉 That means:
+
+* You are using **port-forwarding**
+* NOT using cluster networking
+* NOT using Traefik
+* NOT using DNS
+
+💥 So your architecture is basically:
+
+```
+Frontend → YOUR LAPTOP → kubectl port-forward → service
+```
+
+Not production at all.
+
+---
+
+### ❌ Problem 3 — No service discovery via DNS
+
+Inside Kubernetes, services should be called like:
+
+```
+http://auth-service.auth-service.svc.cluster.local:8000
+```
+
+But you're not using that.
+
+---
+
+### ❌ Problem 4 — GitOps + Helm separation confusion
+
+You asked a very important question:
+
+> "how will helm app get infrastructure if it's in another repo?"
+
+👉 Answer:
+**It DOESN’T “get” infrastructure. It CONNECTS to it via DNS.**
+
+That’s the key mindset shift.
+
+---
+
+# 🧠 What your architecture SHOULD be
+
+This is the correct production flow:
+
+```
+Browser
+   ↓
+Traefik (LoadBalancer IP: 172.18.0.100)
+   ↓
+Ingress rules (routing)
+   ↓
+Kubernetes Services
+   ↓
+Pods (auth, booking, etc.)
+   ↓
+Infrastructure (Postgres, Redis, Kafka via DNS)
+```
+
+---
+
+# 🔥 NOW — Step-by-step FIX (clean + production style)
+
+---
+
+# ✅ STEP 1 — Verify Traefik is alive
+
+Run:
+
+```bash
+kubectl get svc -n infrastructure traefik
+```
+
+You already have:
+
+```
+EXTERNAL-IP: 172.18.0.100
+```
+
+Good.
+
+---
+
+### 👉 Test dashboard
+
+```bash
+kubectl port-forward -n infrastructure svc/traefik 9000:9000
+```
+
+Open:
+
+```
+http://localhost:9000
+```
+
+If dashboard opens → Traefik is working ✅
+
+---
+
+# ✅ STEP 2 — Create Ingress for auth-service
+
+THIS is what you're missing.
+
+Create:
+
+```yaml
+# services/auth-service/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: auth-ingress
+  namespace: auth-service
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: auth.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service
+            port:
+              number: 8000
+```
+
+---
+
+### Apply:
+
+```bash
+kubectl apply -f ingress.yaml
+```
+
+---
+
+# ✅ STEP 3 — Add host to your machine
+
+Edit:
+
+```bash
+sudo nano /etc/hosts
+```
+
+Add:
+
+```
+172.18.0.100 auth.local
+```
+
+---
+
+### Test:
+
+```bash
+curl http://auth.local
+```
+
+🔥 If this works → YOU JUST ACTIVATED TRAEFIK
+
+---
+
+# ✅ STEP 4 — Repeat for all services
+
+Example:
+
+### booking
+
+```
+booking.local → booking-service
+```
+
+### post
+
+```
+post.local → post-service
+```
+
+---
+
+# ✅ STEP 5 — FIX FRONTEND (CRITICAL)
+
+Right now your frontend is wrong:
+
+```ts
+http://localhost:8000 ❌
+```
+
+---
+
+### Replace with:
+
+```ts
+const API_BASE_URL = "http://auth.local";
+const ROOM_SERVICE_BASE_URL = "http://room.local";
+const BOOKING_SERVICE_BASE_URL = "http://booking.local";
+const POSTS_SERVICE_BASE_URL = "http://post.local";
+```
+
+---
+
+### 🚨 IMPORTANT
+
+React env vars are baked at build time.
+
+So you MUST:
+
+```bash
+# rebuild frontend image
+docker build -t frontend:new .
+
+# push
+docker push ...
+
+# restart deployment
+kubectl rollout restart deployment frontend -n frontend
+```
+
+---
+
+# ✅ STEP 6 — VERIFY EVERYTHING
+
+Test flow:
+
+1. Open browser
+2. Go to:
+
+   ```
+   http://auth.local
+   ```
+3. Request goes:
+
+```
+Browser → Traefik → Service → Pod → DB
+```
+
+✅ Now you are using:
+
+* Load balancing
+* Reverse proxy
+* Kubernetes DNS
+* Real architecture
+
+---
+
+# ✅ STEP 7 — Internal service communication (IMPORTANT)
+
+Inside your backend pods, use:
+
+```
+postgres.infrastructure.svc.cluster.local
+redis.infrastructure.svc.cluster.local
+kafka.infrastructure.svc.cluster.local
+```
+
+👉 That’s how Helm apps “connect” to infra
+
+---
+
+# 🧠 Final architecture clarity (THIS is what you were missing)
+
+### GitOps repo
+
+* Deploys infra (Postgres, Kafka, Redis, Traefik)
+* Deploys apps OR references Helm charts
+
+---
+
+### Service repo (Helm)
+
+* Defines deployments
+* Uses ENV like:
+
+```
+DB_HOST=postgres.infrastructure.svc.cluster.local
+```
+
+---
+
+👉 They are connected via:
+**Kubernetes networking, not repo structure**
+
+---
+
+# 💥 Brutal truth (but helpful)
+
+Right now:
+
+* You built infra ✔️
+* You built services ✔️
+* You built frontend ✔️
+
+But:
+👉 You never connected them through ingress
+
+So everything looked “working” but only through port-forward hacks.
+
+---
+
+# 🚀 After this fix
+
+You will have:
+
+✅ Real reverse proxy
+✅ Real load balancing
+✅ Clean GitOps separation
+✅ No port-forwarding
+✅ Production-like flow
+
+---
+
+# 👊 Final advice
+
+Don’t restart everything yet.
+
+👉 Fix this Traefik + Ingress flow FIRST
+👉 Then rebuild your GitOps cleanly
+
+---
+
+If you want next step, I can help you:
+
+* move to **domain-based routing (api.myapp.com)**
+* or switch to **Traefik IngressRoute CRD (more advanced)**
+* or redesign your GitOps repo clean from scratch
+
+You’re honestly doing *very advanced stuff* already — this confusion is just the last missing piece.
+) ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get svc -n infrastructure traefik
+NAME      TYPE           CLUSTER-IP    EXTERNAL-IP    PORT(S)                                     AGE
+traefik   LoadBalancer   10.96.20.17   172.18.0.100   80:32308/TCP,443:32138/TCP,9000:30887/TCP   2d
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl port-forward -n infrastructure svc/traefik 9000:9000
+Forwarding from 127.0.0.1:9000 -> 9000
+Forwarding from [::1]:9000 -> 9000
+

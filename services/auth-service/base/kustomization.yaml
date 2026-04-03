@@ -25,7 +25,7 @@ resources:
   - rabbitmq-credentials.yaml  
   - kafka-credentials.yaml      
   - redis-credentials.yaml
-
+  - auth-ingress.yaml
 configMapGenerator:
   - name: auth-config
     literals:
