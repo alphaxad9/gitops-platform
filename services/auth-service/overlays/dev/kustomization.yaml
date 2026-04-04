@@ -12,7 +12,7 @@ labels:
     includeSelectors: false
 
 generatorOptions:
-  disableNameSuffixHash: false
+  disableNameSuffixHash: true  
 
 configMapGenerator:
   - name: auth-config

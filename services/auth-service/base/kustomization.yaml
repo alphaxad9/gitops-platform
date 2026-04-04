@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: auth-service
 
 generatorOptions:
-  disableNameSuffixHash: false
+  disableNameSuffixHash: true  
 
 resources:
   # Deployments
