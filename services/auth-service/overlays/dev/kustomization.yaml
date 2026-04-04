@@ -1,4 +1,4 @@
-#services/auth-service/overlays/dev/kustomization.yaml
+# services/auth-service/overlays/dev/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -11,7 +11,10 @@ labels:
   - pairs:
       environment: dev
     includeSelectors: false
-    
+
+generatorOptions:
+  disableNameSuffixHash: false  
+
 configMapGenerator:
   - name: auth-config
     behavior: merge
@@ -24,7 +27,6 @@ configMapGenerator:
       - CHANNEL_LAYER_HOSTS=redis.infrastructure.svc.cluster.local:6379
 
 patches:
-  # Set replicas for all deployments in dev
   - patch: |-
       - op: replace
         path: /spec/replicas
@@ -32,7 +34,6 @@ patches:
     target:
       kind: Deployment
       name: auth-api
-  
   - patch: |-
       - op: replace
         path: /spec/replicas
@@ -40,7 +41,6 @@ patches:
     target:
       kind: Deployment
       name: auth-consumer
-  
   - patch: |-
       - op: replace
         path: /spec/replicas
