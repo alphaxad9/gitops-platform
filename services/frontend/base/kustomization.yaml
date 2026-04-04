@@ -1,4 +1,3 @@
-# services/frontend/base/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -8,56 +7,26 @@ generatorOptions:
   disableNameSuffixHash: true
 
 resources:
-  - service-template
+  - api-deployment.yaml
+  - service.yaml
+  - frontend-ingress.yaml
   - frontend-sa.yaml
 
+configMapGenerator:
+  - name: frontend-config
+    literals:
+      - REACT_APP_API_BASE_URL=http://auth.local/zedvye_one/
+      - REACT_APP_ROOM_SERVICE_URL=http://room.local/room_service/
+      - REACT_APP_BOOKING_SERVICE_URL=http://booking.local/booking_service/booking/
+      - REACT_APP_POSTS_SERVICE_URL=http://post.local/api/v1/
+      - REACT_APP_WALLET_SERVICE_URL=http://wallet.local/wallet_service/
+      - NODE_ENV=production
+
+secretGenerator:
+  - name: frontend-secrets
+    literals:
+      - API_KEY=change-me-in-production
+
 images:
-  - name: placeholder
-    newName: alphaxad9/booking_microservice_frontend
+  - name: alphaxad9/booking_microservice_frontend
     newTag: "0.0.1"
-
-patches:
-  # Patch deployment name and references
-  - target:
-      kind: Deployment
-      name: service-placeholder
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: frontend
-      - op: replace
-        path: /metadata/labels/app
-        value: frontend
-      - op: replace
-        path: /metadata/labels/service
-        value: frontend
-      - op: replace
-        path: /spec/selector/matchLabels/app
-        value: frontend
-      - op: replace
-        path: /spec/template/metadata/labels/app
-        value: frontend
-      - op: replace
-        path: /spec/template/metadata/labels/service
-        value: frontend
-      - op: replace
-        path: /spec/template/spec/serviceAccountName
-        value: frontend-sa
-      - op: replace
-        path: /spec/template/spec/containers/0/name
-        value: frontend
-
-  # Patch service name
-  - target:
-      kind: Service
-      name: service-placeholder-service
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: frontend
-      - op: replace
-        path: /metadata/labels/app
-        value: frontend
-      - op: replace
-        path: /spec/selector/app
-        value: frontend

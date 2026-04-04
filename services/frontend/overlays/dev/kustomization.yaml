@@ -12,6 +12,20 @@ labels:
       managed-by: gitops
     includeSelectors: false
 
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: frontend-config
+    behavior: replace
+    literals:
+      - REACT_APP_API_BASE_URL=http://auth.local/zedvye_one/
+      - REACT_APP_ROOM_SERVICE_URL=http://room.local/room_service/
+      - REACT_APP_BOOKING_SERVICE_URL=http://booking.local/booking_service/booking/
+      - REACT_APP_POSTS_SERVICE_URL=http://post.local/api/v1/
+      - REACT_APP_WALLET_SERVICE_URL=http://wallet.local/wallet_service/
+      - NODE_ENV=development
+
 patches:
   - patch: |-
       - op: replace
@@ -19,3 +33,4 @@ patches:
         value: 1
     target:
       kind: Deployment
+      name: frontend
