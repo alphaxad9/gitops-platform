@@ -5,3 +5,4 @@ resources:
 - traefik-config.yaml
 - deployment.yaml
 - service.yaml
+- rbac.yaml 
