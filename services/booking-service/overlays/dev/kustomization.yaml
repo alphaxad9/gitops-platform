@@ -22,7 +22,9 @@ configMapGenerator:
       - SERVICE_NAME=booking
       - DB_NAME=bookingdb
       - DJANGO_SETTINGS_MODULE=booking_service.settings
-      - DJANGO_ALLOWED_HOSTS=booking-service,booking-service.booking-service.svc.cluster.local,localhost,127.0.0.1,booking.local
+      # - DJANGO_ALLOWED_HOSTS=booking-service,booking-service.booking-service.svc.cluster.local,localhost,127.0.0.1,booking.local
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1 #lets apply this and we see if allowe hosts will only show localhost,127.0.0.1 if no, we have to find the exact place where we are gitting the values
+
       - DJANGO_DEBUG=True
       - LOG_LEVEL=DEBUG
       - KAFKA_GROUP_ID=booking_service_id
