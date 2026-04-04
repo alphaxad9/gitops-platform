@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: auth-service
 
 generatorOptions:
-  disableNameSuffixHash: true
+  disableNameSuffixHash: false
 
 resources:
   # Deployments
@@ -26,19 +26,18 @@ resources:
   - kafka-credentials.yaml      
   - redis-credentials.yaml
   - auth-ingress.yaml
+
 configMapGenerator:
   - name: auth-config
     literals:
       - SERVICE_NAME=auth
       - DB_NAME=authdb
       - DJANGO_SETTINGS_MODULE=my_backend.settings
-      - DJANGO_ALLOWED_HOSTS=auth-service,auth-service.auth-service.svc.cluster.local,localhost,127.0.0.1,auth.local
       - KAFKA_GROUP_ID=auth_consumer_group
       - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
-      - LOG_LEVEL=INFO
       - RABBITMQ_QUEUE=auth.events
       - RABBITMQ_VHOST=auth_service
-      - KAFKA_TOPIC=microservice_one.events  # ← CHANGE THIS
+      - KAFKA_TOPIC=microservice_one.events
       - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
       - POSTGRES_PORT=5432
       - DB_HOST=postgres.infrastructure.svc.cluster.local
