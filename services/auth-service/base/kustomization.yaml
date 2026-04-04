@@ -32,7 +32,7 @@ configMapGenerator:
       - SERVICE_NAME=auth
       - DB_NAME=authdb
       - DJANGO_SETTINGS_MODULE=my_backend.settings
-      - DJANGO_ALLOWED_HOSTS=auth-service,auth-service.auth-service.svc.cluster.local,localhost,127.0.0.1
+      - DJANGO_ALLOWED_HOSTS=auth-service,auth-service.auth-service.svc.cluster.local,localhost,127.0.0.1,auth.local
       - KAFKA_GROUP_ID=auth_consumer_group
       - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
       - LOG_LEVEL=INFO
