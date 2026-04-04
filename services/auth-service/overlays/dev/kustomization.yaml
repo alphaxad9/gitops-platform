@@ -14,7 +14,7 @@ labels:
     
 configMapGenerator:
   - name: auth-config
-    behavior: replace
+    behavior: merge
     literals:
       - LOG_LEVEL=DEBUG
       - DJANGO_DEBUG=True
