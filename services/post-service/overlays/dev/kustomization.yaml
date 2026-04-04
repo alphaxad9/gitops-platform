@@ -1,4 +1,3 @@
-# services/post-service/overlays/dev/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -13,12 +12,43 @@ labels:
       managed-by: gitops
     includeSelectors: false
 
+generatorOptions:
+  disableNameSuffixHash: true
+
 configMapGenerator:
   - name: post-config
-    behavior: merge
+    behavior: replace
     literals:
-      - LOG_LEVEL=DEBUG
+      - SERVICE_NAME=post
+      - DB_NAME=postgresgo1
       - GIN_MODE=debug
+      - PORT=8080
+      - FRONTEND_URL=http://localhost:3000,https://yourdomain.com,http://127.0.0.1:3000
+      - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgresgo1
+      - POSTGRES_USER=ishimwe
+      - DB_HOST=postgres.infrastructure.svc.cluster.local
+      - DB_PORT=5432
+      - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
+      - KAFKA_TOPIC=microservice_one.events
+      - KAFKA_GROUP_ID=post_service_outbox_publisher
+      - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
+      - KAFKA_ENABLE_AUTO_COMMIT=false
+      - KAFKA_AUTO_OFFSET_RESET=earliest
+      - KAFKA_RETRIES=5
+      - KAFKA_POLL_TIMEOUT=1.0
+      - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
+      - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
+      - AUTH_PUBLIC_KEY_TTL=300
+      - LOG_LEVEL=DEBUG
+      - REDIS_HOST=redis.infrastructure.svc.cluster.local
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_SOCKET_TIMEOUT=2
+      - REDIS_CONNECT_TIMEOUT=2
+      - REDIS_RETRY_ON_TIMEOUT=true
+      - REDIS_PASSWORD=
       - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080
       - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080
       - CORS_ALLOW_CREDENTIALS=True
