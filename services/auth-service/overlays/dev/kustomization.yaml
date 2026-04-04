@@ -21,7 +21,7 @@ configMapGenerator:
       - SERVICE_NAME=auth
       - DB_NAME=authdb
       - DJANGO_SETTINGS_MODULE=my_backend.settings
-      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+      - DJANGO_ALLOWED_HOSTS=auth-service,auth-service.auth-service.svc.cluster.local,localhost,127.0.0.1,auth.local
       - DJANGO_DEBUG=True
       - LOG_LEVEL=DEBUG
       - KAFKA_GROUP_ID=auth_consumer_group
