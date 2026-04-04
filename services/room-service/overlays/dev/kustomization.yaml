@@ -1,4 +1,3 @@
-# services/room-service/overlays/dev/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -12,16 +11,50 @@ labels:
       environment: dev
       managed-by: gitops
     includeSelectors: false
-    
+
+generatorOptions:
+  disableNameSuffixHash: true
+
 configMapGenerator:
   - name: room-config
-    behavior: merge
+    behavior: replace
     literals:
-      - LOG_LEVEL=DEBUG
+      - SERVICE_NAME=room
+      - DB_NAME=roomdb
+      - DJANGO_SETTINGS_MODULE=room_service.settings
+      - DJANGO_ALLOWED_HOSTS=room-service,room-service.room-service.svc.cluster.local,localhost,127.0.0.1,room.local
       - DJANGO_DEBUG=True
+      - LOG_LEVEL=DEBUG
+      - KAFKA_GROUP_ID=room_service_id
+      - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
+      - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
+      - WALLET_SERVICE=http://wallet-service.wallet-service.svc.cluster.local:8001/wallet_service/wallets/by-user/
+      - RABBITMQ_QUEUE=room_service.commands
+      - RABBITMQ_VHOST=microservice_one
+      - KAFKA_TOPIC=microservice_one.events
+      - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
+      - POSTGRES_PORT=5432
+      - DB_HOST=postgres.infrastructure.svc.cluster.local
+      - DB_PORT=5432
+      - RABBITMQ_HOST=rabbitmq.infrastructure.svc.cluster.local
+      - REDIS_HOST=redis.infrastructure.svc.cluster.local
+      - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
+      - ROOM_CACHE_TTL=300
+      - CHANNEL_LAYER_HOSTS=redis.infrastructure.svc.cluster.local:6379
+      - CHANNEL_LAYER_CAPACITY=1000
+      - CHANNEL_LAYER_EXPIRY=10
       - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://localhost:8002
       - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://localhost:8002
       - CORS_ALLOW_CREDENTIALS=True
+      - DJANGO_SECRET_KEY=your-secret-key-here-change-in-production
+      - DJANGO_LANGUAGE_CODE=en-us
+      - DJANGO_TIME_ZONE=UTC
+      - REDIS_DB=0
+      - REDIS_SOCKET_TIMEOUT=2
+      - REDIS_CONNECT_TIMEOUT=2
+      - REDIS_RETRY_ON_TIMEOUT=true
+      - REDIS_PASSWORD=
+      - REDIS_PORT=6379
 
 patches:
   # Set replicas for all deployments in dev

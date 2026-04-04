@@ -1,4 +1,3 @@
-# services/room-service/base/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -26,6 +25,7 @@ resources:
   - rabbitmq-credentials.yaml  
   - kafka-credentials.yaml      
   - redis-credentials.yaml
+  - room-ingress.yaml
 
 configMapGenerator:
   - name: room-config
@@ -33,7 +33,7 @@ configMapGenerator:
       - SERVICE_NAME=room
       - DB_NAME=roomdb
       - DJANGO_SETTINGS_MODULE=room_service.settings
-      - DJANGO_ALLOWED_HOSTS=room-service,room-service.room-service.svc.cluster.local,localhost,127.0.0.1
+      - DJANGO_ALLOWED_HOSTS=PLACEHOLDER_WILL_BE_REPLACED
       - KAFKA_GROUP_ID=room_service_id
       - AUTH_SERVICE_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/
       - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
