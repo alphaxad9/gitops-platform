@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: auth-service
 
 generatorOptions:
-  disableNameSuffixHash: true  
+  disableNameSuffixHash: true
 
 resources:
   # Deployments
@@ -33,8 +33,10 @@ configMapGenerator:
       - SERVICE_NAME=auth
       - DB_NAME=authdb
       - DJANGO_SETTINGS_MODULE=my_backend.settings
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
       - KAFKA_GROUP_ID=auth_consumer_group
       - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
+      - LOG_LEVEL=INFO
       - RABBITMQ_QUEUE=auth.events
       - RABBITMQ_VHOST=auth_service
       - KAFKA_TOPIC=microservice_one.events

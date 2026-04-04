@@ -1,6 +1,449 @@
+(ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ cd ~/projs/django/microservices/service_one/zedvye_six/gitops-platform
 
+# Delete the old ConfigMap
+kubectl delete configmap auth-config -n auth-service
 
+# Apply the base + overlay
+kubectl apply -k services/auth-service/overlays/dev
 
+# Restart the deployment
+kubectl rollout restart deployment auth-api -n auth-service
+
+# Wait for new pod
+sleep 15
+
+# Verify
+NEW_POD=$(kubectl get pods -n auth-service -l component=api -o jsonpath='{.items[0].metadata.name}')
+kubectl exec -n auth-service $NEW_POD -- printenv | grep DJANGO_ALLOWED_HOSTS
+configmap "auth-config" deleted from auth-service namespace
+serviceaccount/auth-service-sa unchanged
+Warning: resource configmaps/auth-config is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
+configmap/auth-config configured
+secret/auth-secrets configured
+secret/kafka-credentials configured
+secret/postgres-credentials configured
+secret/rabbitmq-credentials configured
+secret/redis-credentials configured
+service/auth-service unchanged
+persistentvolumeclaim/auth-service-media-pvc unchanged
+persistentvolumeclaim/auth-service-static-pvc unchanged
+deployment.apps/auth-api unchanged
+deployment.apps/auth-consumer unchanged
+deployment.apps/auth-producer unchanged
+ingress.networking.k8s.io/auth-ingress unchanged
+deployment.apps/auth-api restarted
+error: Internal error occurred: unable to upgrade connection: container not found ("auth-api")
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n auth-service
+NAME                             READY   STATUS             RESTARTS        AGE
+auth-api-6cf8d9cfd-qqbpf         0/1     CrashLoopBackOff   1 (13s ago)     28s
+auth-api-7578dbb65c-5fbt4        1/1     Running            0               8m21s
+auth-consumer-d89dfd987-zn6v9    1/1     Running            30 (11h ago)    8d
+auth-producer-68c687fff5-mc729   1/1     Running            33 (11h ago)    8d
+helm-auth-5bc497c9f8-kldl2       1/1     Running            11 (139m ago)   2d18h
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n auth-service
+NAME                             READY   STATUS    RESTARTS        AGE
+auth-api-6cf8d9cfd-qqbpf         0/1     Running   2 (35s ago)     50s
+auth-api-7578dbb65c-5fbt4        1/1     Running   0               8m43s
+auth-consumer-d89dfd987-zn6v9    1/1     Running   30 (11h ago)    8d
+auth-producer-68c687fff5-mc729   1/1     Running   33 (11h ago)    8d
+helm-auth-5bc497c9f8-kldl2       1/1     Running   11 (139m ago)   2d18h
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n auth-service
+NAME                             READY   STATUS    RESTARTS        AGE
+auth-api-6cf8d9cfd-qqbpf         0/1     Running   2 (40s ago)     55s
+auth-api-7578dbb65c-5fbt4        1/1     Running   0               8m48s
+auth-consumer-d89dfd987-zn6v9    1/1     Running   30 (11h ago)    8d
+auth-producer-68c687fff5-mc729   1/1     Running   33 (11h ago)    8d
+helm-auth-5bc497c9f8-kldl2       1/1     Running   11 (139m ago)   2d18h
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl get pods -n auth-service
+NAME                             READY   STATUS    RESTARTS        AGE
+auth-api-6cf8d9cfd-qqbpf         0/1     Running   2 (48s ago)     63s
+auth-api-7578dbb65c-5fbt4        1/1     Running   0               8m56s
+auth-consumer-d89dfd987-zn6v9    1/1     Running   30 (11h ago)    8d
+auth-producer-68c687fff5-mc729   1/1     Running   33 (11h ago)    8d
+helm-auth-5bc497c9f8-kldl2       1/1     Running   11 (139m ago)   2d18h
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ kubectl exec -n auth-service $NEW_POD -- printenv | grep DJANGO_ALLOWED_HOSTS
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,auth-service,auth-service.auth-service.svc.cluster.local
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ NEW_POD=$(kubectl get pods -n auth-service -l component=api -o jsonpath='{.items[0].metadata.name}')
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$ cd ~/projs/django/microservices/service_one/zedvye_six/gitops-platform
+
+# Delete the old ConfigMap
+kubectl delete configmap auth-config -n auth-service
+
+# Apply the base + overlay
+kubectl apply -k services/auth-service/overlays/dev
+
+# Restart the deployment
+kubectl rollout restart deployment auth-api -n auth-service
+
+# Wait for new pod
+sleep 15
+
+# Verify
+NEW_POD=$(kubectl get pods -n auth-service -l component=api -o jsonpath='{.items[0].metadata.name}')
+kubectl exec -n auth-service $NEW_POD -- printenv | grep DJANGO_ALLOWED_HOSTS
+configmap "auth-config" deleted from auth-service namespace
+serviceaccount/auth-service-sa unchanged
+configmap/auth-config created
+secret/auth-secrets configured
+secret/kafka-credentials configured
+secret/postgres-credentials configured
+secret/rabbitmq-credentials configured
+secret/redis-credentials configured
+service/auth-service unchanged
+persistentvolumeclaim/auth-service-media-pvc unchanged
+persistentvolumeclaim/auth-service-static-pvc unchanged
+deployment.apps/auth-api unchanged
+deployment.apps/auth-consumer unchanged
+deployment.apps/auth-producer unchanged
+ingress.networking.k8s.io/auth-ingress unchanged
+deployment.apps/auth-api restarted
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,auth-service,auth-service.auth-service.svc.cluster.local
+ishimwe@alpha:~/projs/django/microservices/service_one/zedvye_six/gitops-platform$)(apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: auth-service
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  # Deployments
+  - api-deployment.yaml
+  - consumer-deployment.yaml
+  - producer-deployment.yaml
+  
+  # Service (only for API)
+  - service.yaml
+  
+  # PVCs (only for API)
+  - pvc.yaml
+  
+  # Security & Credentials
+  - auth-sa.yaml
+  - auth-secrets.yaml
+  - postgres-credentials.yaml
+  - rabbitmq-credentials.yaml  
+  - kafka-credentials.yaml      
+  - redis-credentials.yaml
+  - auth-ingress.yaml
+configMapGenerator:
+  - name: auth-config
+    literals:
+      - SERVICE_NAME=auth
+      - DB_NAME=authdb
+      - DJANGO_SETTINGS_MODULE=my_backend.settings
+      - DJANGO_ALLOWED_HOSTS=auth-service,auth-service.auth-service.svc.cluster.local,localhost,127.0.0.1,auth.local
+      - KAFKA_GROUP_ID=auth_consumer_group
+      - AUTH_PUBLIC_KEY_URL=http://auth-service.auth-service.svc.cluster.local:8000/zedvye_one/users/public_key/
+      - LOG_LEVEL=INFO
+      - RABBITMQ_QUEUE=auth.events
+      - RABBITMQ_VHOST=auth_service
+      - KAFKA_TOPIC=microservice_one.events  # ← CHANGE THIS
+      - POSTGRES_HOST=postgres.infrastructure.svc.cluster.local
+      - POSTGRES_PORT=5432
+      - DB_HOST=postgres.infrastructure.svc.cluster.local
+      - DB_PORT=5432
+      - RABBITMQ_HOST=rabbitmq.infrastructure.svc.cluster.local
+      - REDIS_HOST=redis.infrastructure.svc.cluster.local
+      - KAFKA_BROKERS=kafka-cluster-kafka-bootstrap.kafka-operator.svc.cluster.local:9092
+
+images:
+  - name: alphaxad9/auth-service
+    newTag: "0.1.4"
+
+patches:
+  # Add Host header to API probes only
+  - target:
+      kind: Deployment
+      name: auth-api
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: auth-service
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: auth-service
+      - op: add
+        path: /spec/template/spec/containers/0/startupProbe/httpGet/httpHeaders
+        value:
+          - name: Host
+            value: auth-service)(# services/auth-service/overlays/dev/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: auth-service
+
+resources:
+  - ../../base
+
+labels:
+  - pairs:
+      environment: dev
+    includeSelectors: false
+
+generatorOptions:
+  disableNameSuffixHash: false  
+
+configMapGenerator:
+  - name: auth-config
+    behavior: merge
+    literals:
+      - LOG_LEVEL=DEBUG
+      - DJANGO_DEBUG=True
+      - DJANGO_ALLOWED_HOSTS=auth-service,auth-service.auth-service.svc.cluster.local,localhost,127.0.0.1,auth.local
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000,http://127.0.0.1:3000
+      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://localhost:8000,http://127.0.0.1:3000
+      - CHANNEL_LAYER_HOSTS=redis.infrastructure.svc.cluster.local:6379
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: auth-api
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: auth-consumer
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: auth-producer) bruh i might be cooked!
+
+(😭 nahhh you’re not cooked… you just unlocked **Kustomize final boss level**
+
+And now I can see the issue *clearly*.
+
+---
+
+# 💣 THE REAL ROOT CAUSE (finally)
+
+You have **TWO configMapGenerators with the SAME name (`auth-config`)**
+
+### 1️⃣ Base
+
+```yaml
+configMapGenerator:
+  - name: auth-config
+    literals:
+      - DJANGO_ALLOWED_HOSTS=...auth.local   ✅
+```
+
+### 2️⃣ Overlay
+
+```yaml
+configMapGenerator:
+  - name: auth-config
+    behavior: merge
+```
+
+---
+
+# ⚠️ What Kustomize actually does
+
+Because of:
+
+```yaml
+generatorOptions:
+  disableNameSuffixHash: true   ❌ (in base)
+```
+
+👉 The base creates:
+
+```
+auth-config   (static name)
+```
+
+Then overlay tries to **merge into it**…
+
+BUT:
+
+> 💥 Kustomize does NOT merge generated ConfigMaps the way you think
+> 💥 It keeps the ORIGINAL base values
+
+So your overlay value:
+
+```yaml
+DJANGO_ALLOWED_HOSTS=...,auth.local
+```
+
+👉 is being **ignored**
+
+---
+
+# 🧠 Why your pod NEVER gets `auth.local`
+
+Because it's always using:
+
+```bash
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,auth-service,...
+```
+
+👉 straight from **base config**, not overlay
+
+---
+
+# 🔥 THE FIX (clean + final)
+
+## ✅ Step 1 — REMOVE this from base
+
+```yaml
+generatorOptions:
+  disableNameSuffixHash: true
+```
+
+🚨 This is killing your overlay
+
+---
+
+## ✅ Step 2 — REMOVE `configMapGenerator` from overlay
+
+👉 YES — delete this entire block:
+
+```yaml
+configMapGenerator:
+  - name: auth-config
+    behavior: merge
+    literals:
+      ...
+```
+
+---
+
+## ✅ Step 3 — Move ALL env config into ONE place (base OR overlay, not both)
+
+👉 Best practice: keep base minimal, move env-specific stuff to overlay
+
+So:
+
+### 🔁 In BASE → keep only defaults (or even remove DJANGO_ALLOWED_HOSTS)
+
+### 🔥 In OVERLAY → define FULL config:
+
+```yaml
+configMapGenerator:
+  - name: auth-config
+    literals:
+      - DJANGO_ALLOWED_HOSTS=auth-service,auth-service.auth-service.svc.cluster.local,localhost,127.0.0.1,auth.local
+      - DJANGO_DEBUG=True
+      - LOG_LEVEL=DEBUG
+      ...
+```
+
+---
+
+## ✅ Step 4 — Enable hash (VERY IMPORTANT)
+
+In overlay:
+
+```yaml
+generatorOptions:
+  disableNameSuffixHash: false
+```
+
+This makes:
+
+```
+auth-config-abc123
+```
+
+👉 and forces pod reload automatically
+
+---
+
+## ✅ Step 5 — Apply clean
+
+```bash
+kubectl delete configmap auth-config -n auth-service
+kubectl apply -k services/auth-service/overlays/dev
+kubectl rollout restart deployment auth-api -n auth-service
+```
+
+---
+
+# 🧪 Expected result
+
+Now inside pod:
+
+```bash
+printenv | grep DJANGO_ALLOWED_HOSTS
+```
+
+You SHOULD see:
+
+```bash
+...,auth.local ✅
+```
+
+---
+
+# 🎯 Why this was so painful
+
+You had:
+
+* ❌ duplicated configMapGenerator
+* ❌ merge behavior misunderstanding
+* ❌ hash disabled in base (big one)
+* ❌ overlay not actually overriding anything
+
+This combo = **silent failure** 😭
+
+---
+
+# 🧠 Golden rule (tattoo this mentally)
+
+> ❗ NEVER define the same `configMapGenerator` in both base and overlay
+
+Instead:
+
+* base → structure
+* overlay → environment values
+
+---
+
+# ⚡ Bonus (future-proof)
+
+If you want zero headaches later:
+
+👉 Use **ONLY overlay for env configs**
+👉 Let Kustomize generate new names (hash enabled)
+
+You’ll never need to:
+
+* delete configmaps manually ❌
+* restart pods manually ❌
+
+---
+
+# 😄 Final note
+
+You didn’t mess up.
+
+You just hit:
+
+> 🧱 Kustomize + ConfigMap inheritance trap (one of the worst ones)
+
+---
+
+If you want, next we can:
+
+* fix your Traefik header hack (you don’t need it anymore)
+* make your setup production-grade GitOps clean
+
+You’re literally one fix away from everything working 🚀
+)
 
 
 
