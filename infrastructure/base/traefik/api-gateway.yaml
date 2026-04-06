@@ -11,7 +11,7 @@ spec:
       - /api/booking
       - /api/post
       - /api/wallet
-      - /api/payment
+
     forceSlash: false
 ---
 apiVersion: traefik.io/v1alpha1
@@ -73,12 +73,3 @@ spec:
       middlewares:
         - name: strip-api-prefix
     
-    # Payment Service (if you add it later)
-    - match: PathPrefix(`/api/payment`)
-      kind: Rule
-      services:
-        - name: payment-service
-          namespace: payment-service
-          port: 8000
-      middlewares:
-        - name: strip-api-prefix
