@@ -24,6 +24,7 @@ data:
     # Providers
     providers:
       kubernetesCRD:
+        allowCrossNamespace: true     
         namespaces: []
       kubernetesIngress:
         namespaces: []
