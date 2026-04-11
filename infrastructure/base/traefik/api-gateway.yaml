@@ -11,7 +11,6 @@ spec:
       - /api/booking
       - /api/post
       - /api/wallet
-
     forceSlash: false
 ---
 apiVersion: traefik.io/v1alpha1
@@ -32,7 +31,7 @@ spec:
           port: 8000
       middlewares:
         - name: strip-api-prefix
-    
+
     # Room Service
     - match: PathPrefix(`/api/room`)
       kind: Rule
@@ -42,7 +41,7 @@ spec:
           port: 8000
       middlewares:
         - name: strip-api-prefix
-    
+
     # Booking Service
     - match: PathPrefix(`/api/booking`)
       kind: Rule
@@ -52,7 +51,7 @@ spec:
           port: 8000
       middlewares:
         - name: strip-api-prefix
-    
+
     # Post Service (Go - port 8080)
     - match: PathPrefix(`/api/post`)
       kind: Rule
@@ -62,7 +61,7 @@ spec:
           port: 8080
       middlewares:
         - name: strip-api-prefix
-    
+
     # Wallet Service
     - match: PathPrefix(`/api/wallet`)
       kind: Rule
@@ -72,4 +71,11 @@ spec:
           port: 8000
       middlewares:
         - name: strip-api-prefix
-    
+
+    # Frontend static & SPA (catch-all) – MUST BE LAST
+    - match: PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: frontend
+          namespace: frontend
+          port: 80
