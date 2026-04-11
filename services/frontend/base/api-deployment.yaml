@@ -25,7 +25,7 @@ spec:
       serviceAccountName: frontend-sa
       containers:
       - name: frontend
-        image: alphaxad9/booking_microservice_frontend:0.0.1
+        image: alphaxad9/booking_microservice_frontend:0.0.4
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
