@@ -6,7 +6,6 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - /api/auth
       - /api/room
       - /api/booking
       - /api/post
@@ -22,7 +21,7 @@ spec:
   entryPoints:
     - web
   routes:
-    # Auth Service - HIGH PRIORITY
+    # Auth Service - HIGH PRIORITY (uses rewrite, NOT strip)
     - match: PathPrefix(`/api/auth`)
       kind: Rule
       priority: 100
@@ -31,9 +30,9 @@ spec:
           namespace: auth-service
           port: 8000
       middlewares:
-        - name: strip-api-prefix
+        - name: auth-rewrite
     
-    # Room Service - HIGH PRIORITY
+    # Room Service - HIGH PRIORITY (still uses strip for now)
     - match: PathPrefix(`/api/room`)
       kind: Rule
       priority: 100
