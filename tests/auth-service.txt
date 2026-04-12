@@ -1,0 +1,14 @@
+# Step 1: Get CSRF token
+curl -c cookies.txt http://172.18.0.100/api/auth/users/csrf/
+
+# Step 2: Login (replace with actual credentials)
+curl -c cookies.txt -b cookies.txt \
+  -X POST http://172.18.0.100/api/auth/users/token/ \
+  -H "Content-Type: application/json" \
+  -H "X-CSRFToken: ZjOFVpRGWuYySacYQe7SOXKHhgEif68Wt1IvZRMDynbIuhjreVDVMfCBFDrXpXFA" \
+  -d '{"identifier":"umusa","password":"2025New+!"}'
+
+# Step 3: Access profile with cookies
+curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1ODk3MDk5LCJpYXQiOjE3NzU4OTY3OTksImp0aSI6IjI0MDM0MDczYzJjNjRhMTM5MzhjNTljMmZlODNjNWUzIiwidXNlcl9pZCI6ImNkOTM1ODk4LTM4NmItNDRjOC05MzkxLTBkYjk0ZjYyOTgxNCJ9.OOo2wuIJyscWbuDtq8HRIHjpPCKmloby9INBvrIHD2J1O-6bOaJExiojy9YimHclCOGfpWHIoSjjULKi2DLSoDGjF8H_DyzT2FUzObkuMS5XBIVO8xFWA8DtScfAinoDwYI5ojvYvlfUHOg0BsGrWe3CjjdMKySpjOuWwA_xFwDFi4uXEva8tlPgFz-z1BwJD8LMp4roYWiW150KlF-11k5nWvt4jJepOukQL7jhnDmBVMeNa9EvBp72bmeBgNxbJD5HwXW_jOWLB9Dv2MBOhN25lGeAP9Ko3Q7yYSGseem7l6UjVK0SrkNz4FGmsL7cLAobd8IvGq7ABGiY3TkLvA" \
+  http://172.18.0.100/api/auth/users/profile/
+

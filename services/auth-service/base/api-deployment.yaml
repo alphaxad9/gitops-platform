@@ -26,7 +26,7 @@ spec:
       serviceAccountName: auth-service-sa
       containers:
       - name: auth-api
-        image: alphaxad9/auth-service:0.1.4
+        image: alphaxad9/auth-service:0.1.5
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
