@@ -5,8 +5,7 @@ metadata:
   namespace: infrastructure
 spec:
   stripPrefix:
-    prefixes:
-      - /api/wallet
+    prefixes: []
     forceSlash: false
 ---
 apiVersion: traefik.io/v1alpha1
@@ -18,7 +17,7 @@ spec:
   entryPoints:
     - web
   routes:
-    # Auth Service - HIGH PRIORITY (uses rewrite, NOT strip)
+    # Auth Service - HIGH PRIORITY
     - match: PathPrefix(`/api/auth`)
       kind: Rule
       priority: 100
@@ -30,7 +29,7 @@ spec:
         - name: auth-rewrite
           namespace: infrastructure
     
-    # Room Service - HIGH PRIORITY (uses room-rewrite)
+    # Room Service - HIGH PRIORITY
     - match: PathPrefix(`/api/room`)
       kind: Rule
       priority: 100
@@ -42,7 +41,7 @@ spec:
         - name: room-rewrite
           namespace: infrastructure
     
-    # Booking Service - HIGH PRIORITY (uses booking-rewrite)
+    # Booking Service - HIGH PRIORITY
     - match: PathPrefix(`/api/booking`)
       kind: Rule
       priority: 100
@@ -54,7 +53,7 @@ spec:
         - name: booking-rewrite
           namespace: infrastructure
     
-    # Post Service (Go - port 8080) - HIGH PRIORITY
+    # Post Service (Go - port 8080)
     - match: PathPrefix(`/api/post`)
       kind: Rule
       priority: 100
@@ -75,7 +74,7 @@ spec:
           namespace: wallet-service
           port: 8000
       middlewares:
-        - name: strip-api-prefix
+        - name: wallet-rewrite
           namespace: infrastructure
     
     # Frontend static & SPA - LOW PRIORITY (catch-all)

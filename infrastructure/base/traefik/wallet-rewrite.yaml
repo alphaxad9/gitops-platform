@@ -1,0 +1,12 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: wallet-rewrite
+  namespace: infrastructure
+  labels:
+    app: traefik
+    managed-by: gitops
+spec:
+  replacePathRegex:
+    regex: ^/api/wallet/(.*)
+    replacement: /wallet_service/$1
