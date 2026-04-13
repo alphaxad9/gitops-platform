@@ -6,7 +6,6 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - /api/room
       - /api/booking
       - /api/post
       - /api/wallet
@@ -31,8 +30,9 @@ spec:
           port: 8000
       middlewares:
         - name: auth-rewrite
+          namespace: infrastructure
     
-    # Room Service - HIGH PRIORITY (still uses strip for now)
+    # Room Service - HIGH PRIORITY (uses room-rewrite)
     - match: PathPrefix(`/api/room`)
       kind: Rule
       priority: 100
@@ -41,7 +41,8 @@ spec:
           namespace: room-service
           port: 8000
       middlewares:
-        - name: strip-api-prefix
+        - name: room-rewrite
+          namespace: infrastructure
     
     # Booking Service - HIGH PRIORITY
     - match: PathPrefix(`/api/booking`)
@@ -53,6 +54,7 @@ spec:
           port: 8000
       middlewares:
         - name: strip-api-prefix
+          namespace: infrastructure
     
     # Post Service (Go - port 8080) - HIGH PRIORITY
     - match: PathPrefix(`/api/post`)
@@ -64,6 +66,7 @@ spec:
           port: 8080
       middlewares:
         - name: strip-api-prefix
+          namespace: infrastructure
     
     # Wallet Service - HIGH PRIORITY
     - match: PathPrefix(`/api/wallet`)
@@ -75,6 +78,7 @@ spec:
           port: 8000
       middlewares:
         - name: strip-api-prefix
+          namespace: infrastructure
     
     # Frontend static & SPA - LOW PRIORITY (catch-all)
     - match: PathPrefix(`/`)
