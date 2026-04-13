@@ -6,7 +6,6 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - /api/post
       - /api/wallet
     forceSlash: false
 ---
@@ -64,7 +63,7 @@ spec:
           namespace: post-service
           port: 8080
       middlewares:
-        - name: strip-api-prefix
+        - name: post-rewrite
           namespace: infrastructure
     
     # Wallet Service - HIGH PRIORITY
