@@ -6,7 +6,6 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - /api/booking
       - /api/post
       - /api/wallet
     forceSlash: false
@@ -44,7 +43,7 @@ spec:
         - name: room-rewrite
           namespace: infrastructure
     
-    # Booking Service - HIGH PRIORITY
+    # Booking Service - HIGH PRIORITY (uses booking-rewrite)
     - match: PathPrefix(`/api/booking`)
       kind: Rule
       priority: 100
@@ -53,7 +52,7 @@ spec:
           namespace: booking-service
           port: 8000
       middlewares:
-        - name: strip-api-prefix
+        - name: booking-rewrite
           namespace: infrastructure
     
     # Post Service (Go - port 8080) - HIGH PRIORITY

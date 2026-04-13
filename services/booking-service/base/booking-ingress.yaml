@@ -6,9 +6,6 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: traefik
     traefik.ingress.kubernetes.io/router.entrypoints: web
-    traefik.ingress.kubernetes.io/service.headers: |
-      customrequestheaders:
-        Host: booking-service.booking-service.svc.cluster.local
 spec:
   rules:
   - host: booking.local
