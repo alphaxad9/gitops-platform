@@ -1,4 +1,3 @@
-# gitops-platform/environments/dev/auth-application.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -8,9 +7,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: placeholder-repo  # Will be replaced by kustomize patch
-    targetRevision: placeholder-rev  # Will be replaced by kustomize patch
-    path: services/auth-service/overlays/dev
+    repoURL: git@github.com:alphaxad9/microservice_auth_service.git
+    targetRevision: main
+    path: helm
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: auth-service
