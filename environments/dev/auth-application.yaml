@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: auth-service
-  namespace: argocd   
+  namespace: argocd
   annotations:
     environment: dev
 spec:
