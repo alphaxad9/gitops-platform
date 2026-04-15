@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-producer
+  labels:
+    app: auth-service
+    component: producer
+    managed-by: gitops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+      component: producer
+  template:
+    metadata:
+      labels:
+        app: auth-service
+        component: producer
+    spec:
+      serviceAccountName: auth-service-sa
+      containers:
+      - name: auth-producer
+        image: alphaxad9/auth-service:0.1.5
+        imagePullPolicy: IfNotPresent
+        command: ["python", "manage.py", "run_kafka_publisher"]  # ← CHANGED HERE
+        envFrom:
+        - configMapRef:
+            name: auth-config
+        - secretRef:
+            name: auth-secrets
+        - secretRef:
+            name: postgres-credentials
+        - secretRef:
+            name: rabbitmq-credentials
+        - secretRef:
+            name: kafka-credentials
+        - secretRef:
+            name: redis-credentials
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SERVICE_COMPONENT
+          value: "producer"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        volumeMounts:
+        - name: keys
+          mountPath: /app/keys
+          readOnly: true
+      volumes:
+      - name: keys
+        secret:
+          secretName: auth-secrets
+          items:
+          - key: SIGNING_KEY
+            path: private.pem
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000

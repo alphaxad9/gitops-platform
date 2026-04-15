@@ -1,0 +1,61 @@
+# gitops-platform/services/auth-service/overlays/prod/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: auth-service
+
+resources:
+  - ../../base
+
+labels:
+  - pairs:
+      environment: prod
+      criticality: high
+    includeSelectors: false
+    
+configMapGenerator:
+  - name: auth-config
+    behavior: merge
+    literals:
+      - LOG_LEVEL=WARNING
+      - DJANGO_DEBUG=False
+      - DJANGO_ALLOWED_HOSTS=auth-service,auth-service.auth-service.svc.cluster.local,localhost,127.0.0.1,auth.local
+      - CORS_ALLOWED_ORIGINS=https://api.yourdomain.com,https://app.yourdomain.com,http://127.0.0.1:3000
+      - CSRF_TRUSTED_ORIGINS=https://api.yourdomain.com,https://app.yourdomain.com,http://127.0.0.1:3000
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+    target:
+      kind: Deployment
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "1Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "500m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "2Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "1000m"
+    target:
+      kind: Deployment
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/affinity
+        value:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: auth
+                topologyKey: kubernetes.io/hostname
+    target:
+      kind: Deployment
