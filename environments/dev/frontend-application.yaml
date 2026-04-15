@@ -1,16 +1,19 @@
-# gitops-platform/environments/dev/frontend-application.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: frontend
+  namespace: argocd
   annotations:
     environment: dev
 spec:
   project: default
   source:
-    repoURL: placeholder-repo
-    targetRevision: placeholder-rev
-    path: services/frontend/overlays/dev
+    repoURL: https://github.com/alphaxad9/microservice_frontend_service.git
+    targetRevision: main
+    path: helm
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: frontend
@@ -20,7 +23,6 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ApplyOutOfSyncOnly=true
       - ServerSideApply=true
     retry:
       limit: 5
@@ -28,3 +30,18 @@ spec:
         duration: 5s
         factor: 2
         maxDuration: 3m
+  ignoreDifferences:
+  - group: apps
+    kind: Deployment
+    jsonPointers:
+      - /spec/template/metadata/annotations
+      - /spec/template/spec/containers/0/resources
+  - group: ""
+    kind: Service
+    jsonPointers:
+      - /spec/clusterIP
+      - /spec/clusterIPs
+  - group: networking.k8s.io
+    kind: Ingress
+    jsonPointers:
+      - /metadata/annotations
