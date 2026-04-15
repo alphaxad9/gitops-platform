@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: room-service
+  name: frontend
   namespace: argocd
   annotations:
     environment: dev
 spec:
   project: default
   source:
-    repoURL: https://github.com/alphaxad9/microservice_room_service.git
+    repoURL: https://github.com/alphaxad9/microservice_frontend_service.git
     targetRevision: main
     path: helm
     helm:
@@ -16,7 +16,7 @@ spec:
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: room-service
+    namespace: frontend
   syncPolicy:
     automated:
       prune: true
@@ -31,10 +31,6 @@ spec:
         factor: 2
         maxDuration: 3m
   ignoreDifferences:
-  - group: ""
-    kind: Secret
-    jsonPointers:
-      - /data
   - group: apps
     kind: Deployment
     jsonPointers:
