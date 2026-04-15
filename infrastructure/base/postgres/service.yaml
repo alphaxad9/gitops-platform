@@ -5,11 +5,14 @@ metadata:
   namespace: infrastructure
   labels:
     app: postgres
+    component: database
+    managed-by: gitops
 spec:
+  type: ClusterIP
   ports:
   - port: 5432
     targetPort: 5432
     name: postgres
+    protocol: TCP
   selector:
     app: postgres
-  clusterIP: None  # Headless for stable discovery
