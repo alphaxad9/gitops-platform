@@ -1,0 +1,16 @@
+http://172.18.0.100/api/room/available/
+
+
+
+curl -X POST http://room.local/api/room/create/ \
+  -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc2NTQ1MzQ2LCJpYXQiOjE3NzY1NDUwNDYsImp0aSI6IjlkOWVlZTY5NWI0ODQ0YTA4NjBhNTQxNTk0NzQ3ZGVlIiwidXNlcl9pZCI6ImNkOTM1ODk4LTM4NmItNDRjOC05MzkxLTBkYjk0ZjYyOTgxNCJ9.bTFlKMei4UlcsseSMRJNN1BQJfC_caqzbdFDwJowyRLuC9lgsjjGMirVe6wLXjWII2othS4dZHElDBUGgbsJs4U_lWHkCRoc83Ct7zmSLBNCn0NyBQSbBOk0i0mXRaT6hZuXdQt9fBexgh-9Ha41OcB6GB9YL0G2Jl4henUIxrEanbr6uk9v1V3djn1nUb7q-KjHqwsh9jAqyxonIzmBzek0Y8VLHFPmLJyhjZFjfrmiJq2KuhrWUDKZYfNhp9OlE_50gMAG1fnDk_ptowEEPiz-RtPzCSt8Az_CnqvSM_YFcfVOlq8T1u2QgiYq9UY6ZcJZAZjlub9NowRBCS8BfA" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "room_number": "57",
+    "room_type": "SINGLE",
+    "base_price_per_night": "120.00",
+    "amenities": ["WiFi", "AC", "TV"],
+    "max_occupancy": 2
+  }' | jq
+
+
